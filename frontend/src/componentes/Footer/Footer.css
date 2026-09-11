@@ -12,7 +12,7 @@
     max-width: 1100px;
     width: 100%;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     padding: 30px 20px;
     border-bottom: 1px solid #ccc;
     gap: 20px;
@@ -20,6 +20,10 @@
 
 .footer_superior > div {
     width: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
 }
 
 .footer_superior ul {
@@ -34,11 +38,23 @@
 
 .footer_superior a {
     text-decoration: none;
-    color: #000;
+    color: #ffffff8f;
+}
+.footer_logo .logo {
+    color: #FFF;
+}
+.footer_logo p {
+    margin-top: 10px;
+    color: #ffffff8f;
+  
 }
 
 .footer_superior h3 {
     margin-top: 0;
+    margin-bottom: 10px;
+    color: #FFF;
+    text-align: left;
+    width: 100%;
 }
 
 .footer_inferior {
@@ -46,4 +62,11 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px 30px;
+    color: #FFF;
+    gap: 20px;
+}
+
+.footer_inferior p {
+    margin: 0;
+    line-height: 1;
 }
