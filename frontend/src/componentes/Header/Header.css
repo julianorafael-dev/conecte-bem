@@ -1,0 +1,78 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+    padding: 0 30px;
+    border-bottom: 1px solid #ccc;
+}
+
+/* Logo */
+.logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #000;
+}
+
+.logo strong {
+    font-size: 20px;
+}
+
+.coracao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    margin-right: 8px;
+
+    border-radius: 9px;
+
+    color: white;
+    background-color: #2254d7;
+
+    font-size: 22px;
+    line-height: 1;
+}
+
+/* Menu */
+.menu {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.menu a {
+    text-decoration: none;
+    color: #000;
+    transition: 0.3s;
+}
+
+.menu a:hover {
+    color: #2254d7;
+}
+
+/* Login / Cadastro */
+.menu_login_cadastro {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu_login_cadastro a {
+    padding: 6px 12px;
+    border-radius: 5px;
+
+    text-decoration: none;
+    color: #000;
+
+    transition: 0.3s;
+}
+
+.menu_login_cadastro a:hover {
+    background-color: #2254d7;
+    color: #fff;
+}
