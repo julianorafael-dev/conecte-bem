@@ -1,0 +1,11 @@
+.imagem_destaque {
+    width: 50%;          
+    margin: 0 auto;      
+}
+
+.imagem_destaque img {
+    width: 100%;         
+    height: auto;        
+    display: block;      
+    border-radius: var(--radius-md); 
+}

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './Footer.css'
 
 function Footer() {
@@ -14,24 +15,24 @@ function Footer() {
                 <div className="footer_plataforma">
                     <h3>Plataforma</h3>
                     <ul>
-                        <li><a href="/">Oportunidades</a></li>
-                        <li><a href="/">Para ONGs</a></li>
-                        <li><a href="/">Como funciona</a></li>
+                        <li><Link to="/Oportunidades">Oportunidades</Link></li>
+                        <li><Link to="/ComoFunciona">Como funciona</Link></li>
+                        <li><Link to="/">Para ONGs</Link></li>
                     </ul>
                 </div>
                 <div className="footer_conta">
                     <h3>Conta</h3>
                     <ul>
-                        <li><a href="/">Entrar</a></li>
-                        <li><a href="/">Criar conta</a></li>
-                        <li><a href="/">Recuperar senha</a></li>
+                        <li><Link to="/">Entrar</Link></li>
+                        <li><Link to="/">Criar conta</Link></li>
+                        <li><Link to="/">Recuperar senha</Link></li>
                     </ul>
                 </div>
                 <div className="footer_sobre">
                     <h3>Sobre</h3>
                     <ul>
-                        <li><a href="/">Nossa história</a></li>
-                        <li><a href="/">Contato</a></li>
+                        <li><Link to="/Sobre">Nossa história</Link></li>
+                        <li><Link to="/Contato">Contato</Link></li>
                         
                     </ul>
                 </div>
