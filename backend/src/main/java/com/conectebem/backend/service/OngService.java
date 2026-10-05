@@ -50,7 +50,7 @@ public class OngService {
     public OngResponseDTO criar(OngRequestDTO dados) {
         Ong ong = new Ong();
 
-        ong.setUsuarioId(dados.getUsuarioId());
+        ong.setUsuarioId(dados.usuarioId());
         preencherDados(ong, dados);
 
         return paraResponse(ongRepository.save(ong));
@@ -80,28 +80,26 @@ public class OngService {
      * O {@code usuarioId} é definido somente na criação para preservar o vínculo 1-1.
      */
     private void preencherDados(Ong ong, OngRequestDTO dados) {
-        ong.setNome(dados.getNome());
-        ong.setCnpj(dados.getCnpj());
-        ong.setDescricao(dados.getDescricao());
-        ong.setTelefone(dados.getTelefone());
-        ong.setCidade(dados.getCidade());
-        ong.setEstado(dados.getEstado());
+        ong.setNome(dados.nome());
+        ong.setCnpj(dados.cnpj());
+        ong.setDescricao(dados.descricao());
+        ong.setTelefone(dados.telefone());
+        ong.setCidade(dados.cidade());
+        ong.setEstado(dados.estado());
     }
 
     /**
      * Converte a entidade persistida no formato público da API.
      */
     private OngResponseDTO paraResponse(Ong ong) {
-        OngResponseDTO response = new OngResponseDTO();
-
-        response.setId(ong.getId());
-        response.setNome(ong.getNome());
-        response.setCnpj(ong.getCnpj());
-        response.setDescricao(ong.getDescricao());
-        response.setTelefone(ong.getTelefone());
-        response.setCidade(ong.getCidade());
-        response.setEstado(ong.getEstado());
-
-        return response;
+        return new OngResponseDTO(
+                ong.getId(),
+                ong.getNome(),
+                ong.getCnpj(),
+                ong.getDescricao(),
+                ong.getTelefone(),
+                ong.getCidade(),
+                ong.getEstado()
+        );
     }
 }
