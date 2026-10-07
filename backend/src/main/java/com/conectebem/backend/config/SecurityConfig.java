@@ -20,6 +20,15 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/health").permitAll()
+                        // TEMPORÁRIO: liberado porque a autenticação JWT (Pessoa 2)
+                        // ainda não existe. Sem isso, TODO endpoint (inclusive os GETs
+                        // públicos de listagem) responde 401, pois o Spring Security
+                        // exige login e não há nenhum jeito de logar ainda.
+                        // Quando o módulo de auth estiver pronto:
+                        //   - manter GET /categorias/**, /ongs/**, /oportunidades/** públicos
+                        //   - exigir token + role ONG em POST/PUT/DELETE de /oportunidades/**
+                        //     e /ongs/** (ver TODOs nos controllers correspondentes)
+                        .requestMatchers("/categorias/**", "/ongs/**", "/oportunidades/**").permitAll()
                         .anyRequest().authenticated()
                 );
         return http.build();
