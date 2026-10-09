@@ -1,4 +1,4 @@
 package com.conectebem.backend.dto;
 
-public record CategoriaResponse (Long id, String nome, String descricao){
+public record CategoriaResponse (Integer id, String nome, String descricao){
 }

@@ -9,7 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UsuarioResponseDTO {
 
-    private Long id;
+    private Integer id;
     private String nome;
     private String email;
     private TipoUsuario tipo;

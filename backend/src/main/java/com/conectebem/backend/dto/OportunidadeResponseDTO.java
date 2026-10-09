@@ -1,5 +1,10 @@
 package com.conectebem.backend.dto;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
+
 /**
  * Dados de uma oportunidade devolvidos pela API ao frontend.
  *
@@ -15,12 +20,12 @@ public record OportunidadeResponseDTO(
         String nomeCategoria,
         String titulo,
         String descricao,
-        String data,
-        String horario,
+        LocalDate data,
+        LocalTime horario,
         String cidade,
         String estado,
         Integer vagas,
         String status,
-        String criadoEm
+        LocalDateTime criadoEm
 ) {
 }

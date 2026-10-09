@@ -6,6 +6,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Pattern;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Date;
+
 /**
  * Dados recebidos pela API ao criar ou atualizar uma oportunidade.
  *
@@ -19,8 +23,8 @@ public record OportunidadeRequestDTO(
         @NotNull Integer categoriaId,
         @NotBlank @Size(max = 200) String titulo,
         String descricao,
-        @NotBlank String data,
-        @NotBlank String horario,
+        @NotNull LocalDate data,
+        @NotNull LocalTime horario,
         @Size(max = 100) String cidade,
         @Pattern(regexp = "^[A-Z]{2}$", message = "O estado deve conter duas letras maiúsculas.") String estado,
         @NotNull @Min(1) Integer vagas,

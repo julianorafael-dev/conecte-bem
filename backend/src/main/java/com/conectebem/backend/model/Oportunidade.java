@@ -1,6 +1,13 @@
 package com.conectebem.backend.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -31,16 +38,17 @@ public class Oportunidade {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
-    @Column(nullable = false, length = 50)
-    private String data;
+    @Column(nullable = false)
+    private LocalDate data;
 
     @Column(nullable = false, length = 10)
-    private String horario;
+    private LocalTime horario;
 
     @Column(length = 100)
     private String cidade;
 
     @Column(columnDefinition = "CHAR(2)")
+    @JdbcTypeCode(SqlTypes.CHAR)
     private String estado;
 
     @Column(nullable = false)
@@ -50,7 +58,7 @@ public class Oportunidade {
     private String status;
 
     @Column(name = "criado_em", nullable = false, updatable = false)
-    private String criadoEm;
+    private LocalDateTime criadoEm;
 
     public Integer getId() {
         return id;
@@ -92,19 +100,19 @@ public class Oportunidade {
         this.descricao = descricao;
     }
 
-    public String getData() {
+    public LocalDate getData() {
         return data;
     }
 
-    public void setData(String data) {
+    public void setData(LocalDate data) {
         this.data = data;
     }
 
-    public String getHorario() {
+    public LocalTime getHorario() {
         return horario;
     }
 
-    public void setHorario(String horario) {
+    public void setHorario(LocalTime horario) {
         this.horario = horario;
     }
 
@@ -140,11 +148,11 @@ public class Oportunidade {
         this.status = status;
     }
 
-    public String getCriadoEm() {
+    public LocalDateTime getCriadoEm() {
         return criadoEm;
     }
 
-    public void setCriadoEm(String criadoEm) {
+    public void setCriadoEm(LocalDateTime criadoEm) {
         this.criadoEm = criadoEm;
     }
 

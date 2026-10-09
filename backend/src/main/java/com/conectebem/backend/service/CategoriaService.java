@@ -26,7 +26,7 @@ public class CategoriaService {
                 .toList();
     }
 
-    public Optional<CategoriaResponse> buscarPorId(Long id) {
+    public Optional<CategoriaResponse> buscarPorId(Integer id) {
         return categoriaRepository.findById(id)
                 .map(this::paraDto);
 
@@ -51,7 +51,7 @@ public class CategoriaService {
         return paraDto(categoriaRepository.save(categoria));
 
     }
-    public Optional<CategoriaResponse> atualizar(Long id, CategoriaRequest categoriaRequest) {
+    public Optional<CategoriaResponse> atualizar(Integer id, CategoriaRequest categoriaRequest) {
         return categoriaRepository.findById(id)
                 .map(categoria -> {
                     boolean mudouNome = !categoria.getNome().equalsIgnoreCase(categoriaRequest.nome());

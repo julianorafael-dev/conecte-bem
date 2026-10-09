@@ -29,7 +29,7 @@ public class CategoriaController {
 
 //  Busca a Categoria pelo id
     @GetMapping("/{id}")
-    public ResponseEntity<CategoriaResponse> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<CategoriaResponse> buscarPorId(@PathVariable Integer id){
         return categoriaService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -44,7 +44,7 @@ public class CategoriaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoriaResponse> atualizar(@PathVariable Long id, @Valid @RequestBody CategoriaRequest categoriaRequest){
+    public ResponseEntity<CategoriaResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody CategoriaRequest categoriaRequest){
         return categoriaService.atualizar(id, categoriaRequest)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
