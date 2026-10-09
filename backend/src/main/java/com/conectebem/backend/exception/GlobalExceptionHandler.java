@@ -47,6 +47,12 @@ public class GlobalExceptionHandler {
         );
     }
 
+    /** Converte erros de regra de negócio (ex: e-mail já cadastrado, credenciais inválidas) em HTTP 400. */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return montarResposta(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenerico(Exception ex) {
         return montarResposta(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno no servidor.");
@@ -60,15 +66,4 @@ public class GlobalExceptionHandler {
         corpo.put("mensagem", mensagem);
         return ResponseEntity.status(status).body(corpo);
     }
-}
-
-@ExceptionHandler(IllegalArgumentException.class)
-public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
-    Map<String, Object> body = new HashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", HttpStatus.BAD_REQUEST.value());
-    body.put("erro", "Bad Request");
-    body.put("mensagem", ex.getMessage());
-
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
 }
