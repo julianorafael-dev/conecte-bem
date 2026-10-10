@@ -2,8 +2,11 @@ package com.conectebem.backend.service;
 
 import com.conectebem.backend.dto.CategoriaRequest;
 import com.conectebem.backend.dto.CategoriaResponse;
+import com.conectebem.backend.exception.CategoriaEmUsoException;
+import com.conectebem.backend.exception.ResourceNotFoundException;
 import com.conectebem.backend.model.Categoria;
 import com.conectebem.backend.repository.CategoriaRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -62,6 +65,18 @@ public class CategoriaService {
                     categoria.setDescricao(categoriaRequest.descricao());
                     return paraDto(categoriaRepository.save(categoria));
                 });
+    }
+
+    public void deletar(Long id) {
+        Categoria categoria = categoriaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada: " + id));
+
+        try {
+            categoriaRepository.delete(categoria);
+            categoriaRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            throw new CategoriaEmUsoException(id);
+        }
     }
 
 }
