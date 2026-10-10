@@ -50,5 +50,10 @@ public class CategoriaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        categoriaService.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
 
 }
