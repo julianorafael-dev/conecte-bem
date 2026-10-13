@@ -12,6 +12,7 @@ import com.conectebem.backend.repository.OportunidadeRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -52,7 +53,7 @@ public class OportunidadeService {
 
         // 2. Buscar Categoria pelo categoriaId
         Integer categoriaId = dados.categoriaId();
-        Categoria categoria = categoriaRepository.findById(Long.valueOf(categoriaId))
+        Categoria categoria = categoriaRepository.findById(Integer.valueOf(categoriaId))
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada. ID: " + categoriaId));
 
         // 3. Criar nova entidade Oportunidade
@@ -73,7 +74,7 @@ public class OportunidadeService {
         oportunidade.setStatus(dados.status());
 
         // 4. Preencher criadoEm com data atual (formato String yyyy-MM-dd)
-        oportunidade.setCriadoEm(LocalDate.now().toString());
+        oportunidade.setCriadoEm(LocalDateTime.now());
 
         // 5. Salvar no repositório
         oportunidade = oportunidadeRepository.save(oportunidade);
@@ -94,7 +95,7 @@ public class OportunidadeService {
                 .orElseThrow(() -> new ResourceNotFoundException("ONG não encontrada. ID: " + ongId));
 
         Integer categoriaId = dados.categoriaId();
-        Categoria categoria = categoriaRepository.findById(Long.valueOf(categoriaId))
+        Categoria categoria = categoriaRepository.findById(Integer.valueOf(categoriaId))
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada. ID: " + categoriaId));
 
         // 3. Atualizar campos permitidos
@@ -135,7 +136,7 @@ public class OportunidadeService {
 
     /** Filtra oportunidades pela categoria relacionada. */
     public List<OportunidadeResponseDTO> filtrarPorCategoria(Integer categoriaId) {
-        Categoria categoria = categoriaRepository.findById(Long.valueOf(categoriaId))
+        Categoria categoria = categoriaRepository.findById(Integer.valueOf(categoriaId))
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada. ID: " + categoriaId));
         return oportunidadeRepository.findByCategoria(categoria).stream()
                 .map(this::paraResponse)
