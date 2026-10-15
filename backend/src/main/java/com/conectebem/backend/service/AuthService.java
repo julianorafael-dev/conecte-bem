@@ -7,6 +7,7 @@ import com.conectebem.backend.dto.UsuarioResponseDTO;
 import com.conectebem.backend.model.TipoUsuario;
 import com.conectebem.backend.model.Usuario;
 import com.conectebem.backend.repository.UsuarioRepository;
+import com.conectebem.backend.security.GoogleTokenService;
 import com.conectebem.backend.security.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,6 +37,9 @@ public class AuthService {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private GoogleTokenService googleTokenService;
 
     // Autenticação via cliente google
     @org.springframework.beans.factory.annotation.Value("${google.client.id}")
@@ -77,40 +81,24 @@ public class AuthService {
 
     // Login com Google
     public TokenResponseDTO loginComGoogle(GoogleLoginRequestDTO dto) {
-        try {
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
-                    new NetHttpTransport(),
-                    GsonFactory.getDefaultInstance())
-                    .setAudience(Collections.singletonList(googleClientId))
-                    .build();
+        // 1. Valida o token e extrai os dados via GoogleTokenService
+        GoogleIdToken.Payload payload = googleTokenService.verificar(dto.idToken());
+        String email = payload.getEmail();
+        String nome = (String) payload.get("name");
 
-            GoogleIdToken idToken = verifier.verify(dto.idToken());
-            if (idToken == null) {
-                throw new IllegalArgumentException("Token do Google inválido ou expirado.");
-            }
+        // 2. Busca o usuário ou cadastra caso seja o primeiro acesso
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseGet(() -> {
+            Usuario novo = new Usuario();
+            novo.setNome(nome != null ? nome : "Usuário Google");
+            novo.setEmail(email);
+            novo.setTipo(TipoUsuario.VOLUNTARIO);
+            novo.setSenha(passwordEncoder.encode(UUID.randomUUID().toString()));
+            return usuarioRepository.save(novo);
+        });
 
-            GoogleIdToken.Payload payload = idToken.getPayload();
-            String email = payload.getEmail();
-            String nome = (String) payload.get("name");
-
-            Usuario usuario = usuarioRepository.findByEmail(email).orElseGet(() -> {
-                Usuario novo = new Usuario();
-                novo.setNome(nome != null ? nome : "Usuário Google");
-                novo.setEmail(email);
-                novo.setTipo(TipoUsuario.VOLUNTARIO);
-                novo.setSenha(passwordEncoder.encode(UUID.randomUUID().toString()));
-                return usuarioRepository.save(novo);
-            });
-
-            String token = jwtService.gerarToken(usuario);
-            return new TokenResponseDTO(token, "Bearer");
-
-        } catch (IllegalArgumentException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Falha ao validar credencial do Google: " + e.getMessage());
-        }
+        // 3. Emite o JWT do ConecteBem
+        String token = jwtService.gerarToken(usuario);
+        return new TokenResponseDTO(token, "Bearer");
     } //fecha Login Google
-
 } // fecha a classe AuthService
 
