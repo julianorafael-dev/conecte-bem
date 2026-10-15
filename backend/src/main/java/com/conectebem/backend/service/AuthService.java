@@ -74,40 +74,43 @@ public class AuthService {
         String token = jwtService.gerarToken(usuario);
         return new TokenResponseDTO(token);
     }
-}
 
-public TokenResponseDTO loginComGoogle(GoogleLoginRequestDTO dto) {
-    try {
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
-                new NetHttpTransport(),
-                GsonFactory.getDefaultInstance())
-                .setAudience(Collections.singletonList(googleClientId))
-                .build();
+    // Login com Google
+    public TokenResponseDTO loginComGoogle(GoogleLoginRequestDTO dto) {
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                    new NetHttpTransport(),
+                    GsonFactory.getDefaultInstance())
+                    .setAudience(Collections.singletonList(googleClientId))
+                    .build();
 
-        GoogleIdToken idToken = verifier.verify(dto.idToken());
-        if (idToken == null) {
-            throw new IllegalArgumentException("Token do Google inválido ou expirado.");
+            GoogleIdToken idToken = verifier.verify(dto.idToken());
+            if (idToken == null) {
+                throw new IllegalArgumentException("Token do Google inválido ou expirado.");
+            }
+
+            GoogleIdToken.Payload payload = idToken.getPayload();
+            String email = payload.getEmail();
+            String nome = (String) payload.get("name");
+
+            Usuario usuario = usuarioRepository.findByEmail(email).orElseGet(() -> {
+                Usuario novo = new Usuario();
+                novo.setNome(nome != null ? nome : "Usuário Google");
+                novo.setEmail(email);
+                novo.setTipo(TipoUsuario.VOLUNTARIO);
+                novo.setSenha(passwordEncoder.encode(UUID.randomUUID().toString()));
+                return usuarioRepository.save(novo);
+            });
+
+            String token = jwtService.gerarToken(usuario);
+            return new TokenResponseDTO(token, "Bearer");
+
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Falha ao validar credencial do Google: " + e.getMessage());
         }
+    } //fecha Login Google
 
-        GoogleIdToken.Payload payload = idToken.getPayload();
-        String email = payload.getEmail();
-        String nome = (String) payload.get("name");
+} // fecha a classe AuthService
 
-        Usuario usuario = usuarioRepository.findByEmail(email).orElseGet(() -> {
-            Usuario novo = new Usuario();
-            novo.setNome(nome != null ? nome : "Usuário Google");
-            novo.setEmail(email);
-            novo.setTipo(TipoUsuario.VOLUNTARIO);
-            novo.setSenha(passwordEncoder.encode(UUID.randomUUID().toString()));
-            return usuarioRepository.save(novo);
-        });
-
-        String token = jwtService.gerarToken(usuario);
-        return new TokenResponseDTO(token, "Bearer");
-
-    } catch (IllegalArgumentException e) {
-        throw e;
-    } catch (Exception e) {
-        throw new IllegalArgumentException("Falha ao validar credencial do Google: " + e.getMessage());
-    }
-}

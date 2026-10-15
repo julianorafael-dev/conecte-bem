@@ -33,11 +33,11 @@ public class AuthController {
         TokenResponseDTO token = authService.login(dto);
         return ResponseEntity.ok(token);
     }
+    // Login com Google
+    @PostMapping("/google")
+    public ResponseEntity<TokenResponseDTO> loginGoogle(@Valid @RequestBody GoogleLoginRequestDTO dto) {
+        TokenResponseDTO token = authService.loginComGoogle(dto);
+        return ResponseEntity.ok(token);
+    }
 }
 
-// Login com Google
-@PostMapping("/google")
-public ResponseEntity<TokenResponseDTO> loginGoogle(@Valid @RequestBody GoogleLoginRequestDTO dto) {
-    TokenResponseDTO token = authService.loginComGoogle(dto);
-    return ResponseEntity.ok(token);
-}
