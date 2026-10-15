@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.conectebem.backend.dto.GoogleLoginRequestDTO;
 
 @RestController
 @RequestMapping("/auth")
@@ -32,4 +33,11 @@ public class AuthController {
         TokenResponseDTO token = authService.login(dto);
         return ResponseEntity.ok(token);
     }
+    // Login com Google
+    @PostMapping("/google")
+    public ResponseEntity<TokenResponseDTO> loginGoogle(@Valid @RequestBody GoogleLoginRequestDTO dto) {
+        TokenResponseDTO token = authService.loginComGoogle(dto);
+        return ResponseEntity.ok(token);
+    }
 }
+
