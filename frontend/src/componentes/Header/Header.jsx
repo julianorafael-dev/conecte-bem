@@ -19,7 +19,7 @@ function Header() {
 
       <div className="menu_login_cadastro">
         <Link to="/entrar">Entrar</Link>
-        <Link to="/criar-conta">Criar Conta</Link>
+        <Link to="/CriarConta">Criar Conta</Link>
       </div>
     </header>
   );
