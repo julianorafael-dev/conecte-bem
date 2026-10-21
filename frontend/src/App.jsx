@@ -8,6 +8,7 @@ import Oportunidades from './componentes/Oportunidade/Oportunidade.jsx';
 import SobreNos from './componentes/Sobre/Sobre.jsx';
 import ComoFunciona from './componentes/ComoFunciona/ComoFunciona.jsx';
 import Contato from './componentes/Contato/Contato.jsx';
+import CriarConta from './componentes/CriarConta/CriarConta.jsx';
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/ComoFunciona" element={<ComoFunciona />} />
           <Route path="/Sobre" element={<SobreNos />} />
           <Route path="/Contato" element={<Contato />} />
+          <Route path="/CriarConta" element={<CriarConta />} />
           
         </Routes>
 

@@ -1,12 +1,13 @@
-import { useState } from 'react'; // 1. Importe o useState
+import { useState } from 'react';
 import '../../styles/global.css';
 import '../../componentes/Home/Home.css';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBookOpen, faHandHoldingMedical, faLeaf, faPeopleArrows, faPeopleGroup, faPeopleRoof, faTimes 
+import { 
+  faBookOpen, faHandHoldingMedical, faLeaf, 
+  faPeopleArrows, faPeopleGroup, faPeopleRoof, faTimes 
 } from '@fortawesome/free-solid-svg-icons';
 
-// 2. Dados dos cards em uma lista para facilitar a exibição e o Modal
 const AREAS_VOLUNTARIADO = [
   {
     id: 1,
@@ -47,10 +48,8 @@ const AREAS_VOLUNTARIADO = [
 ];
 
 function Home() {
-  // Estado para controlar qual card está aberto no Modal
   const [cardSelecionado, setCardSelecionado] = useState(null);
 
-  // Função para fechar o Modal
   const fecharModal = () => setCardSelecionado(null);
 
   return (
@@ -66,42 +65,50 @@ function Home() {
           <p className="texto_secundario">Busque causas que combinem com você.</p>
           
           <div className="conteudo_card">
-            {AREAS_VOLUNTARIADO.map((item) => (
-              <div 
-                key={item.id} 
-                className="card" 
-                onClick={() => setCardSelecionado(item)} // Ao clicar, define o card ativo
-              >
-                <div className="card_titulo">
-                  <span>{item.titulo}</span>
+            {AREAS_VOLUNTARIADO.map((item) => {
+              const estaAberto = cardSelecionado === item.id;
+
+              return (
+                <div 
+                  key={item.id} 
+                  className="card-wrapper"
+                >
+                  {/* O CARD NORMAL */}
+                  <div 
+                    className="card" 
+                    onClick={() => setCardSelecionado(item.id)}
+                  >
+                    <div className="card_titulo">
+                      <span>{item.titulo}</span>
+                    </div>
+                    <FontAwesomeIcon icon={item.icone} />
+                  </div>
+
+                  {/* MODAL POSICIONADO POR CIMA DO CARD */}
+                  {estaAberto && (
+                    <div className="modal-card-overlay" onClick={(e) => e.stopPropagation()}>
+                      <div className="modal-card-content">
+                        <div className="modal-card-header">
+                          <FontAwesomeIcon icon={item.icone} className="modal-icon" />
+                          <h3>{item.titulo}</h3>
+                        </div>
+                        <div className="modal-card-body">
+                          <p>{item.descricao}</p>
+                        </div>
+                        <div className="modal-card-footer">
+                          <button className="modal-close-btn" onClick={fecharModal} title="Fechar">
+                            <FontAwesomeIcon icon={faTimes} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <FontAwesomeIcon icon={item.icone} />
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       </main>
-
-      {/* 3. ESTRUTURA DO MODAL */}
-      {cardSelecionado && (
-        <div className="modal-overlay" onClick={fecharModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={fecharModal}>
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-            <div className="modal-header">
-              <FontAwesomeIcon icon={cardSelecionado.icone} className="modal-icon" />
-              <h2>{cardSelecionado.titulo}</h2>
-            </div>
-            <div className="modal-body">
-              <p>{cardSelecionado.descricao}</p>
-            </div>
-            {/*<div className="modal-footer">
-              <button className="btn-participar">Quero participar</button>
-            </div> teria que conectar esse botão...*/}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
