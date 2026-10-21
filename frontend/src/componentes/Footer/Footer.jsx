@@ -24,8 +24,8 @@ function Footer() {
                 <div className="footer_conta">
                     <h3>Conta</h3>
                     <ul>
-                        <li><Link to="/">Entrar</Link></li>
-                        <li><Link to="/">Criar conta</Link></li>
+                        <li><Link to="/entrar">Entrar</Link></li>
+                        <li><Link to="/CriarConta">Criar conta</Link></li>
                         <li><Link to="/">Recuperar senha</Link></li>
                     </ul>
                 </div>
