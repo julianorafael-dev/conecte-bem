@@ -13,6 +13,8 @@ import RotaONG from './componentes/RotaONG/RotaONG.jsx';
 import GerenciarOportunidades from './componentes/GerenciarOportunidades/GerenciarOportunidades.jsx';
 import FormOportunidade from './componentes/FormOportunidade/FormOportunidade.jsx';
 import CriarConta from './componentes/CriarConta/CriarConta.jsx';
+import PerfilOng from "./pages/PerfilOng/PerfilOng.jsx";
+import PerfilVoluntario from "./pages/PerfilVoluntario/PerfilVoluntario.jsx";
 
 
 function App() {
@@ -20,7 +22,7 @@ function App() {
     <Router>
       <div>
         <Header />
-        
+
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/Home" element={<Home />} />
@@ -28,38 +30,19 @@ function App() {
           <Route path="/ComoFunciona" element={<ComoFunciona />} />
           <Route path="/Sobre" element={<SobreNos />} />
           <Route path="/Contato" element={<Contato />} />
+          <Route path="/CriarConta" element={<CriarConta />} />
 
-            {/* Área da ONG (só acessa quem estiver logado como ONG) */}
+          //Trabalhando com a rota aberta para todos para poder testar o perfil da ONG, depois colocar a rota fechada para apenas usuários logados como ONG
+          <Route path="/PerfilOng" element={<PerfilOng />} />
+          <Route path="/PerfilVoluntario" element={<PerfilVoluntario />} />
 
-<Route
-  path="/painel/oportunidades"
-  element={
-    <RotaONG>
-      <GerenciarOportunidades />
-    </RotaONG>
-  }
-/>
+          {/* Área da ONG (só acessa quem estiver logado como ONG) */}
 
-<Route
-  path="/painel/oportunidades/nova"
-  element={
-    <RotaONG>
-      <FormOportunidade />
-    </RotaONG>
-  }
-/>
+          <Route path="/painel/oportunidades" element={<RotaONG><GerenciarOportunidades/></RotaONG>}/>
+          <Route path="/painel/oportunidades/nova" element={<RotaONG><FormOportunidade /></RotaONG>}/>
+          <Route path="/painel/oportunidades/:id/editar" element={<RotaONG><FormOportunidade /></RotaONG>}/>
+          {/* <Route path="/painel/perfil" element={<RotaONG><PerfilOng /></RotaONG>}/> */}
 
-<Route
-  path="/painel/oportunidades/:id/editar"
-  element={
-    <RotaONG>
-      <FormOportunidade />
-    </RotaONG>
-  }
-/>
-
-<Route path="/CriarConta" element={<CriarConta />} />
-          
         </Routes>
 
         <Footer />
