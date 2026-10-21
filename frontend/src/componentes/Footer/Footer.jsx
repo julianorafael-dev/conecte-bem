@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { IoHeart, IoHeartOutline } from 'react-icons/io5';
 import './Footer.css'
 
 function Footer() {
@@ -7,7 +8,7 @@ function Footer() {
             <div className="footer_superior">
                 <div className="footer_logo">
                     <a href="/" className="logo">
-                        <span className="coracao">&#9825;</span>
+                        <span className="coracao"><IoHeartOutline size={20} /></span>
                         <strong>Conecte-Bem</strong>
                     </a>
                     <p>Conectando voluntários a ONGs para transformar realidades através do voluntariado.</p>
@@ -38,8 +39,8 @@ function Footer() {
                 </div>
             </div>
             <div className="footer_inferior">
-                <p>&copy; 2026 Conecte-Bem -- Projeto de TCC - Bootcamp Full Stack.</p>
-                <p>Feito com <span className="coracaov">❤</span> para impactar o mundo.</p>
+                <p>&copy; 2026 Conecte-Bem - Feito com <span className="coracaov"><IoHeart style={{ verticalAlign: 'middle' }} /></span> para impactar o mundo.</p>
+                <p><i>(Projeto Final de Conclusão +Prati - Bootcamp Full Stack.)</i></p>
             </div>
         </footer>
     )
