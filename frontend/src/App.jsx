@@ -8,9 +8,11 @@ import Oportunidades from './componentes/Oportunidade/Oportunidade.jsx';
 import SobreNos from './componentes/Sobre/Sobre.jsx';
 import ComoFunciona from './componentes/ComoFunciona/ComoFunciona.jsx';
 import Contato from './componentes/Contato/Contato.jsx';
+
 import RotaONG from './componentes/RotaONG/RotaONG.jsx';
 import GerenciarOportunidades from './componentes/GerenciarOportunidades/GerenciarOportunidades.jsx';
 import FormOportunidade from './componentes/FormOportunidade/FormOportunidade.jsx';
+import CriarConta from './componentes/CriarConta/CriarConta.jsx';
 
 
 function App() {
@@ -27,10 +29,36 @@ function App() {
           <Route path="/Sobre" element={<SobreNos />} />
           <Route path="/Contato" element={<Contato />} />
 
-          {/* Área da ONG (só acessa quem estiver logado como ONG) */}
-          <Route path="/painel/oportunidades" element={<RotaONG><GerenciarOportunidades /></RotaONG>} />
-          <Route path="/painel/oportunidades/nova" element={<RotaONG><FormOportunidade /></RotaONG>} />
-          <Route path="/painel/oportunidades/:id/editar" element={<RotaONG><FormOportunidade /></RotaONG>} />
+            {/* Área da ONG (só acessa quem estiver logado como ONG) */}
+
+<Route
+  path="/painel/oportunidades"
+  element={
+    <RotaONG>
+      <GerenciarOportunidades />
+    </RotaONG>
+  }
+/>
+
+<Route
+  path="/painel/oportunidades/nova"
+  element={
+    <RotaONG>
+      <FormOportunidade />
+    </RotaONG>
+  }
+/>
+
+<Route
+  path="/painel/oportunidades/:id/editar"
+  element={
+    <RotaONG>
+      <FormOportunidade />
+    </RotaONG>
+  }
+/>
+
+<Route path="/CriarConta" element={<CriarConta />} />
           
         </Routes>
 
