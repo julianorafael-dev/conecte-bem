@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../../styles/global.css';
 import '../../componentes/Home/Home.css';
 
@@ -107,6 +108,8 @@ function Home() {
               );
             })}
           </div>
+
+          <Link to="/Oportunidades" className="botao_oportunidades">Conhecer Oportunidades</Link>
         </section>
       </main>
     </div>

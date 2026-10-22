@@ -1,11 +1,150 @@
-.imagem_destaque {
-    width: 50%;          
-    margin: 0 auto;      
+.sobre {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2.5rem 1rem 3rem;
 }
 
-.imagem_destaque img {
-    width: 100%;         
-    height: auto;        
-    display: block;      
-    border-radius: var(--radius-md); 
+.sobre-topo {
+    max-width: 720px;
+    margin: 0 auto 2rem;
+    text-align: center;
+}
+
+.sobre-topo h1 {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+.sobre-topo p {
+    color: var(--text-muted);
+    font-size: clamp(1rem, 2.5vw, 1.15rem);
+    line-height: 1.7;
+}
+
+.sobre-imagem {
+    margin: 0 auto 2.5rem;
+}
+
+.sobre-imagem img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+}
+
+.sobre-pilares {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+}
+
+.sobre-card {
+    padding: 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+
+.sobre-icone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 0.75rem;
+    border-radius: var(--radius-sm);
+    background: #dbeafe;
+    color: var(--primary);
+    font-size: 1.4rem;
+}
+
+.sobre-card h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.sobre-card p {
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.sobre-como {
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+    text-align: center;
+}
+
+.sobre-como h2,
+.sobre-chamada h2 {
+    font-size: clamp(1.3rem, 4vw, 1.7rem);
+    margin-bottom: 0.75rem;
+}
+
+.sobre-como p {
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+.sobre-chamada {
+    padding: 2rem 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+
+.sobre-chamada p {
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+}
+
+.sobre-botoes {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.sobre-botao {
+    padding: 0.7rem 1.4rem;
+    font-weight: 600;
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-sm);
+    color: var(--primary);
+    background: #fff;
+}
+
+.sobre-botao:hover {
+    background: #eff6ff;
+    color: var(--primary-hover);
+}
+
+.sobre-botao-principal {
+    background: var(--primary);
+    color: #fff;
+}
+
+.sobre-botao-principal:hover {
+    background: var(--primary-hover);
+    color: #fff;
+}
+
+@media (max-width: 480px) {
+    .sobre {
+        padding-top: 1.75rem;
+    }
+
+    .sobre-botoes {
+        flex-direction: column;
+    }
+
+    .sobre-botao {
+        text-align: center;
+    }
 }
