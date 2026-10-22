@@ -1,0 +1,116 @@
+import { useState } from 'react';
+import '../../styles/global.css';
+import '../../componentes/Home/Home.css';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faBookOpen, faHandHoldingMedical, faLeaf, 
+  faPeopleArrows, faPeopleGroup, faPeopleRoof, faTimes 
+} from '@fortawesome/free-solid-svg-icons';
+
+const AREAS_VOLUNTARIADO = [
+  {
+    id: 1,
+    titulo: 'Educação e Cultura',
+    icone: faBookOpen,
+    descricao: 'Apoie projetos educacionais, aulas de reforço, contação de histórias e oficinas culturais para crianças e adultos.'
+  },
+  {
+    id: 2,
+    titulo: 'Saúde e Apoio Emocional',
+    icone: faHandHoldingMedical,
+    descricao: 'Participe de ações de apoio a pacientes, campanhas de doação de sangue, escuta empática e suporte em hospitais.'
+  },
+  {
+    id: 3,
+    titulo: 'Meio Ambiente e Animais',
+    icone: faLeaf,
+    descricao: 'Ajude na preservação ambiental, mutirões de reciclagem, proteção animal e cuidados em abrigos.'
+  },
+  {
+    id: 4,
+    titulo: 'Assistência Social e Comunitária',
+    icone: faPeopleGroup,
+    descricao: 'Contribua com a distribuição de alimentos, agasalhos e desenvolvimento social em comunidades vulneráveis.'
+  },
+  {
+    id: 5,
+    titulo: 'Voluntariado Digital',
+    icone: faPeopleArrows,
+    descricao: 'Doando suas habilidades remotamente em design, programação, redes sociais e gestão de projetos para ONGs.'
+  },
+  {
+    id: 6,
+    titulo: 'Turismo Social',
+    icone: faPeopleRoof,
+    descricao: 'Participe de viagens e expedições voltadas ao desenvolvimento sustentável e apoio comunitário local.'
+  }
+];
+
+function Home() {
+  const [cardSelecionado, setCardSelecionado] = useState(null);
+
+  const fecharModal = () => setCardSelecionado(null);
+
+  return (
+    <div className="home-container">
+      <main className="conteudo_principal">
+        <section className="titulo_principal">
+          <h1>Conectando voluntários a ONGs</h1>
+          <p className="texto_secundario">Transformando realidades através do voluntariado.</p>
+        </section>
+
+        <section className="container_cards">
+          <h2>Conheça as áreas do Voluntariado</h2>
+          <p className="texto_secundario">Busque causas que combinem com você.</p>
+          
+          <div className="conteudo_card">
+            {AREAS_VOLUNTARIADO.map((item) => {
+              const estaAberto = cardSelecionado === item.id;
+
+              return (
+                <div 
+                  key={item.id} 
+                  className="card-wrapper"
+                >
+                  {/* O CARD NORMAL */}
+                  <div 
+                    className="card" 
+                    onClick={() => setCardSelecionado(item.id)}
+                  >
+                    <div className="card_titulo">
+                      <span>{item.titulo}</span>
+                    </div>
+                    <FontAwesomeIcon icon={item.icone} />
+                  </div>
+
+                  {/* MODAL POSICIONADO POR CIMA DO CARD */}
+                  {estaAberto && (
+                    <div className="modal-card-overlay" onClick={(e) => e.stopPropagation()}>
+                      <div className="modal-card-content">
+                        <div className="modal-card-header">
+                          <FontAwesomeIcon icon={item.icone} className="modal-icon" />
+                          <h3>{item.titulo}</h3>
+                        </div>
+                        <div className="modal-card-body">
+                          <p>{item.descricao}</p>
+                        </div>
+                        <div className="modal-card-footer">
+                          <button className="modal-close-btn" onClick={fecharModal} title="Fechar">
+                            <FontAwesomeIcon icon={faTimes} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+export default Home;
