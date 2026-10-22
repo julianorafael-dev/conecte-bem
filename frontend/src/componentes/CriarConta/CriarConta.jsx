@@ -118,7 +118,7 @@ function CriarConta() {
 
                 {/* Nome Completo */}
                 <div className="form-grupo">
-                    <label htmlFor="data-de-nascimento">{formData.tipoPessoa === 'CPF' ? 'Nome Completo' : 'Razão Social'}</label>
+                    <label htmlFor="nome-completo">{formData.tipoPessoa === 'CPF' ? 'Nome Completo' : 'Razão Social'}</label>
                     <input 
                         id="nome-completo" 
                         name="nomeCompleto" 
