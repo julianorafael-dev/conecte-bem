@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBullseye, faEye, faHandHoldingHeart } from '@fortawesome/free-solid-svg-icons';
-import fotoSobre from '../../midia/foto-sobre.png';
+import fotoSobre from '../../midia/foto-sobre.avif';
 import './Sobre.css';
 
 const PILARES = [
