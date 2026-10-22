@@ -64,13 +64,11 @@
 
 .footer_inferior {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    text-align: center;
     padding: 20px 30px;
     color: #FFF;
-    gap: 10px;
+    gap: 20px;
 }
 
 .footer_inferior p {
