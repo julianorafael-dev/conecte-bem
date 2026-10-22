@@ -118,14 +118,14 @@ function CriarConta() {
 
                 {/* Nome Completo */}
                 <div className="form-grupo">
-                    <label htmlFor="nome-completo">Nome completo</label>
+                    <label htmlFor="data-de-nascimento">{formData.tipoPessoa === 'CPF' ? 'Nome Completo' : 'Razão Social'}</label>
                     <input 
                         id="nome-completo" 
                         name="nomeCompleto" 
                         type="text" 
                         className="form-control" 
                         required 
-                        placeholder="João Silva" 
+                        placeholder="Nome Completo ou Razão Social" 
                         minLength="4" 
                         value={formData.nomeCompleto}
                         onChange={handleChange}
