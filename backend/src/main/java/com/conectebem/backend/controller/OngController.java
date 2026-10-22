@@ -26,6 +26,18 @@ import java.util.List;
 @RequestMapping("/ongs")
 public class OngController {
 
+    @GetMapping("/me")
+    public OngResponseDTO meuPerfil(@org.springframework.security.core.annotation.AuthenticationPrincipal com.conectebem.backend.model.Usuario usuario) {
+        return ongService.buscarPerfil(usuario.getId());
+    }
+
+    @PutMapping("/me")
+    public OngResponseDTO atualizarMeuPerfil(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.conectebem.backend.model.Usuario usuario,
+            @Valid @RequestBody com.conectebem.backend.dto.OngPerfilRequestDTO dados) {
+        return ongService.atualizarPerfil(usuario.getId(), dados);
+    }
+
     private final OngService ongService;
 
     public OngController(OngService ongService) {

@@ -25,27 +25,27 @@
   color: var(--text-dark, #0f172a);
 }
 
-.editar-dados {
+.perfil-ong-container .editar-dados {
   display: flex;
   flex-direction: column;
   gap: 20px;
   width: 100%;
 }
 
-.form-grupo {
+.perfil-ong-container .form-grupo {
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: 100%;
 }
 
-.form-grupo label {
+.perfil-ong-container .form-grupo label {
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--text-dark, #0f172a);
 }
 
-.form-control {
+.perfil-ong-container .form-control {
   width: 100%;
   padding: 12px 16px;
   font-size: 1rem;
@@ -57,24 +57,24 @@
   transition: all 0.2s ease-in-out;
 }
 
-.form-control:focus {
+.perfil-ong-container .form-control:focus {
   outline: none;
   border-color: var(--primary, #2254D7);
   background-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(34, 84, 215, 0.15);
 }
 
-.form-control:disabled {
+.perfil-ong-container .form-control:disabled {
   color: var(--text-muted, #64748b);
   cursor: not-allowed;
 }
 
-textarea.form-control {
+.perfil-ong-container textarea.form-control {
   min-height: 120px;
   resize: vertical;
 }
 
-.btn {
+.perfil-ong-container .btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -89,12 +89,12 @@ textarea.form-control {
   margin-top: 10px;
 }
 
-.btn-primary {
+.perfil-ong-container .btn-primary {
   background-color: var(--primary, #2254D7);
   color: #ffffff;
 }
 
-.btn-primary:hover:not(:disabled) {
+.perfil-ong-container .btn-primary:hover:not(:disabled) {
   background-color: #1a42b0;
 }
 
@@ -108,4 +108,31 @@ textarea.form-control {
     font-size: 1.5rem;
     margin-bottom: 24px;
   }
+}
+
+.perfil-ong-container fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.perfil-ong-container legend {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.perfil-ong-container > p { margin-bottom: 24px; }
+.perfil-ong-container .form-control[readonly] { color: #64748b; background: #f1f5f9; }
+.perfil-ong-container .perfil-ong-acoes { display: flex; gap: 12px; }
+.perfil-ong-container .btn:disabled { opacity: .65; cursor: wait; }
+.perfil-ong-container .perfil-ong-erro { color: #b91c1c; }
+.perfil-ong-container .perfil-ong-sucesso { color: #166534; }
+
+@media (max-width: 600px) {
+  .perfil-ong-container .perfil-ong-acoes { flex-direction: column-reverse; }
 }

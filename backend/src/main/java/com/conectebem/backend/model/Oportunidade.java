@@ -1,6 +1,8 @@
 package com.conectebem.backend.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -44,7 +46,8 @@ public class Oportunidade {
     @Column(length = 100)
     private String cidade;
 
-    @Column(columnDefinition = "CHAR(2)")
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "estado", length = 2, columnDefinition = "char(2)")
     private String estado;
 
     @Column(nullable = false)
