@@ -61,7 +61,7 @@ function GerenciarOportunidades() {
       <ul className="gerenciar-lista">
         {oportunidades.map((op) => (
           <li key={op.id} className="gerenciar-card">
-            <div>
+            <Link to={`/painel/oportunidades/${op.id}/inscritos`} className="gerenciar-info" title="Ver voluntários inscritos">
               <h2>{op.titulo}</h2>
               <p>
                 {op.nomeCategoria} · {formatarData(op.data)} às {(op.horario ?? '').slice(0, 5)}
@@ -70,7 +70,7 @@ function GerenciarOportunidades() {
               <span className={`gerenciar-status status-${op.status}`}>
                 {ROTULO_STATUS[op.status] ?? op.status}
               </span>
-            </div>
+            </Link>
             <div className="gerenciar-botoes">
               <Link to={`/painel/oportunidades/${op.id}/editar`} className="gerenciar-editar">Editar</Link>
               <button type="button" className="gerenciar-excluir" onClick={() => excluir(op)}>Excluir</button>
