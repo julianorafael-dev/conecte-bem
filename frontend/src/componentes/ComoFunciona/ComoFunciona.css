@@ -1,11 +1,167 @@
-.imagem_destaque {
-    width: 50%;          
-    margin: 0 auto;      
+.como {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2.5rem 1rem 3rem;
 }
 
-.imagem_destaque img {
-    width: 100%;         
-    height: auto;        
-    display: block;      
-    border-radius: var(--radius-md); 
+.como-topo {
+    max-width: 720px;
+    margin: 0 auto 2rem;
+    text-align: center;
+}
+
+.como-topo h1 {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+.como-topo p {
+    color: var(--text-muted);
+    font-size: clamp(1rem, 2.5vw, 1.15rem);
+    line-height: 1.7;
+}
+
+.como-imagem {
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+}
+
+.como-imagem img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+}
+
+.como-colunas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+}
+
+.como-bloco {
+    padding: 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.como-bloco h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1.25rem;
+    color: var(--primary);
+}
+
+.como-passos {
+    list-style: none;
+    counter-reset: passo;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.como-passos li {
+    counter-increment: passo;
+    position: relative;
+    padding-left: 3rem;
+    min-height: 2.2rem;
+}
+
+.como-passos li::before {
+    content: counter(passo);
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+}
+
+.como-passos h3 {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+}
+
+.como-passos p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.como-chamada {
+    padding: 2rem 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+
+.como-chamada h2 {
+    font-size: clamp(1.3rem, 4vw, 1.7rem);
+    margin-bottom: 0.75rem;
+}
+
+.como-chamada p {
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+}
+
+.como-botoes {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.como-botao {
+    padding: 0.7rem 1.4rem;
+    font-weight: 600;
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-sm);
+    color: var(--primary);
+    background: #fff;
+}
+
+.como-botao:hover {
+    background: #eff6ff;
+    color: var(--primary-hover);
+}
+
+.como-botao-principal {
+    background: var(--primary);
+    color: #fff;
+}
+
+.como-botao-principal:hover {
+    background: var(--primary-hover);
+    color: #fff;
+}
+
+@media (max-width: 480px) {
+    .como {
+        padding-top: 1.75rem;
+    }
+
+    .como-colunas {
+        grid-template-columns: 1fr;
+    }
+
+    .como-botoes {
+        flex-direction: column;
+    }
+
+    .como-botao {
+        text-align: center;
+    }
 }
