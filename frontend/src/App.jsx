@@ -12,6 +12,7 @@ import Contato from './componentes/Contato/Contato.jsx';
 import RotaONG from './componentes/RotaONG/RotaONG.jsx';
 import GerenciarOportunidades from './componentes/GerenciarOportunidades/GerenciarOportunidades.jsx';
 import FormOportunidade from './componentes/FormOportunidade/FormOportunidade.jsx';
+import VoluntariosInscritos from './componentes/VoluntariosInscritos/VoluntariosInscritos.jsx';
 import CriarConta from './componentes/CriarConta/CriarConta.jsx';
 import PerfilOng from "./pages/PerfilOng/PerfilOng.jsx";
 import PerfilVoluntario from "./pages/PerfilVoluntario/PerfilVoluntario.jsx";
@@ -43,6 +44,14 @@ function App() {
           <Route path="/painel/oportunidades/:id/editar" element={<RotaONG><FormOportunidade /></RotaONG>}/>
           {/* <Route path="/painel/perfil" element={<RotaONG><PerfilOng /></RotaONG>}/> */}
 
+          <Route
+            path="/painel/oportunidades/:id/inscritos"
+            element={
+              <RotaONG>
+                <VoluntariosInscritos />
+              </RotaONG>
+            }
+          />
         </Routes>
 
         <Footer />
