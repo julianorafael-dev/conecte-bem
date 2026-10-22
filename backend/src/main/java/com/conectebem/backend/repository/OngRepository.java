@@ -10,4 +10,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * necessário escrever SQL para essas ações básicas.</p>
  */
 public interface OngRepository extends JpaRepository<Ong, Integer> {
+    java.util.Optional<Ong> findByUsuarioId(Integer usuarioId);
 }

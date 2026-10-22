@@ -18,6 +18,25 @@ import java.util.List;
 @Service
 public class OngService {
 
+    public OngResponseDTO buscarPerfil(Integer usuarioId) {
+        return paraResponse(buscarPorUsuario(usuarioId));
+    }
+
+    public OngResponseDTO atualizarPerfil(Integer usuarioId, com.conectebem.backend.dto.OngPerfilRequestDTO dados) {
+        Ong ong = buscarPorUsuario(usuarioId);
+        ong.setNome(dados.nome().trim());
+        ong.setDescricao(dados.descricao());
+        ong.setTelefone(dados.telefone());
+        ong.setCidade(dados.cidade());
+        ong.setEstado(dados.estado());
+        return paraResponse(ongRepository.save(ong));
+    }
+
+    private Ong buscarPorUsuario(Integer usuarioId) {
+        return ongRepository.findByUsuarioId(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("ONG não encontrada."));
+    }
+
     private final OngRepository ongRepository;
 
     public OngService(OngRepository ongRepository) {
