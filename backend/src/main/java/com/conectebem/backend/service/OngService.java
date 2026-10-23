@@ -2,10 +2,13 @@ package com.conectebem.backend.service;
 
 import com.conectebem.backend.dto.OngRequestDTO;
 import com.conectebem.backend.dto.OngResponseDTO;
+import com.conectebem.backend.dto.PainelOngResponseDTO;
 import com.conectebem.backend.exception.ResourceNotFoundException;
 import com.conectebem.backend.model.Ong;
 import com.conectebem.backend.repository.OngRepository;
+import com.conectebem.backend.repository.OportunidadeRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,6 +20,9 @@ import java.util.List;
  */
 @Service
 public class OngService {
+
+    private static final String STATUS_ABERTA = "ABERTA";
+    private static final String STATUS_ENCERRADA = "ENCERRADA";
 
     public OngResponseDTO buscarPerfil(Integer usuarioId) {
         return paraResponse(buscarPorUsuario(usuarioId));
@@ -38,9 +44,30 @@ public class OngService {
     }
 
     private final OngRepository ongRepository;
+    private final OportunidadeRepository oportunidadeRepository;
 
-    public OngService(OngRepository ongRepository) {
+    public OngService(OngRepository ongRepository, OportunidadeRepository oportunidadeRepository) {
         this.ongRepository = ongRepository;
+        this.oportunidadeRepository = oportunidadeRepository;
+    }
+
+    /**
+     * Retorna os indicadores da ONG vinculada ao usuário autenticado.
+     *
+     * <p>A busca prévia da ONG assegura que somente uma conta com perfil de
+     * ONG cadastrado receba os dados do painel.</p>
+     */
+    @Transactional(readOnly = true)
+    public PainelOngResponseDTO buscarResumoPainel(Integer usuarioId) {
+        Ong ong = buscarPorUsuario(usuarioId);
+
+        return new PainelOngResponseDTO(
+                ong.getNome(),
+                oportunidadeRepository.countByOngUsuarioId(usuarioId),
+                oportunidadeRepository.countByOngUsuarioIdAndStatus(usuarioId, STATUS_ABERTA),
+                oportunidadeRepository.countByOngUsuarioIdAndStatus(usuarioId, STATUS_ENCERRADA),
+                oportunidadeRepository.countInscricoesByOngUsuarioId(usuarioId)
+        );
     }
 
     /**
