@@ -14,6 +14,8 @@ import GerenciarOportunidades from './componentes/GerenciarOportunidades/Gerenci
 import FormOportunidade from './componentes/FormOportunidade/FormOportunidade.jsx';
 import VoluntariosInscritos from './componentes/VoluntariosInscritos/VoluntariosInscritos.jsx';
 import CriarConta from './componentes/CriarConta/CriarConta.jsx';
+import RotaVoluntario from './componentes/RotaVoluntario/RotaVoluntario.jsx';
+import MinhasCandidaturas from './componentes/MinhasCandidaturas/MinhasCandidaturas.jsx';
 import PerfilOng from "./pages/PerfilOng/PerfilOng.jsx";
 import PerfilVoluntario from "./pages/PerfilVoluntario/PerfilVoluntario.jsx";
 
@@ -36,6 +38,9 @@ function App() {
           //Trabalhando com a rota aberta para todos para poder testar o perfil da ONG, depois colocar a rota fechada para apenas usuários logados como ONG
           <Route path="/PerfilOng" element={<PerfilOng />} />
           <Route path="/PerfilVoluntario" element={<PerfilVoluntario />} />
+
+          {/* Área do voluntário (só acessa quem estiver logado como voluntário) */}
+          <Route path="/painel/candidaturas" element={<RotaVoluntario><MinhasCandidaturas /></RotaVoluntario>}/>
 
           {/* Área da ONG (só acessa quem estiver logado como ONG) */}
 

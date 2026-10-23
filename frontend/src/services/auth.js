@@ -29,3 +29,7 @@ export function getUsuario() {
 export function isOng() {
   return getUsuario()?.tipo === 'ONG';
 }
+
+export function isVoluntario() {
+  return getUsuario()?.tipo === 'VOLUNTARIO';
+}
