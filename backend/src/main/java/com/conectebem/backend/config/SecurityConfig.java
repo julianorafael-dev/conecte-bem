@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/health").permitAll()
                         .requestMatchers("/auth/**").permitAll() // Liberta as rotas de registo e login
-                        .requestMatchers("/ongs/me").hasRole("ONG")
+                        .requestMatchers("/ongs/me/**").hasRole("ONG")
                         .requestMatchers("/voluntarios/me").hasRole("VOLUNTARIO")
                         .requestMatchers(HttpMethod.GET, "/ongs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/oportunidades/**").permitAll()
