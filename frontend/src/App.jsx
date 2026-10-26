@@ -14,6 +14,8 @@ import GerenciarOportunidades from './componentes/GerenciarOportunidades/Gerenci
 import FormOportunidade from './componentes/FormOportunidade/FormOportunidade.jsx';
 import VoluntariosInscritos from './componentes/VoluntariosInscritos/VoluntariosInscritos.jsx';
 import CriarConta from './componentes/CriarConta/CriarConta.jsx';
+import RotaVoluntario from './componentes/RotaVoluntario/RotaVoluntario.jsx';
+import MinhasCandidaturas from './componentes/MinhasCandidaturas/MinhasCandidaturas.jsx';
 import PerfilOng from "./pages/PerfilOng/PerfilOng.jsx";
 import PerfilVoluntario from "./pages/PerfilVoluntario/PerfilVoluntario.jsx";
 import PainelOng from "./pages/PainelOng/PainelOng.jsx";
@@ -37,6 +39,9 @@ function App() {
           {/* Rotas de perfil ainda abertas temporariamente para testes. */}
           <Route path="/PerfilOng" element={<PerfilOng />} />
           <Route path="/PerfilVoluntario" element={<PerfilVoluntario />} />
+
+          {/* Área do voluntário (só acessa quem estiver logado como voluntário) */}
+          <Route path="/painel/candidaturas" element={<RotaVoluntario><MinhasCandidaturas /></RotaVoluntario>}/>
 
           {/* Área da ONG (só acessa quem estiver logado como ONG) */}
           <Route path="/painel" element={<RotaONG><PainelOng /></RotaONG>} />
