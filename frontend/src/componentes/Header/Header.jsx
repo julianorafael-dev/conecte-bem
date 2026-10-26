@@ -1,5 +1,6 @@
 
 import { Link } from 'react-router-dom';
+import { isOng } from '../../services/auth.js';
 import './Header.css';
 
 function Header() {
@@ -15,6 +16,7 @@ function Header() {
         <Link to="/Oportunidades">Oportunidades</Link>
         <Link to="/ComoFunciona">Como Funciona</Link>
         <Link to="/Sobre">Sobre nós</Link>
+        {isOng() && <Link to="/painel">Painel da ONG</Link>}
       </nav>
 
       <div className="menu_login_cadastro">

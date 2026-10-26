@@ -2,8 +2,11 @@ package com.conectebem.backend.controller;
 
 import com.conectebem.backend.dto.OngRequestDTO;
 import com.conectebem.backend.dto.OngResponseDTO;
+import com.conectebem.backend.dto.PainelOngResponseDTO;
+import com.conectebem.backend.model.Usuario;
 import com.conectebem.backend.service.OngService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,13 +30,19 @@ import java.util.List;
 public class OngController {
 
     @GetMapping("/me")
-    public OngResponseDTO meuPerfil(@org.springframework.security.core.annotation.AuthenticationPrincipal com.conectebem.backend.model.Usuario usuario) {
+    public OngResponseDTO meuPerfil(@AuthenticationPrincipal Usuario usuario) {
         return ongService.buscarPerfil(usuario.getId());
+    }
+
+    /** Retorna os indicadores do painel da ONG autenticada. */
+    @GetMapping("/me/painel")
+    public PainelOngResponseDTO meuPainel(@AuthenticationPrincipal Usuario usuario) {
+        return ongService.buscarResumoPainel(usuario.getId());
     }
 
     @PutMapping("/me")
     public OngResponseDTO atualizarMeuPerfil(
-            @org.springframework.security.core.annotation.AuthenticationPrincipal com.conectebem.backend.model.Usuario usuario,
+            @AuthenticationPrincipal Usuario usuario,
             @Valid @RequestBody com.conectebem.backend.dto.OngPerfilRequestDTO dados) {
         return ongService.atualizarPerfil(usuario.getId(), dados);
     }
