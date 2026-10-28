@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import fotoComoFunciona from '../../midia/foto-comofunc.avif';
+import fotoComoFunciona from '../../assets/foto-comofunc.avif';
 import './ComoFunciona.css';
 
 const PASSOS_VOLUNTARIO = [

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../../context/AuthContext.jsx'
 import { useNavigate, Link } from 'react-router-dom'
 
 function Login() {
@@ -102,7 +102,7 @@ function Login() {
       </p>
 
       <p style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-        Não tem conta? <Link to="/criar-conta" style={{ color: '#4CAF50', fontWeight: 'bold' }}>Cadastre-se</Link>
+        Não tem conta? <Link to="/CriarConta" style={{ color: '#4CAF50', fontWeight: 'bold' }}>Cadastre-se</Link>
       </p>
 
       {/* Modal Recuperar Senha */}
