@@ -1,0 +1,30 @@
+.nao-encontrada {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 4rem 1rem;
+  text-align: center;
+}
+
+.nao-encontrada-codigo {
+  color: var(--primary);
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.nao-encontrada h1 { margin-bottom: 1rem; }
+
+.nao-encontrada a {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  color: #fff;
+  background: var(--primary);
+  border-radius: var(--radius-sm);
+}
+
+.nao-encontrada a:hover { background: var(--primary-hover); }
+
+.nao-encontrada a:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 4px;
+}

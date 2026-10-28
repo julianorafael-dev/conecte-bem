@@ -15,6 +15,7 @@ import PerfilOng from "../pages/PerfilOng/PerfilOng.jsx";
 import PerfilVoluntario from "../pages/PerfilVoluntario/PerfilVoluntario.jsx";
 import PainelOng from "../pages/PainelOng/PainelOng.jsx";
 import Login from '../pages/Login/Login.jsx';
+import NaoEncontrada from '../pages/NaoEncontrada/NaoEncontrada.jsx';
 
 function AppRoutes() {
   return (
@@ -49,6 +50,7 @@ function AppRoutes() {
         </RotaONG>
       }
     />
+    <Route path="*" element={<NaoEncontrada />} />
     </Routes>
   );
 }
