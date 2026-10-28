@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../../styles/global.css';
-import '../../componentes/Home/Home.css';
+import './Home.css';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 

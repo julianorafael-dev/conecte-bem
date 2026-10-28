@@ -1,26 +1,26 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Header from './componentes/Header/Header.jsx';
-import Home from './componentes/Home/Home.jsx';
+import Home from './pages/Home/Home.jsx';
 import Footer from './componentes/Footer/Footer.jsx';
-import Oportunidades from './componentes/Oportunidade/Oportunidade.jsx';
-import SobreNos from './componentes/Sobre/Sobre.jsx';
-import ComoFunciona from './componentes/ComoFunciona/ComoFunciona.jsx';
-import Contato from './componentes/Contato/Contato.jsx';
+import Oportunidades from './pages/Oportunidade/Oportunidade.jsx';
+import SobreNos from './pages/Sobre/Sobre.jsx';
+import ComoFunciona from './pages/ComoFunciona/ComoFunciona.jsx';
+import Contato from './pages/Contato/Contato.jsx';
 
-import RotaONG from './componentes/RotaONG/RotaONG.jsx';
-import GerenciarOportunidades from './componentes/GerenciarOportunidades/GerenciarOportunidades.jsx';
-import FormOportunidade from './componentes/FormOportunidade/FormOportunidade.jsx';
-import VoluntariosInscritos from './componentes/VoluntariosInscritos/VoluntariosInscritos.jsx';
-import CriarConta from './componentes/CriarConta/CriarConta.jsx';
-import RotaVoluntario from './componentes/RotaVoluntario/RotaVoluntario.jsx';
-import MinhasCandidaturas from './componentes/MinhasCandidaturas/MinhasCandidaturas.jsx';
+import RotaONG from './routes/RotaONG/RotaONG.jsx';
+import GerenciarOportunidades from './pages/GerenciarOportunidades/GerenciarOportunidades.jsx';
+import FormOportunidade from './pages/FormOportunidade/FormOportunidade.jsx';
+import VoluntariosInscritos from './pages/VoluntariosInscritos/VoluntariosInscritos.jsx';
+import CriarConta from './pages/CriarConta/CriarConta.jsx';
+import RotaVoluntario from './routes/RotaVoluntario/RotaVoluntario.jsx';
+import MinhasCandidaturas from './pages/MinhasCandidaturas/MinhasCandidaturas.jsx';
 import PerfilOng from "./pages/PerfilOng/PerfilOng.jsx";
 import PerfilVoluntario from "./pages/PerfilVoluntario/PerfilVoluntario.jsx";
 import PainelOng from "./pages/PainelOng/PainelOng.jsx";
 
 import { AuthProvider } from './context/AuthContext';
-import Login from './pages/Login.jsx';
+import Login from './pages/Login/Login.jsx';
 
 function App() {
   return (
@@ -32,6 +32,7 @@ function App() {
           <Routes>
             {/* Sua rota nova */}
             <Route path="/login" element={<Login />} />
+            <Route path="/entrar" element={<Login />} />
 
             {/* Tudo que já existia continua igual */}
             <Route path="/" element={<Home />} />
