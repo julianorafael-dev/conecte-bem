@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "titulo": "Apoio Escolar para Crianças",
+    "ong": { "id": 101, "nome": "ONG Educar+" },
+    "categoria": "Educação",
+    "descricao": "Auxílio em matemática e português para crianças do ensino fundamental.",
+    "localizacao": "Remoto",
+    "dataCriacao": "2026-10-30",
+    "vagasTotais": 5,
+    "vagasDisponiveis": 2,
+    "status": "ABERTA"
+  },
+  {
+    "id": 2,
+    "titulo": "Mutirão de Limpeza Ambiental",
+    "ong": { "id": 102, "nome": "EcoAção" },
+    "categoria": "Meio Ambiente",
+    "descricao": "Ação conjunta para recolha de resíduos sólidos em parques da cidade.",
+    "localizacao": "Presencial - Porto Alegre, RS",
+    "dataCriacao": "2026-11-01",
+    "vagasTotais": 20,
+    "vagasDisponiveis": 20,
+    "status": "ABERTA"
+  },
+  {
+    "id": 3,
+    "titulo": "Desenvolvedor Frontend Voluntário",
+    "ong": { "id": 103, "nome": "Tech Para o Bem" },
+    "categoria": "Tecnologia",
+    "descricao": "Criação de landing page para campanha de arrecadação de agasalhos.",
+    "localizacao": "Remoto",
+    "dataCriacao": "2026-11-01",
+    "vagasTotais": 1,
+    "vagasDisponiveis": 0,
+    "status": "ENCERRADA"
+  }
+]
