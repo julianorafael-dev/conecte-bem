@@ -3,6 +3,7 @@ package com.conectebem.backend.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -51,6 +52,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
         return montarResposta(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    /**
+     * Converte erros de autorização em HTTP 403.
+     *
+     * <p>Sem este handler, a {@code AccessDeniedException} lançada na camada
+     * de serviço seria capturada pelo handler genérico de {@code Exception}
+     * e respondida como 500 "Erro interno no servidor", mascarando o erro
+     * de autorização.</p>
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+        return montarResposta(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

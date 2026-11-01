@@ -26,20 +26,20 @@ function PainelOng() {
 
     async function carregarPainel() {
       try {
-        const [dadosPainel, minhaOng, todasOportunidades] = await Promise.all([
+        // O backend já retorna apenas as oportunidades da ONG autenticada
+        // (GET /ongs/me/oportunidades) — não é preciso baixar todas nem filtrar.
+        const [dadosPainel, minhasOportunidades] = await Promise.all([
           api('/ongs/me/painel'),
-          api('/ongs/me'),
-          api('/oportunidades'),
+          api('/ongs/me/oportunidades'),
         ]);
 
-        const minhasOportunidades = todasOportunidades
-          .filter((oportunidade) => oportunidade.ongId === minhaOng.id)
+        const ultimas = minhasOportunidades
           .sort((primeira, segunda) => new Date(segunda.criadoEm) - new Date(primeira.criadoEm))
           .slice(0, 3);
 
         if (ativo) {
           setResumo(dadosPainel);
-          setOportunidades(minhasOportunidades);
+          setOportunidades(ultimas);
         }
       } catch (error) {
         if (ativo) setErro(error.message);
