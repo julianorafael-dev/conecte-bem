@@ -20,9 +20,10 @@ function GerenciarOportunidades() {
   useEffect(() => {
     async function carregar() {
       try {
-        const minhaOng = await api('/ongs/me');
-        const todas = await api('/oportunidades');
-        setOportunidades(todas.filter((op) => op.ongId === minhaOng.id));
+        // O backend já retorna apenas as oportunidades da ONG autenticada
+        // (GET /ongs/me/oportunidades) — não é preciso filtrar no navegador.
+        const minhas = await api('/ongs/me/oportunidades');
+        setOportunidades(minhas);
       } catch (e) {
         setErro(e.message);
       } finally {

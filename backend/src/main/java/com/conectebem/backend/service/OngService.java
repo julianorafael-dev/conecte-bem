@@ -2,9 +2,11 @@ package com.conectebem.backend.service;
 
 import com.conectebem.backend.dto.OngRequestDTO;
 import com.conectebem.backend.dto.OngResponseDTO;
+import com.conectebem.backend.dto.OportunidadeResponseDTO;
 import com.conectebem.backend.dto.PainelOngResponseDTO;
 import com.conectebem.backend.exception.ResourceNotFoundException;
 import com.conectebem.backend.model.Ong;
+import com.conectebem.backend.model.Oportunidade;
 import com.conectebem.backend.repository.OngRepository;
 import com.conectebem.backend.repository.OportunidadeRepository;
 import org.springframework.stereotype.Service;
@@ -67,6 +69,49 @@ public class OngService {
                 oportunidadeRepository.countByOngUsuarioIdAndStatus(usuarioId, STATUS_ABERTA),
                 oportunidadeRepository.countByOngUsuarioIdAndStatus(usuarioId, STATUS_ENCERRADA),
                 oportunidadeRepository.countInscricoesByOngUsuarioId(usuarioId)
+        );
+    }
+
+    /**
+     * Lista as oportunidades da ONG vinculada ao usuário autenticado.
+     *
+     * <p>A busca prévia da ONG assegura que apenas contas com perfil de ONG
+     * cadastrado recebam a listagem; caso contrário, o usuário recebe a
+     * resposta padrão de recurso não encontrado.</p>
+     *
+     * <p>O filtro é feito no servidor pelo {@code usuarioId} da ONG — o
+     * {@code ongId} informado em qualquer requisição nunca é usado como
+     * critério de autorização.</p>
+     */
+    @Transactional(readOnly = true)
+    public List<OportunidadeResponseDTO> listarOportunidadesDoUsuario(Integer usuarioId) {
+        buscarPorUsuario(usuarioId);
+
+        return oportunidadeRepository.findByOngUsuarioId(usuarioId)
+                .stream()
+                .map(this::paraResponseOportunidade)
+                .toList();
+    }
+
+    /**
+     * Converte uma oportunidade da ONG autenticada para o formato público da API.
+     */
+    private OportunidadeResponseDTO paraResponseOportunidade(Oportunidade oportunidade) {
+        return new OportunidadeResponseDTO(
+                oportunidade.getId(),
+                oportunidade.getOng().getId(),
+                oportunidade.getOng().getNome(),
+                oportunidade.getCategoria().getId().intValue(), // Categoria.id é Long; DTO espera Integer
+                oportunidade.getCategoria().getNome(),
+                oportunidade.getTitulo(),
+                oportunidade.getDescricao(),
+                oportunidade.getData(),
+                oportunidade.getHorario(),
+                oportunidade.getCidade(),
+                oportunidade.getEstado(),
+                oportunidade.getVagas(),
+                oportunidade.getStatus(),
+                oportunidade.getCriadoEm()
         );
     }
 

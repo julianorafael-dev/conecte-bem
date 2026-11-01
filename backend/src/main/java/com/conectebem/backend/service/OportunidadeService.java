@@ -6,9 +6,12 @@ import com.conectebem.backend.exception.ResourceNotFoundException;
 import com.conectebem.backend.model.Categoria;
 import com.conectebem.backend.model.Ong;
 import com.conectebem.backend.model.Oportunidade;
+import com.conectebem.backend.model.TipoUsuario;
+import com.conectebem.backend.model.Usuario;
 import com.conectebem.backend.repository.CategoriaRepository;
 import com.conectebem.backend.repository.OngRepository;
 import com.conectebem.backend.repository.OportunidadeRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -44,12 +47,17 @@ public class OportunidadeService {
         return paraResponse(oportunidade);
     }
 
-    /** Cria uma nova oportunidade a partir dos dados do RequestDTO. */
-    public OportunidadeResponseDTO criar(OportunidadeRequestDTO dados) {
-        // 1. Buscar ONG pelo ongId
-        Integer ongId = dados.ongId();
-        Ong ong = ongRepository.findById(ongId)
-                .orElseThrow(() -> new ResourceNotFoundException("ONG não encontrada. ID: " + ongId));
+    /**
+     * Cria uma nova oportunidade vinculada à ONG do usuário autenticado.
+     *
+     * <p>O {@code ongId} recebido no corpo da requisição NÃO é usado para
+     * definir o proprietário: a ONG é resolvida no servidor pelo vínculo
+     * {@code usuarioId}. O campo permanece no DTO apenas por compatibilidade
+     * com o formulário do frontend.</p>
+     */
+    public OportunidadeResponseDTO criar(OportunidadeRequestDTO dados, Usuario usuario) {
+        // 1. Resolver a ONG pelo usuário autenticado (não pelo ongId do corpo)
+        Ong ong = ongDoUsuarioAutenticado(usuario);
 
         // 2. Buscar Categoria pelo categoriaId
         Integer categoriaId = dados.categoriaId();
@@ -83,26 +91,32 @@ public class OportunidadeService {
         return paraResponse(oportunidade);
     }
 
-    /** Atualiza uma oportunidade existente. */
-    public OportunidadeResponseDTO atualizar(Integer id, OportunidadeRequestDTO dados) {
+    /**
+     * Atualiza uma oportunidade existente, desde que pertença à ONG do
+     * usuário autenticado. A ONG proprietária nunca é alterada: a edição
+     * não permite transferir a oportunidade para outra ONG.
+     */
+    public OportunidadeResponseDTO atualizar(Integer id, OportunidadeRequestDTO dados, Usuario usuario) {
         // 1. Verificar se a oportunidade existe
         Oportunidade oportunidadeExistente = oportunidadeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Oportunidade não encontrada. ID: " + id));
 
-        // 2. Buscar ONG e Categoria (validar existência)
-        Integer ongId = dados.ongId();
-        Ong ong = ongRepository.findById(ongId)
-                .orElseThrow(() -> new ResourceNotFoundException("ONG não encontrada. ID: " + ongId));
+        // 2. Validar propriedade: oportunidade passou a pertencer à ONG do usuário autenticado
+        Ong ongDoUsuario = ongDoUsuarioAutenticado(usuario);
+        if (!oportunidadeExistente.getOng().getId().equals(ongDoUsuario.getId())) {
+            throw new AccessDeniedException("Você só pode alterar oportunidades da sua própria ONG.");
+        }
 
+        // 3. Buscar Categoria (validar existência)
         Integer categoriaId = dados.categoriaId();
         Categoria categoria = categoriaRepository.findById(Integer.valueOf(categoriaId))
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada. ID: " + categoriaId));
 
-        // 3. Atualizar campos permitidos
+        // 4. Atualizar campos permitidos
         // NÃO alterar o ID
         // NÃO alterar criadoEm
+        // NÃO alterar a ONG proprietária (acompanhamento: edição não transfere a oportunidade)
 
-        oportunidadeExistente.setOng(ong);
         oportunidadeExistente.setCategoria(categoria);
         oportunidadeExistente.setTitulo(dados.titulo());
         oportunidadeExistente.setDescricao(dados.descricao());
@@ -118,13 +132,40 @@ public class OportunidadeService {
         return paraResponse(oportunidadeExistente);
     }
 
-    /** Exclui uma oportunidade pelo ID. */
-    public void excluir(Integer id) {
-        // Verificar se existe antes de excluir
-        if (!oportunidadeRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Oportunidade não encontrada. ID: " + id);
+    /**
+     * Exclui uma oportunidade da ONG do usuário autenticado.
+     *
+     * <p>A exclusão continua física (comportamento atual). Verificação de
+     * inscrições ativas e o tratamento delas dependem de acordo com a
+     * Pessoa 4 e NÃO foram alterados aqui.</p>
+     */
+    public void excluir(Integer id, Usuario usuario) {
+        // Verificar se existe antes de excluir (404 quando inexistente)
+        Oportunidade oportunidade = oportunidadeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Oportunidade não encontrada. ID: " + id));
+
+        // Validar propriedade: apenas a ONG dona pode excluir (403 caso contrário)
+        Ong ongDoUsuario = ongDoUsuarioAutenticado(usuario);
+        if (!oportunidade.getOng().getId().equals(ongDoUsuario.getId())) {
+            throw new AccessDeniedException("Você só pode excluir oportunidades da sua própria ONG.");
         }
+
         oportunidadeRepository.deleteById(id);
+    }
+
+    /**
+     * Resolve a ONG vinculada ao usuário autenticado.
+     *
+     * <p>Autorização em duas camadas: contas que não são do tipo ONG recebem
+     * 403; contas do tipo ONG sem registro de ONG vinculado recebem 404
+     * (mesmo padrão já usado em {@code OngService.buscarPorUsuario}).</p>
+     */
+    private Ong ongDoUsuarioAutenticado(Usuario usuario) {
+        if (usuario.getTipo() != TipoUsuario.ONG) {
+            throw new AccessDeniedException("Apenas contas do tipo ONG podem gerenciar oportunidades.");
+        }
+        return ongRepository.findByUsuarioId(usuario.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("ONG do usuário autenticado não encontrada."));
     }
 
     /** Filtra oportunidades por cidade. */

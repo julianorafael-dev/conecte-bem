@@ -48,4 +48,14 @@ public interface OportunidadeRepository extends JpaRepository<Oportunidade, Inte
               AND inscricao.status IN ('PENDENTE', 'CONFIRMADA')
             """, nativeQuery = true)
     long countInscricoesByOngUsuarioId(@Param("usuarioId") Integer usuarioId);
+
+    /**
+     * Lista todas as oportunidades da ONG vinculada ao usuário informado.
+     *
+     * <p>Navega pelo relacionamento {@code Oportunidade.ong} e pelo atributo
+     * {@code Ong.usuarioId} (o id do perfil de usuário, não o id da ONG).
+     * Retorna em ordem decrescente de criação.</p>
+     */
+    @Query("SELECT o FROM Oportunidade o WHERE o.ong.usuarioId = :usuarioId ORDER BY o.criadoEm DESC")
+    List<Oportunidade> findByOngUsuarioId(@Param("usuarioId") Integer usuarioId);
 }

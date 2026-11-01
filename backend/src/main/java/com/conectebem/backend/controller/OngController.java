@@ -2,6 +2,7 @@ package com.conectebem.backend.controller;
 
 import com.conectebem.backend.dto.OngRequestDTO;
 import com.conectebem.backend.dto.OngResponseDTO;
+import com.conectebem.backend.dto.OportunidadeResponseDTO;
 import com.conectebem.backend.dto.PainelOngResponseDTO;
 import com.conectebem.backend.model.Usuario;
 import com.conectebem.backend.service.OngService;
@@ -38,6 +39,13 @@ public class OngController {
     @GetMapping("/me/painel")
     public PainelOngResponseDTO meuPainel(@AuthenticationPrincipal Usuario usuario) {
         return ongService.buscarResumoPainel(usuario.getId());
+    }
+
+    /** Retorna as oportunidades da ONG vinculada ao usuário autenticado. */
+    @GetMapping("/me/oportunidades")
+    public List<OportunidadeResponseDTO> minhasOportunidades(
+            @AuthenticationPrincipal Usuario usuario) {
+        return ongService.listarOportunidadesDoUsuario(usuario.getId());
     }
 
     @PutMapping("/me")

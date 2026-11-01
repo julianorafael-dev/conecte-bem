@@ -40,6 +40,12 @@ public class SecurityConfig {
                         .requestMatchers("/voluntarios/me").hasRole("VOLUNTARIO")
                         .requestMatchers(HttpMethod.GET, "/ongs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/oportunidades/**").permitAll()
+                        // Defesa em profundidade (alinhado com a Pessoa 2): somente
+                        // contas do tipo ONG gerenciam oportunidades. Esses matchers
+                        // precisam vir APÓS o GET público acima e ANTES do anyRequest().
+                        .requestMatchers(HttpMethod.POST, "/oportunidades/**").hasRole("ONG")
+                        .requestMatchers(HttpMethod.PUT, "/oportunidades/**").hasRole("ONG")
+                        .requestMatchers(HttpMethod.DELETE, "/oportunidades/**").hasRole("ONG")
                         .requestMatchers(HttpMethod.GET, "/categorias/**").permitAll()
                         .anyRequest().authenticated()
                 )
