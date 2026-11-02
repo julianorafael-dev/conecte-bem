@@ -34,5 +34,17 @@
     "vagasTotais": 1,
     "vagasDisponiveis": 0,
     "status": "ENCERRADA"
+  },
+  {
+    "id": 4,
+    "titulo": "Plantar uma árvore",
+    "ong": { "id": 103, "nome": "REplantar" },
+    "categoria": "Meio Ambiente",
+    "descricao": "Plantar arvores em áreas urbanas para melhorar a qualidade do ar e a estética da cidade.",
+    "localizacao": "Presencial - Porto Alegre, RS",
+    "dataCriacao": "2026-10-14",
+    "vagasTotais": 10,
+    "vagasDisponiveis": 7,
+    "status": "ABERTA"
   }
 ]
