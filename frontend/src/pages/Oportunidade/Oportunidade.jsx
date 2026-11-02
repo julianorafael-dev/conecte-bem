@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaTimes } from 'react-icons/fa';
 import './Oportunidade.css';
 import vagas from '../../mocks/vagasMock.json';
 
@@ -9,6 +9,9 @@ function Oportunidades() {
   const [ongSelecionada, setOngSelecionada] = useState('');
   const [somenteAbertas, setSomenteAbertas] = useState(false);
   const [cidadesSelecionadas, setCidadesSelecionadas] = useState([]);
+  
+  // Estado para controlar a abertura do Modal
+  const [vagaSelecionada, setVagaSelecionada] = useState(null);
 
   const ongsUnicas = useMemo(() => [...new Set(vagas.map(v => v.ong.nome))], []);
   const localizacoesUnicas = useMemo(() => [...new Set(vagas.map(v => v.localizacao))], []);
@@ -123,7 +126,12 @@ function Oportunidades() {
                   <span className={`oportunidades-vagas ${vaga.vagasDisponiveis > 0 ? 'disponivel' : 'indisponivel'}`}>
                     {vaga.vagasDisponiveis} vagas disponíveis de {vaga.vagasTotais}
                   </span>
-                  <button className="oportunidades-button">Ver Detalhes</button>
+                  <button 
+                    className="oportunidades-button"
+                    onClick={() => setVagaSelecionada(vaga)} 
+                  >
+                    Ver Detalhes
+                  </button>
                 </div>
               </div>
             ))
@@ -135,6 +143,45 @@ function Oportunidades() {
           )}
         </main>
       </div>
+
+      {/* MODAL SOBREPOSTO */}
+      {vagaSelecionada && (
+        <div className="modal-overlay" onClick={() => setVagaSelecionada(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setVagaSelecionada(null)}>
+              <FaTimes />
+            </button>
+
+            <h2 className="modal-title">{vagaSelecionada.titulo}</h2>
+            <p className="modal-ong"><strong>{vagaSelecionada.ong.nome}</strong></p>
+            
+            <div className="modal-tags">
+              <span className="modal-tag">{vagaSelecionada.categoria}</span>
+              <span className="modal-tag">{vagaSelecionada.localizacao}</span>
+              <span className={`modal-tag modal-tag-status ${vagaSelecionada.status === 'ABERTA' ? 'aberta' : 'fechada'}`}>
+                {vagaSelecionada.status}
+              </span>
+            </div>
+
+            <h3>Descrição da Atividade</h3>
+            <p className="modal-description">{vagaSelecionada.descricao}</p>
+            
+            <div className="modal-action-box">
+              <p className="modal-vagas-info">
+                {vagaSelecionada.vagasDisponiveis} de {vagaSelecionada.vagasTotais} vagas disponíveis
+              </p>
+              
+              <button 
+                className={`modal-btn-inscrever ${vagaSelecionada.status !== 'ABERTA' || vagaSelecionada.vagasDisponiveis === 0 ? 'esgotada' : ''}`}
+                disabled={vagaSelecionada.status !== 'ABERTA' || vagaSelecionada.vagasDisponiveis === 0}
+                onClick={() => alert(`Inscrição simulada para: ${vagaSelecionada.titulo}.`)}
+              >
+                {vagaSelecionada.status !== 'ABERTA' || vagaSelecionada.vagasDisponiveis === 0 ? 'Vagas Esgotadas' : 'Quero me Inscrever'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -291,3 +291,133 @@
     align-items: flex-start;
   }
 }
+
+/* =========================================
+   ESTILOS DO MODAL
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.modal-content {
+  background-color: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+.modal-title {
+  margin-top: 0;
+  padding-right: 2rem;
+  color: #2c3e50;
+  font-size: 1.8rem;
+}
+
+.modal-ong {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-tags {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.modal-tag {
+  padding: 0.4rem 0.8rem;
+  background-color: #eef2f5;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.modal-tag-status {
+  font-weight: bold;
+}
+
+.modal-tag-status.aberta {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.modal-tag-status.fechada {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.modal-description {
+  line-height: 1.6;
+  color: #444;
+  margin-bottom: 2rem;
+}
+
+.modal-action-box {
+  padding: 1.5rem;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  text-align: center;
+  background-color: #f9fafb;
+}
+
+.modal-vagas-info {
+  margin-bottom: 2.0rem;
+  color: #555;
+}
+
+.modal-btn-inscrever {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-btn-inscrever:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.modal-btn-inscrever.esgotada {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
