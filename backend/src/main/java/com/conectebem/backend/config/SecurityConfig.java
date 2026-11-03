@@ -38,6 +38,12 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll() // Liberta as rotas de registo e login
                         .requestMatchers("/ongs/me/**").hasRole("ONG")
                         .requestMatchers("/voluntarios/me").hasRole("VOLUNTARIO")
+                        // Rotas de inscrições: regras específicas precisam vir antes
+                        // do GET público de /oportunidades/** abaixo.
+                        .requestMatchers(HttpMethod.GET, "/oportunidades/*/inscricoes").hasRole("ONG")
+                        .requestMatchers(HttpMethod.POST, "/inscricoes").hasRole("VOLUNTARIO")
+                        .requestMatchers(HttpMethod.GET, "/inscricoes/me").hasRole("VOLUNTARIO")
+                        .requestMatchers(HttpMethod.DELETE, "/inscricoes/**").hasRole("VOLUNTARIO")
                         .requestMatchers(HttpMethod.GET, "/ongs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/oportunidades/**").permitAll()
                         // Defesa em profundidade (alinhado com a Pessoa 2): somente
