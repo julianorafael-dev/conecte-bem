@@ -2,11 +2,14 @@ package com.conectebem.backend.repository;
 
 import com.conectebem.backend.model.Categoria;
 import com.conectebem.backend.model.Oportunidade;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Centraliza o acesso à tabela de oportunidades.
@@ -58,4 +61,14 @@ public interface OportunidadeRepository extends JpaRepository<Oportunidade, Inte
      */
     @Query("SELECT o FROM Oportunidade o WHERE o.ong.usuarioId = :usuarioId ORDER BY o.criadoEm DESC")
     List<Oportunidade> findByOngUsuarioId(@Param("usuarioId") Integer usuarioId);
+
+    /**
+     * Busca uma oportunidade bloqueando sua linha durante uma nova inscrição.
+     *
+     * <p>O bloqueio pessimista evita que duas requisições concorrentes contem
+     * a última vaga ao mesmo tempo e ultrapassem a capacidade definida.</p>
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT o FROM Oportunidade o WHERE o.id = :id")
+    Optional<Oportunidade> findByIdForUpdate(@Param("id") Integer id);
 }

@@ -16,7 +16,7 @@ import java.util.Map;
  * Padroniza as respostas de erro da API.
  *
  * <p>Além de recurso não encontrado, trata validações de DTO e conflitos das
- * regras únicas do banco usadas no módulo ONG.</p>
+ * regras de integridade do banco.</p>
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -44,8 +44,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleConflict(DataIntegrityViolationException ex) {
         return montarResposta(
                 HttpStatus.CONFLICT,
-                "Já existe uma ONG com este CNPJ ou vinculada a este usuário."
+                "Não foi possível concluir a operação porque os dados conflitam com um registro existente."
         );
+    }
+
+    /** Converte conflitos previstos no módulo de inscrições em HTTP 409. */
+    @ExceptionHandler(InscricaoConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleInscricaoConflict(InscricaoConflictException ex) {
+        return montarResposta(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     /** Converte erros de regra de negócio (ex: e-mail já cadastrado, credenciais inválidas) em HTTP 400. */
