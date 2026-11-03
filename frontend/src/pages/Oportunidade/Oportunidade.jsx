@@ -1,22 +1,45 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { FaSearch, FaTimes } from 'react-icons/fa';
+import { api } from '../../services/api.js';
 import './Oportunidade.css';
-import vagas from '../../mocks/vagasMock.json';
 
 function Oportunidades() {
+  // 1. Novos estados para a API de listagem
+  const [vagas, setVagas] = useState([]);
+  const [carregandoGeral, setCarregandoGeral] = useState(true);
+  const [erroGeral, setErroGeral] = useState('');
+
+  // Estados dos filtros
   const [busca, setBusca] = useState('');
   const [categoria, setCategoria] = useState('');
   const [ongSelecionada, setOngSelecionada] = useState('');
   const [somenteAbertas, setSomenteAbertas] = useState(false);
   const [cidadesSelecionadas, setCidadesSelecionadas] = useState([]);
   
-  // Estado para controlar a abertura do Modal e Inscrição
+  // Estados do Modal e Inscrição
   const [vagaSelecionada, setVagaSelecionada] = useState(null);
   const [vagasInscritas, setVagasInscritas] = useState([]);
   const [carregandoInscricao, setCarregandoInscricao] = useState(false);
+  const [erroInscricao, setErroInscricao] = useState('');
 
-  const ongsUnicas = useMemo(() => [...new Set(vagas.map(v => v.ong.nome))], []);
-  const localizacoesUnicas = useMemo(() => [...new Set(vagas.map(v => v.localizacao))], []);
+  // 2. Buscar as vagas do backend ao montar o componente
+  useEffect(() => {
+    async function carregarOportunidades() {
+      try {
+        const dados = await api('/oportunidades'); 
+        setVagas(dados);
+      } catch (error) {
+        setErroGeral(error.message || 'Não foi possível carregar as oportunidades.');
+      } finally {
+        setCarregandoGeral(false);
+      }
+    }
+    carregarOportunidades();
+  }, []);
+
+  // Extrações dinâmicas baseadas nos dados da API
+  const ongsUnicas = useMemo(() => [...new Set(vagas.map(v => v.ong.nome))], [vagas]);
+  const localizacoesUnicas = useMemo(() => [...new Set(vagas.map(v => v.localizacao))], [vagas]);
 
   const handleCidadeChange = (cidade) => {
     setCidadesSelecionadas((prev) => 
@@ -36,14 +59,43 @@ function Oportunidades() {
     return tituloMatch && categoriaMatch && ongMatch && statusMatch && cidadeMatch;
   });
 
-  // Função para simular a inscrição (agora no local correto, fora do filter)
-  const handleInscricao = () => {
+  // 3. Função real para submeter a inscrição
+  const handleInscricao = async () => {
     setCarregandoInscricao(true);
-    setTimeout(() => {
+    setErroInscricao('');
+    try {
+      await api('/inscricoes', { 
+        method: 'POST', 
+        body: { oportunidadeId: vagaSelecionada.id } 
+      });
       setVagasInscritas((prev) => [...prev, vagaSelecionada.id]);
+    } catch (error) {
+      setErroInscricao(error.message || 'Erro ao realizar inscrição. Tente novamente.');
+    } finally {
       setCarregandoInscricao(false);
-    }, 1000);
+    }
   };
+
+  // 4. Telas de carregamento e erro da página principal
+  if (carregandoGeral) {
+    return (
+      <div className="oportunidades-page" style={{ textAlign: 'center', padding: '4rem' }}>
+        <h2 style={{ color: '#666' }}>Carregando oportunidades...</h2>
+      </div>
+    );
+  }
+
+  if (erroGeral) {
+    return (
+      <div className="oportunidades-page" style={{ textAlign: 'center', padding: '4rem' }}>
+        <h2 style={{ color: '#d9534f' }}>Erro</h2>
+        <p>{erroGeral}</p>
+        <button onClick={() => window.location.reload()} className="oportunidades-button" style={{ marginTop: '1rem' }}>
+          Tentar Novamente
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="oportunidades-page">
@@ -139,7 +191,10 @@ function Oportunidades() {
                   </span>
                   <button 
                     className="oportunidades-button"
-                    onClick={() => setVagaSelecionada(vaga)} 
+                    onClick={() => {
+                      setVagaSelecionada(vaga);
+                      setErroInscricao(''); // Limpa erros antigos ao abrir modal
+                    }} 
                   >
                     Ver Detalhes
                   </button>
@@ -182,6 +237,13 @@ function Oportunidades() {
                 {vagaSelecionada.vagasDisponiveis} de {vagaSelecionada.vagasTotais} vagas disponíveis
               </p>
               
+              {/* Avisos de Sucesso ou Erro na Inscrição */}
+              {erroInscricao && (
+                <div style={{ padding: '1rem', backgroundColor: '#f8d7da', color: '#721c24', borderRadius: '8px', marginBottom: '1rem', fontWeight: 'bold' }}>
+                  ❌ {erroInscricao}
+                </div>
+              )}
+
               {vagasInscritas.includes(vagaSelecionada.id) && (
                 <div style={{ padding: '1rem', backgroundColor: '#d4edda', color: '#155724', borderRadius: '8px', marginBottom: '1rem', fontWeight: 'bold' }}>
                   ✅ Inscrição realizada com sucesso!
