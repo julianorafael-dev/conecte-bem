@@ -1,9 +1,272 @@
+import { useState, useEffect, useMemo } from 'react';
+import { FaSearch, FaTimes } from 'react-icons/fa';
+import { api } from '../../services/api.js';
+import './Oportunidade.css';
 
 function Oportunidades() {
+  // 1. Novos estados para a API de listagem
+  const [vagas, setVagas] = useState([]);
+  const [carregandoGeral, setCarregandoGeral] = useState(true);
+  const [erroGeral, setErroGeral] = useState('');
+
+  // Estados dos filtros
+  const [busca, setBusca] = useState('');
+  const [categoria, setCategoria] = useState('');
+  const [ongSelecionada, setOngSelecionada] = useState('');
+  const [somenteAbertas, setSomenteAbertas] = useState(false);
+  const [cidadesSelecionadas, setCidadesSelecionadas] = useState([]);
+  
+  // Estados do Modal e Inscrição
+  const [vagaSelecionada, setVagaSelecionada] = useState(null);
+  const [vagasInscritas, setVagasInscritas] = useState([]);
+  const [carregandoInscricao, setCarregandoInscricao] = useState(false);
+  const [erroInscricao, setErroInscricao] = useState('');
+
+  // 2. Buscar as vagas do backend ao montar o componente
+  useEffect(() => {
+    async function carregarOportunidades() {
+      try {
+        const dados = await api('/oportunidades'); 
+        setVagas(dados);
+      } catch (error) {
+        setErroGeral(error.message || 'Não foi possível carregar as oportunidades.');
+      } finally {
+        setCarregandoGeral(false);
+      }
+    }
+    carregarOportunidades();
+  }, []);
+
+  // Extrações dinâmicas baseadas nos dados da API
+  const ongsUnicas = useMemo(() => [...new Set(vagas.map(v => v.ong.nome))], [vagas]);
+  const localizacoesUnicas = useMemo(() => [...new Set(vagas.map(v => v.localizacao))], [vagas]);
+
+  const handleCidadeChange = (cidade) => {
+    setCidadesSelecionadas((prev) => 
+      prev.includes(cidade) 
+        ? prev.filter((c) => c !== cidade) 
+        : [...prev, cidade]
+    );
+  };
+
+  const vagasFiltradas = vagas.filter((vaga) => {
+    const tituloMatch = vaga.titulo.toLowerCase().includes(busca.toLowerCase());
+    const categoriaMatch = categoria === '' || vaga.categoria === categoria;
+    const ongMatch = ongSelecionada === '' || vaga.ong.nome === ongSelecionada;
+    const statusMatch = !somenteAbertas || vaga.status === 'ABERTA';
+    const cidadeMatch = cidadesSelecionadas.length === 0 || cidadesSelecionadas.includes(vaga.localizacao);
+    
+    return tituloMatch && categoriaMatch && ongMatch && statusMatch && cidadeMatch;
+  });
+
+  // 3. Função real para submeter a inscrição
+  const handleInscricao = async () => {
+    setCarregandoInscricao(true);
+    setErroInscricao('');
+    try {
+      await api('/inscricoes', { 
+        method: 'POST', 
+        body: { oportunidadeId: vagaSelecionada.id } 
+      });
+      setVagasInscritas((prev) => [...prev, vagaSelecionada.id]);
+    } catch (error) {
+      setErroInscricao(error.message || 'Erro ao realizar inscrição. Tente novamente.');
+    } finally {
+      setCarregandoInscricao(false);
+    }
+  };
+
+  // 4. Telas de carregamento e erro da página principal
+  if (carregandoGeral) {
+    return (
+      <div className="oportunidades-page" style={{ textAlign: 'center', padding: '4rem' }}>
+        <h2 style={{ color: '#666' }}>Carregando oportunidades...</h2>
+      </div>
+    );
+  }
+
+  if (erroGeral) {
+    return (
+      <div className="oportunidades-page" style={{ textAlign: 'center', padding: '4rem' }}>
+        <h2 style={{ color: '#d9534f' }}>Erro</h2>
+        <p>{erroGeral}</p>
+        <button onClick={() => window.location.reload()} className="oportunidades-button" style={{ marginTop: '1rem' }}>
+          Tentar Novamente
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h1>Oportunidades</h1>
-      <p>Confira todas as vagas e causas disponíveis para voluntariado.</p>
+    <div className="oportunidades-page">
+      <h1>Oportunidades de Voluntariado</h1>
+      <p className="oportunidades-subtitle">Encontre a causa perfeita para você e faça a diferença.</p>
+
+      <div className="oportunidades-search-wrapper">
+        <div className="oportunidades-search">
+          <span className="oportunidades-search-icon">
+            <FaSearch />
+          </span>
+          <input
+            type="text"
+            placeholder="Buscar oportunidades por título ou palavra-chave..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="oportunidades-layout">
+        <aside className="oportunidades-filtros">
+          <h3>Filtros</h3>
+
+          <div className="oportunidades-filtro-group">
+            <label className="oportunidades-filtro-label">Causa</label>
+            <select className="oportunidades-select" value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+              <option value="">Todas as causas</option>
+              <option value="Educação">Educação</option>
+              <option value="Meio Ambiente">Meio Ambiente</option>
+              <option value="Tecnologia">Tecnologia</option>
+            </select>
+          </div>
+
+          <div className="oportunidades-filtro-group">
+            <label className="oportunidades-filtro-label">ONG</label>
+            <select className="oportunidades-select" value={ongSelecionada} onChange={(e) => setOngSelecionada(e.target.value)}>
+              <option value="">Todas as ONGs</option>
+              {ongsUnicas.map((ong) => (
+                <option key={ong} value={ong}>{ong}</option>
+              ))}
+            </select>
+          </div>
+
+          <label className="oportunidades-checkbox">
+            <input
+              type="checkbox"
+              checked={somenteAbertas}
+              onChange={(e) => setSomenteAbertas(e.target.checked)}
+            />
+            Somente Vagas Abertas
+          </label>
+
+          <div className="oportunidades-localizacao">
+            <label className="oportunidades-filtro-label">Localização</label>
+            <div className="oportunidades-localizacao-lista">
+              {localizacoesUnicas.map((loc) => (
+                <label key={loc} className="oportunidades-localizacao-item">
+                  <input
+                    type="checkbox"
+                    checked={cidadesSelecionadas.includes(loc)}
+                    onChange={() => handleCidadeChange(loc)}
+                  />
+                  {loc}
+                </label>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        <main className="oportunidades-main">
+          <div className="oportunidades-resultado">
+            {vagasFiltradas.length} {vagasFiltradas.length === 1 ? 'oportunidade encontrada' : 'oportunidades encontradas'}
+          </div>
+
+          {vagasFiltradas.length > 0 ? (
+            vagasFiltradas.map((vaga) => (
+              <div key={vaga.id} className="oportunidades-card">
+                <div className="oportunidades-card-header">
+                  <h2 className="oportunidades-card-title">{vaga.titulo}</h2>
+                  <span className={`oportunidades-status ${vaga.status === 'ABERTA' ? 'aberta' : 'fechada'}`}>
+                    {vaga.status}
+                  </span>
+                </div>
+                <p className="oportunidades-card-meta">
+                  <strong>{vaga.ong.nome}</strong> • {vaga.categoria} • {vaga.localizacao}
+                </p>
+                <p className="oportunidades-card-description">{vaga.descricao}</p>
+
+                <div className="oportunidades-card-footer">
+                  <span className={`oportunidades-vagas ${vaga.vagasDisponiveis > 0 ? 'disponivel' : 'indisponivel'}`}>
+                    {vaga.vagasDisponiveis} vagas disponíveis de {vaga.vagasTotais}
+                  </span>
+                  <button 
+                    className="oportunidades-button"
+                    onClick={() => {
+                      setVagaSelecionada(vaga);
+                      setErroInscricao(''); // Limpa erros antigos ao abrir modal
+                    }} 
+                  >
+                    Ver Detalhes
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="oportunidades-empty">
+              <h3>Nenhuma oportunidade encontrada</h3>
+              <p>Tente ajustar os filtros ao lado ou pesquisar por outros termos.</p>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* MODAL SOBREPOSTO */}
+      {vagaSelecionada && (
+        <div className="modal-overlay" onClick={() => setVagaSelecionada(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setVagaSelecionada(null)}>
+              <FaTimes />
+            </button>
+
+            <h2 className="modal-title">{vagaSelecionada.titulo}</h2>
+            <p className="modal-ong"><strong>{vagaSelecionada.ong.nome}</strong></p>
+            
+            <div className="modal-tags">
+              <span className="modal-tag">{vagaSelecionada.categoria}</span>
+              <span className="modal-tag">{vagaSelecionada.localizacao}</span>
+              <span className={`modal-tag modal-tag-status ${vagaSelecionada.status === 'ABERTA' ? 'aberta' : 'fechada'}`}>
+                {vagaSelecionada.status}
+              </span>
+            </div>
+
+            <h3>Descrição da Atividade</h3>
+            <p className="modal-description">{vagaSelecionada.descricao}</p>
+            
+            <div className="modal-action-box">
+              <p className="modal-vagas-info">
+                {vagaSelecionada.vagasDisponiveis} de {vagaSelecionada.vagasTotais} vagas disponíveis
+              </p>
+              
+              {/* Avisos de Sucesso ou Erro na Inscrição */}
+              {erroInscricao && (
+                <div style={{ padding: '1rem', backgroundColor: '#f8d7da', color: '#721c24', borderRadius: '8px', marginBottom: '1rem', fontWeight: 'bold' }}>
+                  ❌ {erroInscricao}
+                </div>
+              )}
+
+              {vagasInscritas.includes(vagaSelecionada.id) && (
+                <div style={{ padding: '1rem', backgroundColor: '#d4edda', color: '#155724', borderRadius: '8px', marginBottom: '1rem', fontWeight: 'bold' }}>
+                  ✅ Inscrição realizada com sucesso!
+                </div>
+              )}
+              
+              <button 
+                className={`modal-btn-inscrever ${vagaSelecionada.status !== 'ABERTA' || vagaSelecionada.vagasDisponiveis === 0 || vagasInscritas.includes(vagaSelecionada.id) ? 'esgotada' : ''}`}
+                disabled={vagaSelecionada.status !== 'ABERTA' || vagaSelecionada.vagasDisponiveis === 0 || vagasInscritas.includes(vagaSelecionada.id) || carregandoInscricao}
+                onClick={handleInscricao}
+              >
+                {vagasInscritas.includes(vagaSelecionada.id) 
+                  ? 'Inscrito' 
+                  : carregandoInscricao 
+                    ? 'Processando...' 
+                    : vagaSelecionada.status !== 'ABERTA' || vagaSelecionada.vagasDisponiveis === 0 
+                      ? 'Vagas Esgotadas' 
+                      : 'Quero me Inscrever'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
