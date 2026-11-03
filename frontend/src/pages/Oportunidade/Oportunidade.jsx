@@ -10,8 +10,10 @@ function Oportunidades() {
   const [somenteAbertas, setSomenteAbertas] = useState(false);
   const [cidadesSelecionadas, setCidadesSelecionadas] = useState([]);
   
-  // Estado para controlar a abertura do Modal
+  // Estado para controlar a abertura do Modal e Inscrição
   const [vagaSelecionada, setVagaSelecionada] = useState(null);
+  const [vagasInscritas, setVagasInscritas] = useState([]);
+  const [carregandoInscricao, setCarregandoInscricao] = useState(false);
 
   const ongsUnicas = useMemo(() => [...new Set(vagas.map(v => v.ong.nome))], []);
   const localizacoesUnicas = useMemo(() => [...new Set(vagas.map(v => v.localizacao))], []);
@@ -33,6 +35,15 @@ function Oportunidades() {
     
     return tituloMatch && categoriaMatch && ongMatch && statusMatch && cidadeMatch;
   });
+
+  // Função para simular a inscrição (agora no local correto, fora do filter)
+  const handleInscricao = () => {
+    setCarregandoInscricao(true);
+    setTimeout(() => {
+      setVagasInscritas((prev) => [...prev, vagaSelecionada.id]);
+      setCarregandoInscricao(false);
+    }, 1000);
+  };
 
   return (
     <div className="oportunidades-page">
@@ -171,12 +182,24 @@ function Oportunidades() {
                 {vagaSelecionada.vagasDisponiveis} de {vagaSelecionada.vagasTotais} vagas disponíveis
               </p>
               
+              {vagasInscritas.includes(vagaSelecionada.id) && (
+                <div style={{ padding: '1rem', backgroundColor: '#d4edda', color: '#155724', borderRadius: '8px', marginBottom: '1rem', fontWeight: 'bold' }}>
+                  ✅ Inscrição realizada com sucesso!
+                </div>
+              )}
+              
               <button 
-                className={`modal-btn-inscrever ${vagaSelecionada.status !== 'ABERTA' || vagaSelecionada.vagasDisponiveis === 0 ? 'esgotada' : ''}`}
-                disabled={vagaSelecionada.status !== 'ABERTA' || vagaSelecionada.vagasDisponiveis === 0}
-                onClick={() => alert(`Inscrição simulada para: ${vagaSelecionada.titulo}.`)}
+                className={`modal-btn-inscrever ${vagaSelecionada.status !== 'ABERTA' || vagaSelecionada.vagasDisponiveis === 0 || vagasInscritas.includes(vagaSelecionada.id) ? 'esgotada' : ''}`}
+                disabled={vagaSelecionada.status !== 'ABERTA' || vagaSelecionada.vagasDisponiveis === 0 || vagasInscritas.includes(vagaSelecionada.id) || carregandoInscricao}
+                onClick={handleInscricao}
               >
-                {vagaSelecionada.status !== 'ABERTA' || vagaSelecionada.vagasDisponiveis === 0 ? 'Vagas Esgotadas' : 'Quero me Inscrever'}
+                {vagasInscritas.includes(vagaSelecionada.id) 
+                  ? 'Inscrito' 
+                  : carregandoInscricao 
+                    ? 'Processando...' 
+                    : vagaSelecionada.status !== 'ABERTA' || vagaSelecionada.vagasDisponiveis === 0 
+                      ? 'Vagas Esgotadas' 
+                      : 'Quero me Inscrever'}
               </button>
             </div>
           </div>
