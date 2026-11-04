@@ -1,22 +1,40 @@
 import { useState } from 'react'
-import { useAuth } from '../../context/AuthContext.jsx'
-import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../../hooks/useAuth.js'
+import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom'
+
+function destinoPorTipo(tipo) {
+  return tipo === 'ONG' ? '/painel' : '/Home'
+}
 
 function Login() {
-  const [tipo, setTipo] = useState('voluntario')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
-  const { login } = useAuth()
+  const [erro, setErro] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const { usuario, login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [modalAberto, setModalAberto] = useState(false)
   const [emailRecuperacao, setEmailRecuperacao] = useState('')
   const [dataNascimento, setDataNascimento] = useState('')
 
-  const handleSubmit = (e) => {
+  // Quem já está logado não precisa ver a tela de login.
+  if (usuario && !enviando) {
+    return <Navigate to={destinoPorTipo(usuario.tipo)} replace />
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    login(email, senha, tipo)
-    navigate('/home')
+    setErro('')
+    setEnviando(true)
+    try {
+      const autenticado = await login(email.trim(), senha)
+      navigate(destinoPorTipo(autenticado?.tipo), { replace: true })
+    } catch (error) {
+      setErro(error.message)
+      setEnviando(false)
+    }
   }
 
   const handleRecuperarSenha = (e) => {
@@ -29,33 +47,11 @@ function Login() {
     <div style={{ maxWidth: '420px', margin: '3rem auto', padding: '2rem' }}>
       <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>Acessar</h2>
 
-      {/* Toggle Voluntário / ONG */}
-      <div style={{ display: 'flex', marginBottom: '2rem', borderRadius: '8px', border: '1px solid #ddd', overflow: 'hidden' }}>
-        <button
-          type="button"
-          onClick={() => setTipo('voluntario')}
-          style={{
-            flex: 1, padding: '0.8rem', border: 'none',
-            backgroundColor: tipo === 'voluntario' ? '#4CAF50' : 'transparent',
-            color: tipo === 'voluntario' ? 'white' : '#666',
-            cursor: 'pointer', fontWeight: tipo === 'voluntario' ? 'bold' : 'normal'
-          }}
-        >
-          Voluntário
-        </button>
-        <button
-          type="button"
-          onClick={() => setTipo('ong')}
-          style={{
-            flex: 1, padding: '0.8rem', border: 'none',
-            backgroundColor: tipo === 'ong' ? '#4CAF50' : 'transparent',
-            color: tipo === 'ong' ? 'white' : '#666',
-            cursor: 'pointer', fontWeight: tipo === 'ong' ? 'bold' : 'normal'
-          }}
-        >
-          ONG
-        </button>
-      </div>
+      {location.state?.mensagem && (
+        <p role="status" style={{ color: '#2e7d32', textAlign: 'center', marginBottom: '1rem' }}>
+          {location.state.mensagem}
+        </p>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '1rem' }}>
@@ -76,15 +72,21 @@ function Login() {
           />
         </div>
 
+        {erro && (
+          <p role="alert" style={{ color: '#c62828', marginBottom: '1rem' }}>{erro}</p>
+        )}
+
         <button
           type="submit"
+          disabled={enviando}
           style={{
             width: '100%', padding: '0.9rem', backgroundColor: '#4CAF50',
             color: 'white', border: 'none', borderRadius: '4px',
-            fontSize: '1rem', cursor: 'pointer', marginTop: '0.5rem'
+            fontSize: '1rem', cursor: enviando ? 'wait' : 'pointer', marginTop: '0.5rem',
+            opacity: enviando ? 0.7 : 1
           }}
         >
-          Acessar
+          {enviando ? 'Entrando...' : 'Acessar'}
         </button>
       </form>
 

@@ -132,13 +132,13 @@ class SecurityConfigHttpTest {
                 .andExpect(status().isOk());
     }
 
-    // ---------- Cenário 2: POST /oportunidades sem token -> status real ----------
+    // ---------- Cenário 2: POST /oportunidades sem token -> 401 ----------
 
     @Test
     void postOportunidadesSemToken() throws Exception {
         mockMvc.perform(post("/oportunidades")
                         .contentType(MediaType.APPLICATION_JSON).content(CORPO_VALIDO))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     // ---------- Cenários 3, 4 e 5: sem token (PUT / DELETE / GET /ongs/me/oportunidades) ----------
@@ -147,19 +147,19 @@ class SecurityConfigHttpTest {
     void putOportunidadesSemToken() throws Exception {
         mockMvc.perform(put("/oportunidades/5")
                         .contentType(MediaType.APPLICATION_JSON).content(CORPO_VALIDO))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void deleteOportunidadesSemToken() throws Exception {
         mockMvc.perform(delete("/oportunidades/5"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void getMeOportunidadesSemToken() throws Exception {
         mockMvc.perform(get("/ongs/me/oportunidades"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     // ---------- Cenário 6: GET /ongs/me/oportunidades com VOLUNTARIO -> 403 ----------
@@ -292,7 +292,7 @@ class SecurityConfigHttpTest {
         mockMvc.perform(post("/oportunidades")
                         .header("Authorization", "Bearer token-ong7")
                         .contentType(MediaType.APPLICATION_JSON).content(CORPO_VALIDO))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     // ---------- Reforço: /ongs/me/oportunidades com ONG autenticada atravessa a cadeia ----------

@@ -1,9 +1,10 @@
 import { Navigate } from 'react-router-dom';
-import { isVoluntario } from '../../services/auth.js';
+import { useAuth } from '../../hooks/useAuth.js';
 
 // Só deixa passar quem está logado como voluntário; os demais vão para o login.
 function RotaVoluntario({ children }) {
-  return isVoluntario() ? children : <Navigate to="/entrar" replace />;
+  const { usuario } = useAuth();
+  return usuario?.tipo === 'VOLUNTARIO' ? children : <Navigate to="/entrar" replace />;
 }
 
 export default RotaVoluntario;

@@ -1,8 +1,15 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { IoEye, IoEyeOff } from 'react-icons/io5';
+import { useAuth } from '../../hooks/useAuth.js';
 import './CriarConta.css';
 
 function CriarConta() {
+    const { registrar, login } = useAuth();
+    const navigate = useNavigate();
+    const [erro, setErro] = useState('');
+    const [enviando, setEnviando] = useState(false);
+
     // 1. Estados do Formulário
     const [formData, setFormData] = useState({
         email: '',
@@ -56,16 +63,51 @@ function CriarConta() {
     };
 
     // 5. Envio do Formulário
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setErro('');
 
         if (formData.senha !== formData.confirmarSenha) {
             return;
         }
 
-        // Exemplo de ação ao enviar o formulário
-        alert('Cadastro realizado com sucesso! Por favor, clique em "Entrar" no menu superior');
-        console.log('Dados do cadastro:', formData);
+        // Pessoa Jurídica = conta de ONG (exige CNPJ); Pessoa Física = voluntário.
+        const ehOng = formData.tipoPessoa === 'CNPJ';
+        if (ehOng && formData.cpfCnpj.length !== 14) {
+            setErro('Informe o CNPJ com 14 números.');
+            return;
+        }
+
+        const dados = {
+            nome: formData.nomeCompleto.trim(),
+            email: formData.email.trim(),
+            senha: formData.senha,
+            tipo: ehOng ? 'ONG' : 'VOLUNTARIO',
+        };
+        if (ehOng) {
+            dados.cnpj = formData.cpfCnpj;
+            if (formData.telefone) dados.telefone = formData.telefone;
+        }
+
+        setEnviando(true);
+        try {
+            await registrar(dados);
+        } catch (error) {
+            setErro(error.message);
+            setEnviando(false);
+            return;
+        }
+
+        // Conta criada: já entra com as mesmas credenciais.
+        try {
+            const autenticado = await login(dados.email, dados.senha);
+            navigate(autenticado?.tipo === 'ONG' ? '/painel' : '/Home', { replace: true });
+        } catch {
+            navigate('/entrar', {
+                replace: true,
+                state: { mensagem: 'Conta criada! Entre com seu e-mail e senha.' },
+            });
+        }
     };
 
     return (
@@ -127,6 +169,7 @@ function CriarConta() {
                         required 
                         placeholder="Nome Completo ou Razão Social" 
                         minLength="4" 
+                        maxLength="150"
                         value={formData.nomeCompleto}
                         onChange={handleChange}
                     />
@@ -160,6 +203,7 @@ function CriarConta() {
                         type="text" 
                         inputMode="numeric"
                         className="form-control" 
+                        required={formData.tipoPessoa === 'CNPJ'}
                         maxLength={formData.tipoPessoa === 'CPF' ? 11 : 14} 
                         placeholder={formData.tipoPessoa === 'CPF' ? "00000000000" : "00000000000000"} 
                         value={formData.cpfCnpj}
@@ -239,9 +283,11 @@ function CriarConta() {
                 </div>
                 
 
+               {erro && <span className="form-erro" role="alert">{erro}</span>}
+
                {/* Botão de envio habilitado */}
-                <button className="btn btn-primary btn-block btn-lg" type="submit">
-                    Confirmar e continuar
+                <button className="btn btn-primary btn-block btn-lg" type="submit" disabled={enviando}>
+                    {enviando ? 'Enviando...' : 'Confirmar e continuar'}
                 </button>
             </form>
         </div>
