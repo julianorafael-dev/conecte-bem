@@ -54,7 +54,13 @@ public class GlobalExceptionHandler {
         return montarResposta(HttpStatus.CONFLICT, ex.getMessage());
     }
 
-    /** Converte erros de regra de negócio (ex: e-mail já cadastrado, credenciais inválidas) em HTTP 400. */
+    /** Converte e-mail/senha incorretos no login em HTTP 401. */
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    public ResponseEntity<Map<String, Object>> handleCredenciaisInvalidas(CredenciaisInvalidasException ex) {
+        return montarResposta(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    /** Converte erros de regra de negócio (ex: e-mail ou CNPJ já cadastrado) em HTTP 400. */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
         return montarResposta(HttpStatus.BAD_REQUEST, ex.getMessage());

@@ -1,12 +1,21 @@
-// ATENÇÃO: o nome da chave abaixo precisa ser o MESMO que a tela de Login
-// usa para salvar o token. Se o login salvar com outro nome, troque aqui.
-const CHAVE_TOKEN = 'token';
+// Única fonte da sessão: o JWT salvo no localStorage.
+// O contexto (AuthContext) e o api.js usam estas funções.
+export const CHAVE_TOKEN = 'token';
+export const EVENTO_SESSAO_EXPIRADA = 'conectebem:sessao-expirada';
 
 export function getToken() {
   return localStorage.getItem(CHAVE_TOKEN);
 }
 
-// O JWT do backend carrega: sub (e-mail), id (id do usuário) e tipo (ONG/VOLUNTARIO).
+export function setToken(token) {
+  localStorage.setItem(CHAVE_TOKEN, token);
+}
+
+export function removeToken() {
+  localStorage.removeItem(CHAVE_TOKEN);
+}
+
+// O JWT do backend carrega: sub (e-mail), id (id do usuário), tipo (ONG/VOLUNTARIO) e exp.
 export function getUsuario() {
   const token = getToken();
   if (!token) return null;
@@ -20,7 +29,7 @@ export function getUsuario() {
     );
     const dados = JSON.parse(json);
     if (dados.exp && dados.exp * 1000 < Date.now()) return null; // token expirado
-    return { id: dados.id, email: dados.sub, tipo: dados.tipo };
+    return { id: dados.id, email: dados.sub, tipo: dados.tipo, exp: dados.exp };
   } catch {
     return null;
   }

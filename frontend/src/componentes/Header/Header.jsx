@@ -1,9 +1,16 @@
-
-import { Link } from 'react-router-dom';
-import { isOng } from '../../services/auth.js';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth.js';
 import './Header.css';
 
 function Header() {
+  const { usuario, logout } = useAuth();
+  const navigate = useNavigate();
+
+  function sair() {
+    logout();
+    navigate('/Home');
+  }
+
   return (
     <header className="header">
       <Link to="/Home" className="logo">
@@ -16,12 +23,18 @@ function Header() {
         <Link to="/Oportunidades">Oportunidades</Link>
         <Link to="/ComoFunciona">Como Funciona</Link>
         <Link to="/Sobre">Sobre nós</Link>
-        {isOng() && <Link to="/painel">Painel da ONG</Link>}
+        {usuario?.tipo === 'ONG' && <Link to="/painel">Painel da ONG</Link>}
       </nav>
 
       <div className="menu_login_cadastro">
-        <Link to="/entrar">Entrar</Link>
-        <Link to="/CriarConta">Criar Conta</Link>
+        {usuario ? (
+          <button type="button" className="btn-sair" onClick={sair}>Sair</button>
+        ) : (
+          <>
+            <Link to="/entrar">Entrar</Link>
+            <Link to="/CriarConta">Criar Conta</Link>
+          </>
+        )}
       </div>
     </header>
   );

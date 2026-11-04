@@ -196,3 +196,9 @@
     gap: 12px;
   }
 }
+.form-erro {
+    display: block;
+    margin-top: 6px;
+    color: #c62828;
+    font-size: 14px;
+}

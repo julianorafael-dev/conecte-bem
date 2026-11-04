@@ -11,4 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface OngRepository extends JpaRepository<Ong, Integer> {
     java.util.Optional<Ong> findByUsuarioId(Integer usuarioId);
+
+    boolean existsByCnpj(String cnpj);
 }

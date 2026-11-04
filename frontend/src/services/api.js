@@ -1,4 +1,4 @@
-import { getToken } from './auth.js';
+import { getToken, removeToken, EVENTO_SESSAO_EXPIRADA } from './auth.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -7,7 +7,10 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 export async function api(caminho, { method = 'GET', body } = {}) {
   const headers = {};
   if (body !== undefined) headers['Content-Type'] = 'application/json';
-  const token = getToken();
+
+  // Rotas /auth/* (login, registro) nunca levam token: um token velho no navegador
+  // não pode transformar "senha incorreta" em "sessão expirada".
+  const token = caminho.startsWith('/auth/') ? null : getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
   let resposta;
@@ -26,8 +29,14 @@ export async function api(caminho, { method = 'GET', body } = {}) {
   const dados = await resposta.json().catch(() => null);
 
   if (!resposta.ok) {
-    if (resposta.status === 401 || resposta.status === 403) {
-      throw new Error('Sessão expirada ou sem permissão. Entre novamente.');
+    // 401 com token enviado = token expirado/inválido: encerra a sessão.
+    if (resposta.status === 401 && token) {
+      removeToken();
+      window.dispatchEvent(new Event(EVENTO_SESSAO_EXPIRADA));
+      throw new Error('Sua sessão expirou. Entre novamente.');
+    }
+    if (resposta.status === 403) {
+      throw new Error(dados?.mensagem || 'Você não tem permissão para realizar esta ação.');
     }
     throw new Error(dados?.mensagem || 'Erro inesperado. Tente novamente.');
   }

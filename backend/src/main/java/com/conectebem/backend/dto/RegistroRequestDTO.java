@@ -13,10 +13,12 @@ import lombok.Setter;
 public class RegistroRequestDTO {
 
     @NotBlank(message = "O nome é obrigatório")
+    @Size(max = 150, message = "O nome deve ter no máximo 150 caracteres")
     private String nome;
 
     @NotBlank(message = "O e-mail é obrigatório")
     @Email(message = "Formato de e-mail inválido")
+    @Size(max = 150, message = "O e-mail deve ter no máximo 150 caracteres")
     private String email;
 
     @NotBlank(message = "A senha é obrigatória")
@@ -26,10 +28,18 @@ public class RegistroRequestDTO {
     @NotNull(message = "O tipo de usuário é obrigatório")
     private TipoUsuario tipo;
 
-    // Campos complementares utilizados quando tipo == ONG
+    // Campos complementares utilizados quando tipo == ONG (CNPJ é obrigatório nesse caso;
+    // a validação específica fica no AuthService). Para VOLUNTARIO são ignorados.
+    @Size(max = 18, message = "O CNPJ deve ter no máximo 18 caracteres")
     private String cnpj;
+
     private String descricao;
+
+    @Size(max = 20, message = "O telefone deve ter no máximo 20 caracteres")
     private String telefone;
+
+    @Size(max = 100, message = "A cidade deve ter no máximo 100 caracteres")
     private String cidade;
+
     private String estado;
 }
