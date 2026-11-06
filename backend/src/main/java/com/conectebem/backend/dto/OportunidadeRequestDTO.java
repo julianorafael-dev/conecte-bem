@@ -20,13 +20,20 @@ import java.time.LocalTime;
 public record OportunidadeRequestDTO(
         @NotNull Integer ongId,
         @NotNull Integer categoriaId,
-        @NotBlank @Size(max = 200) String titulo,
+        @NotBlank
+        @Size(max = 150, message = "O título deve ter no máximo 150 caracteres.")
+        String titulo,
         String descricao,
         @NotNull LocalDate data,
         @NotNull LocalTime horario,
         @Size(max = 100) String cidade,
         @Pattern(regexp = "^[A-Z]{2}$", message = "O estado deve conter duas letras maiúsculas.") String estado,
         @NotNull @Min(1) Integer vagas,
-        @NotBlank String status
+        @NotBlank
+        @Pattern(
+                regexp = "ABERTA|ENCERRADA|CANCELADA",
+                message = "O status deve ser ABERTA, ENCERRADA ou CANCELADA."
+        )
+        String status
 ) {
 }

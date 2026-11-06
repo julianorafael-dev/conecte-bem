@@ -101,7 +101,7 @@ public class OngService {
                 oportunidade.getId(),
                 oportunidade.getOng().getId(),
                 oportunidade.getOng().getNome(),
-                oportunidade.getCategoria().getId().intValue(), // Categoria.id é Long; DTO espera Integer
+                oportunidade.getCategoria().getId(),
                 oportunidade.getCategoria().getNome(),
                 oportunidade.getTitulo(),
                 oportunidade.getDescricao(),
