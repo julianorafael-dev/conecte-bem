@@ -2,9 +2,9 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: conect-bem-db
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD no arquivo .env antes de iniciar o Docker.}
+      POSTGRES_DB: ${DB_NAME:-conect-bem-db}
     ports:
       - "5432:5432"
     volumes:

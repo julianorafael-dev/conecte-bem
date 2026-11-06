@@ -36,7 +36,7 @@ CREATE TABLE public.ongs (
 );
 
 CREATE TABLE public.categorias (
-    id        BIGSERIAL PRIMARY KEY,
+    id        SERIAL PRIMARY KEY,
     nome      varchar(100) NOT NULL,
     descricao text,
     CONSTRAINT categorias_nome_key UNIQUE (nome)
@@ -45,7 +45,7 @@ CREATE TABLE public.categorias (
 CREATE TABLE public.oportunidades (
     id           SERIAL PRIMARY KEY,
     ong_id       integer      NOT NULL,
-    categoria_id bigint       NOT NULL,
+    categoria_id integer      NOT NULL,
     titulo       varchar(150) NOT NULL,
     descricao    text,
     data         date         NOT NULL,

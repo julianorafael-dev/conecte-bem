@@ -17,9 +17,14 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class OportunidadeService {
+
+    private static final Set<String> STATUS_VALIDOS = Set.of(
+            "ABERTA", "ENCERRADA", "CANCELADA"
+    );
 
     private final OportunidadeRepository oportunidadeRepository;
     private final CategoriaRepository categoriaRepository;
@@ -56,6 +61,8 @@ public class OportunidadeService {
      * com o formulário do frontend.</p>
      */
     public OportunidadeResponseDTO criar(OportunidadeRequestDTO dados, Usuario usuario) {
+        validarStatus(dados.status());
+
         // 1. Resolver a ONG pelo usuário autenticado (não pelo ongId do corpo)
         Ong ong = ongDoUsuarioAutenticado(usuario);
 
@@ -97,6 +104,8 @@ public class OportunidadeService {
      * não permite transferir a oportunidade para outra ONG.
      */
     public OportunidadeResponseDTO atualizar(Integer id, OportunidadeRequestDTO dados, Usuario usuario) {
+        validarStatus(dados.status());
+
         // 1. Verificar se a oportunidade existe
         Oportunidade oportunidadeExistente = oportunidadeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Oportunidade não encontrada. ID: " + id));
@@ -186,9 +195,19 @@ public class OportunidadeService {
 
     /** Filtra oportunidades por status. */
     public List<OportunidadeResponseDTO> filtrarPorStatus(String status) {
+        validarStatus(status);
         return oportunidadeRepository.findByStatus(status).stream()
                 .map(this::paraResponse)
                 .toList();
+    }
+
+    /** Garante que o status seja compatível com a constraint do banco. */
+    private void validarStatus(String status) {
+        if (!STATUS_VALIDOS.contains(status)) {
+            throw new IllegalArgumentException(
+                    "O status deve ser ABERTA, ENCERRADA ou CANCELADA."
+            );
+        }
     }
 
     /** Converte entidade Oportunidade para DTO de resposta. */
@@ -197,7 +216,7 @@ public class OportunidadeService {
                 oportunidade.getId(),
                 oportunidade.getOng().getId(),
                 oportunidade.getOng().getNome(),
-                oportunidade.getCategoria().getId().intValue(), // Categoria.id é Long; DTO espera Integer (ver nota sobre padronizar tipos)
+                oportunidade.getCategoria().getId(),
                 oportunidade.getCategoria().getNome(),
                 oportunidade.getTitulo(),
                 oportunidade.getDescricao(),

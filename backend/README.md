@@ -69,13 +69,17 @@ O `usuarioId` precisa existir na tabela `usuarios`, pois o banco possui chave es
 
 O backend usa a base local `conect-bem-db` em `localhost:5432`.
 
-Para não versionar senhas, a configuração usa a variável de ambiente `DB_PASSWORD`:
+Para não versionar credenciais, a configuração usa variáveis de ambiente:
 
 ```properties
-spring.datasource.password=${DB_PASSWORD:postgres}
+DB_URL=jdbc:postgresql://localhost:5432/conect-bem-db
+DB_USERNAME=postgres
+DB_PASSWORD=sua_senha_local
 ```
 
-O valor padrão `postgres` atende ao `docker-compose.yml`. Em uma instalação local com outra senha, defina `DB_PASSWORD` na configuração de execução da IDE antes de iniciar a aplicação.
+`DB_PASSWORD` não possui valor padrão e nunca deve ser enviada ao Git. No Docker,
+crie um arquivo `backend/.env` (ignorado pelo Git) com essas variáveis antes de
+executar `docker compose up`.
 
 ## Validações realizadas
 

@@ -35,6 +35,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -315,5 +316,46 @@ class OportunidadeServiceHttpTest {
                         .contentType(MediaType.APPLICATION_JSON).content(corpoInvalido))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    void statusInvalidoNaCriacaoRetorna400() throws Exception {
+        autenticado(TipoUsuario.ONG, 7);
+
+        String corpoComStatusInvalido = corpoValido.replace("\"ABERTA\"", "\"PAUSADA\"");
+
+        mockMvc.perform(post("/oportunidades")
+                        .contentType(MediaType.APPLICATION_JSON).content(corpoComStatusInvalido))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensagem")
+                        .value("status: O status deve ser ABERTA, ENCERRADA ou CANCELADA."));
+
+        verify(oportunidadeRepository, never()).save(any(Oportunidade.class));
+    }
+
+    @Test
+    void tituloComMaisDe150CaracteresRetorna400() throws Exception {
+        autenticado(TipoUsuario.ONG, 7);
+
+        String tituloInvalido = "A".repeat(151);
+        String corpoComTituloInvalido = corpoValido.replace(
+                "Título da oportunidade", tituloInvalido
+        );
+
+        mockMvc.perform(post("/oportunidades")
+                        .contentType(MediaType.APPLICATION_JSON).content(corpoComTituloInvalido))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensagem")
+                        .value("titulo: O título deve ter no máximo 150 caracteres."));
+
+        verify(oportunidadeRepository, never()).save(any(Oportunidade.class));
+    }
+
+    @Test
+    void filtroComStatusInvalidoRetorna400() throws Exception {
+        mockMvc.perform(get("/oportunidades").param("status", "PAUSADA"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensagem")
+                        .value("O status deve ser ABERTA, ENCERRADA ou CANCELADA."));
     }
 }
