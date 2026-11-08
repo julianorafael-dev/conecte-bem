@@ -358,4 +358,45 @@ class OportunidadeServiceHttpTest {
                 .andExpect(jsonPath("$.mensagem")
                         .value("O status deve ser ABERTA, ENCERRADA ou CANCELADA."));
     }
+
+    // ---------- Regressões: entrada HTTP inválida deve retornar 400 ----------
+
+    @Test
+    void jsonMalformadoRetorna400ComMensagemEstavel() throws Exception {
+        autenticado(TipoUsuario.ONG, 7);
+
+        mockMvc.perform(post("/oportunidades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"titulo\":\"JSON sem fechamento\""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.mensagem")
+                        .value("Corpo da requisição inválido. Verifique o JSON e os formatos dos campos."));
+
+        verify(oportunidadeRepository, never()).save(any(Oportunidade.class));
+    }
+
+    @Test
+    void dataEmFormatoInvalidoRetorna400ComMensagemEstavel() throws Exception {
+        autenticado(TipoUsuario.ONG, 7);
+
+        String corpoComDataInvalida = corpoValido.replace("2027-01-10", "10/01/2027");
+
+        mockMvc.perform(post("/oportunidades")
+                        .contentType(MediaType.APPLICATION_JSON).content(corpoComDataInvalida))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.mensagem")
+                        .value("Corpo da requisição inválido. Verifique o JSON e os formatos dos campos."));
+
+        verify(oportunidadeRepository, never()).save(any(Oportunidade.class));
+    }
+
+    @Test
+    void idNaoNumericoRetorna400ComMensagemEstavel() throws Exception {
+        mockMvc.perform(get("/oportunidades/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.mensagem").value("Parâmetro 'id' deve ter um valor válido."));
+    }
 }

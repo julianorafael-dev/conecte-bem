@@ -75,10 +75,12 @@ Para não versionar credenciais, a configuração usa variáveis de ambiente:
 DB_URL=jdbc:postgresql://localhost:5432/conect-bem-db
 DB_USERNAME=postgres
 DB_PASSWORD=sua_senha_local
+JWT_SECRET=uma_chave_unica_com_pelo_menos_32_caracteres
 ```
 
-`DB_PASSWORD` não possui valor padrão e nunca deve ser enviada ao Git. No Docker,
-crie um arquivo `backend/.env` (ignorado pelo Git) com essas variáveis antes de
+`DB_PASSWORD` e `JWT_SECRET` não possuem valor padrão e nunca devem ser enviados ao Git.
+No IntelliJ, informe-os em **Run/Debug Configurations > Environment variables**.
+No Docker, crie um arquivo `backend/.env` (ignorado pelo Git) com essas variáveis antes de
 executar `docker compose up`.
 
 ## Validações realizadas

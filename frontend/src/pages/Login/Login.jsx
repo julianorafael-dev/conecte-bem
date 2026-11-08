@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../hooks/useAuth.js'
 import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom'
 
@@ -18,6 +18,50 @@ function Login() {
   const [modalAberto, setModalAberto] = useState(false)
   const [emailRecuperacao, setEmailRecuperacao] = useState('')
   const [dataNascimento, setDataNascimento] = useState('')
+  const botaoRecuperarRef = useRef(null)
+  const dialogoRecuperacaoRef = useRef(null)
+  const emailRecuperacaoRef = useRef(null)
+
+  function fecharModalRecuperacao() {
+    setModalAberto(false)
+    window.setTimeout(() => botaoRecuperarRef.current?.focus(), 0)
+  }
+
+  useEffect(() => {
+    if (!modalAberto) return undefined
+
+    // O foco começa no primeiro campo do diálogo e fica contido nele até o fechamento.
+    window.setTimeout(() => emailRecuperacaoRef.current?.focus(), 0)
+
+    function tratarTecla(evento) {
+      if (evento.key === 'Escape') {
+        evento.preventDefault()
+        fecharModalRecuperacao()
+        return
+      }
+
+      if (evento.key !== 'Tab') return
+
+      const elementosFocaveis = dialogoRecuperacaoRef.current?.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href]'
+      )
+      if (!elementosFocaveis?.length) return
+
+      const primeiro = elementosFocaveis[0]
+      const ultimo = elementosFocaveis[elementosFocaveis.length - 1]
+
+      if (evento.shiftKey && document.activeElement === primeiro) {
+        evento.preventDefault()
+        ultimo.focus()
+      } else if (!evento.shiftKey && document.activeElement === ultimo) {
+        evento.preventDefault()
+        primeiro.focus()
+      }
+    }
+
+    document.addEventListener('keydown', tratarTecla)
+    return () => document.removeEventListener('keydown', tratarTecla)
+  }, [modalAberto])
 
   // Quem já está logado não precisa ver a tela de login.
   if (usuario && !enviando) {
@@ -40,7 +84,7 @@ function Login() {
   const handleRecuperarSenha = (e) => {
     e.preventDefault()
     alert(`E-mail: ${emailRecuperacao}\nData de nascimento: ${dataNascimento}`)
-    setModalAberto(false)
+    fecharModalRecuperacao()
   }
 
   return (
@@ -55,18 +99,18 @@ function Login() {
 
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.3rem' }}>E-mail</label>
+          <label htmlFor="login-email" style={{ display: 'block', marginBottom: '0.3rem' }}>E-mail</label>
           <input
-            type="email" value={email}
+            id="login-email" name="email" type="email" autoComplete="email" value={email}
             onChange={(e) => setEmail(e.target.value)} required
             style={{ width: '100%', padding: '0.7rem', border: '1px solid #ddd', borderRadius: '4px' }}
           />
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.3rem' }}>Senha</label>
+          <label htmlFor="login-senha" style={{ display: 'block', marginBottom: '0.3rem' }}>Senha</label>
           <input
-            type="password" value={senha}
+            id="login-senha" name="password" type="password" autoComplete="current-password" value={senha}
             onChange={(e) => setSenha(e.target.value)} required
             style={{ width: '100%', padding: '0.7rem', border: '1px solid #ddd', borderRadius: '4px' }}
           />
@@ -80,7 +124,7 @@ function Login() {
           type="submit"
           disabled={enviando}
           style={{
-            width: '100%', padding: '0.9rem', backgroundColor: '#4CAF50',
+            width: '100%', padding: '0.9rem', backgroundColor: '#2e7d32',
             color: 'white', border: 'none', borderRadius: '4px',
             fontSize: '1rem', cursor: enviando ? 'wait' : 'pointer', marginTop: '0.5rem',
             opacity: enviando ? 0.7 : 1
@@ -92,6 +136,7 @@ function Login() {
 
       <p style={{ textAlign: 'center', marginTop: '1rem' }}>
         <button
+          ref={botaoRecuperarRef}
           type="button"
           onClick={() => setModalAberto(true)}
           style={{
@@ -104,7 +149,7 @@ function Login() {
       </p>
 
       <p style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-        Não tem conta? <Link to="/CriarConta" style={{ color: '#4CAF50', fontWeight: 'bold' }}>Cadastre-se</Link>
+        Não tem conta? <Link to="/CriarConta" style={{ color: '#2e7d32', fontWeight: 'bold' }}>Cadastre-se</Link>
       </p>
 
       {/* Modal Recuperar Senha */}
@@ -113,35 +158,35 @@ function Login() {
           position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
           backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
         }}>
-          <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', width: '90%', maxWidth: '400px' }}>
-            <h3 style={{ marginTop: 0, marginBottom: '1.5rem' }}>Recuperar Senha</h3>
+          <div ref={dialogoRecuperacaoRef} role="dialog" aria-modal="true" aria-labelledby="titulo-recuperar-senha" style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', width: '90%', maxWidth: '400px' }}>
+            <h3 id="titulo-recuperar-senha" style={{ marginTop: 0, marginBottom: '1.5rem' }}>Recuperar Senha</h3>
             <form onSubmit={handleRecuperarSenha}>
               <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.3rem' }}>E-mail</label>
+                <label htmlFor="recuperar-email" style={{ display: 'block', marginBottom: '0.3rem' }}>E-mail</label>
                 <input
-                  type="email" value={emailRecuperacao}
+                  ref={emailRecuperacaoRef} id="recuperar-email" name="recuperar-email" type="email" autoComplete="email" value={emailRecuperacao}
                   onChange={(e) => setEmailRecuperacao(e.target.value)} required
                   style={{ width: '100%', padding: '0.7rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 />
               </div>
               <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.3rem' }}>Data de Nascimento</label>
+                <label htmlFor="recuperar-data-nascimento" style={{ display: 'block', marginBottom: '0.3rem' }}>Data de Nascimento</label>
                 <input
-                  type="date" value={dataNascimento}
+                  id="recuperar-data-nascimento" name="recuperar-data-nascimento" type="date" autoComplete="bday" value={dataNascimento}
                   onChange={(e) => setDataNascimento(e.target.value)} required
                   style={{ width: '100%', padding: '0.7rem', border: '1px solid #ddd', borderRadius: '4px' }}
                 />
               </div>
               <div style={{ display: 'flex', gap: '0.8rem' }}>
                 <button
-                  type="button" onClick={() => setModalAberto(false)}
+                  type="button" onClick={fecharModalRecuperacao}
                   style={{ flex: 1, padding: '0.7rem', backgroundColor: '#eee', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  style={{ flex: 1, padding: '0.7rem', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                  style={{ flex: 1, padding: '0.7rem', backgroundColor: '#2e7d32', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                 >
                   Continuar
                 </button>
