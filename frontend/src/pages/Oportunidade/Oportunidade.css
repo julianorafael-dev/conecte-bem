@@ -96,6 +96,41 @@
   font-size: 0.95rem;
 }
 
+.oportunidades-select:disabled {
+  background-color: #eee;
+  color: #777;
+  cursor: not-allowed;
+}
+
+.oportunidades-filtro-aviso-categorias {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.oportunidades-filtro-aviso-categorias p {
+  color: #c0392b;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.oportunidades-filtro-retry {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #0056b3;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.oportunidades-filtro-retry:disabled {
+  color: #999;
+  cursor: wait;
+}
+
 .oportunidades-checkbox {
   display: flex;
   align-items: center;
@@ -401,10 +436,12 @@
 }
 
 .modal-btn-inscrever {
+  display: block;
   width: 100%;
   padding: 1rem;
   font-size: 1.1rem;
   font-weight: bold;
+  text-align: center;
   background-color: #28a745;
   color: white;
   border: none;
