@@ -243,6 +243,69 @@ class InscricaoServiceTest {
         assertEquals(StatusInscricao.PENDENTE, respostas.getFirst().statusInscricao());
     }
 
+    @Test
+    void ongProprietariaConfirmaInscricaoPendente() {
+        Usuario contaOng = usuario(5, TipoUsuario.ONG);
+        Ong ong = ongComId(50);
+        Inscricao inscricao = inscricao(100, voluntario(1), oportunidade(10, 2, "ABERTA", 50), StatusInscricao.PENDENTE);
+
+        when(ongRepository.findByUsuarioId(5)).thenReturn(Optional.of(ong));
+        when(inscricaoRepository.findById(100)).thenReturn(Optional.of(inscricao));
+
+        var resposta = service.confirmarPelaOng(100, contaOng);
+
+        assertEquals(StatusInscricao.CONFIRMADA, resposta.status());
+        verify(inscricaoRepository).save(inscricao);
+    }
+
+    @Test
+    void ongNaoConfirmaInscricaoCancelada() {
+        Usuario contaOng = usuario(5, TipoUsuario.ONG);
+        Ong ong = ongComId(50);
+        Inscricao inscricao = inscricao(100, voluntario(1), oportunidade(10, 2, "ABERTA", 50), StatusInscricao.CANCELADA);
+
+        when(ongRepository.findByUsuarioId(5)).thenReturn(Optional.of(ong));
+        when(inscricaoRepository.findById(100)).thenReturn(Optional.of(inscricao));
+
+        assertThrows(InscricaoConflictException.class, () -> service.confirmarPelaOng(100, contaOng));
+        verify(inscricaoRepository, never()).save(any());
+    }
+
+    @Test
+    void ongProprietariaCancelaInscricaoConfirmada() {
+        Usuario contaOng = usuario(5, TipoUsuario.ONG);
+        Ong ong = ongComId(50);
+        Inscricao inscricao = inscricao(100, voluntario(1), oportunidade(10, 2, "ABERTA", 50), StatusInscricao.CONFIRMADA);
+
+        when(ongRepository.findByUsuarioId(5)).thenReturn(Optional.of(ong));
+        when(inscricaoRepository.findById(100)).thenReturn(Optional.of(inscricao));
+
+        var resposta = service.cancelarPelaOng(100, contaOng);
+
+        assertEquals(StatusInscricao.CANCELADA, resposta.status());
+        verify(inscricaoRepository).save(inscricao);
+    }
+
+    @Test
+    void ongNaoAlteraInscricaoDeOportunidadeDeOutraOng() {
+        Usuario contaOng = usuario(5, TipoUsuario.ONG);
+        Ong ong = ongComId(50);
+        Inscricao inscricao = inscricao(100, voluntario(1), oportunidade(10, 2, "ABERTA", 99), StatusInscricao.PENDENTE);
+
+        when(ongRepository.findByUsuarioId(5)).thenReturn(Optional.of(ong));
+        when(inscricaoRepository.findById(100)).thenReturn(Optional.of(inscricao));
+
+        assertThrows(AccessDeniedException.class, () -> service.confirmarPelaOng(100, contaOng));
+        assertThrows(AccessDeniedException.class, () -> service.cancelarPelaOng(100, contaOng));
+        verify(inscricaoRepository, never()).save(any());
+    }
+
+    @Test
+    void voluntarioNaoConfirmaInscricao() {
+        assertThrows(AccessDeniedException.class, () -> service.confirmarPelaOng(100, voluntario(1)));
+        verify(inscricaoRepository, never()).save(any());
+    }
+
     private Usuario voluntario(Integer id) {
         return usuario(id, TipoUsuario.VOLUNTARIO);
     }

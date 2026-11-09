@@ -70,7 +70,8 @@ function Oportunidades() {
     async function carregarOportunidades() {
       try {
         const lista = await api('/oportunidades');
-        if (ativo) setOportunidades(lista ?? []);
+        // Oportunidades canceladas pela ONG não aparecem na listagem pública.
+        if (ativo) setOportunidades((lista ?? []).filter((o) => o.status !== 'CANCELADA'));
       } catch (error) {
         if (ativo) {
           setErro(

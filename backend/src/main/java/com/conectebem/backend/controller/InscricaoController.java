@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,6 +58,24 @@ public class InscricaoController {
             @AuthenticationPrincipal Usuario usuario
     ) {
         inscricaoService.cancelar(id, usuario);
+    }
+
+    /** A ONG proprietária da oportunidade confirma a inscrição. */
+    @PutMapping("/inscricoes/{id}/confirmar")
+    public InscritoResponseDTO confirmarPelaOng(
+            @PathVariable Integer id,
+            @AuthenticationPrincipal Usuario usuario
+    ) {
+        return inscricaoService.confirmarPelaOng(id, usuario);
+    }
+
+    /** A ONG proprietária da oportunidade cancela a inscrição. */
+    @PutMapping("/inscricoes/{id}/recusar")
+    public InscritoResponseDTO cancelarPelaOng(
+            @PathVariable Integer id,
+            @AuthenticationPrincipal Usuario usuario
+    ) {
+        return inscricaoService.cancelarPelaOng(id, usuario);
     }
 
     /** Lista os inscritos de uma oportunidade para a ONG proprietária. */

@@ -109,16 +109,14 @@ function PainelOng() {
             <Link to="/painel/oportunidades/nova">Criar a primeira oportunidade</Link>
           </div>
         ) : (
-          <ul className="painel-ong-lista">
+          <ul className="painel-ong-grid">
             {oportunidades.map((oportunidade) => (
               <li key={oportunidade.id} className="painel-ong-item">
-                <div>
-                  <h3>{oportunidade.titulo}</h3>
-                  <p>{oportunidade.nomeCategoria} · {formatarData(oportunidade.data)}</p>
-                </div>
                 <span className={`painel-ong-status status-${oportunidade.status}`}>
                   {ROTULO_STATUS[oportunidade.status] ?? oportunidade.status}
                 </span>
+                <h3>{oportunidade.titulo}</h3>
+                <p>{oportunidade.nomeCategoria} · {formatarData(oportunidade.data)}</p>
               </li>
             ))}
           </ul>

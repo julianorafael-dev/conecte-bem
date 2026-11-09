@@ -19,6 +19,33 @@
 }
 .gerenciar-novo:hover { background: var(--primary-hover); color: #fff; }
 
+.gerenciar-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.gerenciar-filtro {
+  padding: 0.4rem 0.85rem;
+  color: var(--text-dark);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.gerenciar-filtro:hover { border-color: var(--primary); }
+
+.gerenciar-filtro.ativo {
+  color: #ffffff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
 .gerenciar-lista { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
 
 .gerenciar-card {

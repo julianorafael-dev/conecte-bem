@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth.js';
 import fotoComoFunciona from '../../assets/foto-comofunc.avif';
 import './ComoFunciona.css';
 
@@ -54,6 +55,8 @@ function ListaPassos({ passos }) {
 }
 
 function ComoFunciona() {
+  const { usuario } = useAuth();
+
   return (
     <main className="como">
       <section className="como-topo">
@@ -88,7 +91,9 @@ function ComoFunciona() {
         <h2>Pronto para começar?</h2>
         <p>Crie sua conta e faça parte de uma rede que transforma realidades.</p>
         <div className="como-botoes">
-          <Link to="/CriarConta" className="como-botao como-botao-principal">Criar conta</Link>
+          {!usuario && (
+            <Link to="/CriarConta" className="como-botao como-botao-principal">Criar conta</Link>
+          )}
           <Link to="/Oportunidades" className="como-botao">Ver oportunidades</Link>
         </div>
       </section>

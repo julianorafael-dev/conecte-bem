@@ -18,12 +18,17 @@ function Login() {
   const [modalAberto, setModalAberto] = useState(false)
   const [emailRecuperacao, setEmailRecuperacao] = useState('')
   const [dataNascimento, setDataNascimento] = useState('')
+  const [recuperacaoEnviada, setRecuperacaoEnviada] = useState(false)
   const botaoRecuperarRef = useRef(null)
   const dialogoRecuperacaoRef = useRef(null)
   const emailRecuperacaoRef = useRef(null)
+  const fecharRecuperacaoRef = useRef(null)
 
   function fecharModalRecuperacao() {
     setModalAberto(false)
+    setRecuperacaoEnviada(false)
+    setEmailRecuperacao('')
+    setDataNascimento('')
     window.setTimeout(() => botaoRecuperarRef.current?.focus(), 0)
   }
 
@@ -83,8 +88,8 @@ function Login() {
 
   const handleRecuperarSenha = (e) => {
     e.preventDefault()
-    alert(`E-mail: ${emailRecuperacao}\nData de nascimento: ${dataNascimento}`)
-    fecharModalRecuperacao()
+    setRecuperacaoEnviada(true)
+    window.setTimeout(() => fecharRecuperacaoRef.current?.focus(), 0)
   }
 
   return (
@@ -160,38 +165,53 @@ function Login() {
         }}>
           <div ref={dialogoRecuperacaoRef} role="dialog" aria-modal="true" aria-labelledby="titulo-recuperar-senha" style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', width: '90%', maxWidth: '400px' }}>
             <h3 id="titulo-recuperar-senha" style={{ marginTop: 0, marginBottom: '1.5rem' }}>Recuperar Senha</h3>
-            <form onSubmit={handleRecuperarSenha}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="recuperar-email" style={{ display: 'block', marginBottom: '0.3rem' }}>E-mail</label>
-                <input
-                  ref={emailRecuperacaoRef} id="recuperar-email" name="recuperar-email" type="email" autoComplete="email" value={emailRecuperacao}
-                  onChange={(e) => setEmailRecuperacao(e.target.value)} required
-                  style={{ width: '100%', padding: '0.7rem', border: '1px solid #ddd', borderRadius: '4px' }}
-                />
-              </div>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label htmlFor="recuperar-data-nascimento" style={{ display: 'block', marginBottom: '0.3rem' }}>Data de Nascimento</label>
-                <input
-                  id="recuperar-data-nascimento" name="recuperar-data-nascimento" type="date" autoComplete="bday" value={dataNascimento}
-                  onChange={(e) => setDataNascimento(e.target.value)} required
-                  style={{ width: '100%', padding: '0.7rem', border: '1px solid #ddd', borderRadius: '4px' }}
-                />
-              </div>
-              <div style={{ display: 'flex', gap: '0.8rem' }}>
+            {recuperacaoEnviada ? (
+              <>
+                <p role="status" style={{ color: '#2e7d32', marginBottom: '1.5rem' }}>
+                  Enviamos um link de recuperação para o e-mail informado.
+                </p>
                 <button
+                  ref={fecharRecuperacaoRef}
                   type="button" onClick={fecharModalRecuperacao}
-                  style={{ flex: 1, padding: '0.7rem', backgroundColor: '#eee', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                  style={{ width: '100%', padding: '0.7rem', backgroundColor: '#2e7d32', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                 >
-                  Cancelar
+                  Fechar
                 </button>
-                <button
-                  type="submit"
-                  style={{ flex: 1, padding: '0.7rem', backgroundColor: '#2e7d32', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                >
-                  Continuar
-                </button>
-              </div>
-            </form>
+              </>
+            ) : (
+              <form onSubmit={handleRecuperarSenha}>
+                <div style={{ marginBottom: '1rem' }}>
+                  <label htmlFor="recuperar-email" style={{ display: 'block', marginBottom: '0.3rem' }}>E-mail</label>
+                  <input
+                    ref={emailRecuperacaoRef} id="recuperar-email" name="recuperar-email" type="email" autoComplete="email" value={emailRecuperacao}
+                    onChange={(e) => setEmailRecuperacao(e.target.value)} required
+                    style={{ width: '100%', padding: '0.7rem', border: '1px solid #ddd', borderRadius: '4px' }}
+                  />
+                </div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label htmlFor="recuperar-data-nascimento" style={{ display: 'block', marginBottom: '0.3rem' }}>Data de Nascimento</label>
+                  <input
+                    id="recuperar-data-nascimento" name="recuperar-data-nascimento" type="date" autoComplete="bday" value={dataNascimento}
+                    onChange={(e) => setDataNascimento(e.target.value)} required
+                    style={{ width: '100%', padding: '0.7rem', border: '1px solid #ddd', borderRadius: '4px' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '0.8rem' }}>
+                  <button
+                    type="button" onClick={fecharModalRecuperacao}
+                    style={{ flex: 1, padding: '0.7rem', backgroundColor: '#eee', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    style={{ flex: 1, padding: '0.7rem', backgroundColor: '#2e7d32', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                  >
+                    Continuar
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
