@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth.js';
 import './Header.css';
@@ -5,6 +6,15 @@ import './Header.css';
 function Header() {
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const tipo = usuario?.tipo;
+    document.title = tipo === 'VOLUNTARIO'
+      ? 'Conecte-Bem | Voluntário'
+      : tipo === 'ONG'
+        ? 'Conecte-Bem | ONG'
+        : 'Conecte-Bem';
+  }, [usuario?.tipo]);
 
   function sair() {
     logout();
