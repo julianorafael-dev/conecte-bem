@@ -121,7 +121,8 @@ function FormOportunidade() {
       <form onSubmit={enviar}>
         <label>
           Título
-          <input name="titulo" value={form.titulo} onChange={alterar} maxLength={200} required />
+          <input name="titulo" value={form.titulo} onChange={alterar} maxLength={150} required />
+          <small className="form-op-contador" aria-live="polite">{form.titulo.length}/150 caracteres</small>
         </label>
 
         <label>

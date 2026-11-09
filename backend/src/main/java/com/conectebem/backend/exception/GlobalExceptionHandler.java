@@ -2,11 +2,14 @@ package com.conectebem.backend.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -37,6 +40,36 @@ public class GlobalExceptionHandler {
                 .orElse("Dados inválidos.");
 
         return montarResposta(HttpStatus.BAD_REQUEST, mensagem);
+    }
+
+    /**
+     * Trata JSON malformado e valores que não podem ser convertidos para os
+     * tipos esperados, como uma data enviada fora do formato ISO.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleUnreadableMessage(HttpMessageNotReadableException ex) {
+        return montarResposta(
+                HttpStatus.BAD_REQUEST,
+                "Corpo da requisição inválido. Verifique o JSON e os formatos dos campos."
+        );
+    }
+
+    /** Trata parâmetros de rota ou query string enviados com tipo incompatível. */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return montarResposta(
+                HttpStatus.BAD_REQUEST,
+                "Parâmetro '" + ex.getName() + "' deve ter um valor válido."
+        );
+    }
+
+    /** Trata parâmetros obrigatórios ausentes sem expor detalhes internos do Spring. */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingParameter(MissingServletRequestParameterException ex) {
+        return montarResposta(
+                HttpStatus.BAD_REQUEST,
+                "Parâmetro obrigatório ausente: '" + ex.getParameterName() + "'."
+        );
     }
 
     /** Converte violações de unicidade ou chave estrangeira do banco em HTTP 409. */

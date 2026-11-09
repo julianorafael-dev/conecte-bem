@@ -40,6 +40,13 @@
   border-color: transparent;
 }
 
+.form-op-contador {
+  align-self: flex-end;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+
 .form-op-linha { display: flex; gap: 1rem; }
 .form-op-grande { flex: 3; }
 
