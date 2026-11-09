@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBullseye, faEye, faHandHoldingHeart } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '../../hooks/useAuth.js';
 import fotoSobre from '../../assets/foto-sobre.avif';
 import './Sobre.css';
 
@@ -26,6 +27,8 @@ const PILARES = [
 ];
 
 function SobreNos() {
+  const { usuario } = useAuth();
+
   return (
     <main className="sobre">
       <section className="sobre-topo">
@@ -71,7 +74,7 @@ function SobreNos() {
         <p>Seja voluntário ou represente uma ONG, há um lugar para você no Conecte-Bem.</p>
         <div className="sobre-botoes">
           <Link to="/Oportunidades" className="sobre-botao sobre-botao-principal">Ver oportunidades</Link>
-          <Link to="/CriarConta" className="sobre-botao">Criar conta</Link>
+          {!usuario && <Link to="/CriarConta" className="sobre-botao">Criar conta</Link>}
         </div>
       </section>
     </main>

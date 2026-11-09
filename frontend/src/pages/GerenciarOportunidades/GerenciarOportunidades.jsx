@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../services/api.js';
 import './GerenciarOportunidades.css';
@@ -12,10 +12,19 @@ function formatarData(iso) {
 
 const ROTULO_STATUS = { ABERTA: 'Aberta', ENCERRADA: 'Encerrada', CANCELADA: 'Cancelada' };
 
+const FILTROS = [
+  { chave: 'todas', rotulo: 'Todas' },
+  { chave: 'ABERTA', rotulo: 'Abertas' },
+  { chave: 'ENCERRADA', rotulo: 'Encerradas' },
+  { chave: 'CANCELADA', rotulo: 'Canceladas' },
+];
+
 function GerenciarOportunidades() {
   const [oportunidades, setOportunidades] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
+  const [filtro, setFiltro] = useState('todas');
+  const [cancelando, setCancelando] = useState(null);
 
   useEffect(() => {
     async function carregar() {
@@ -33,14 +42,38 @@ function GerenciarOportunidades() {
     carregar();
   }, []);
 
-  async function excluir(op) {
-    if (!window.confirm(`Excluir a oportunidade "${op.titulo}"? Essa ação não pode ser desfeita.`)) return;
+  const listaFiltrada = useMemo(
+    () => oportunidades.filter((op) => filtro === 'todas' || op.status === filtro),
+    [oportunidades, filtro]
+  );
+
+  // Cancelar não apaga a oportunidade: só muda o status para CANCELADA,
+  // preservando o histórico (e os inscritos) para consulta posterior.
+  async function cancelar(op) {
+    if (!window.confirm(`Cancelar a oportunidade "${op.titulo}"?`)) return;
     setErro('');
+    setCancelando(op.id);
     try {
-      await api(`/oportunidades/${op.id}`, { method: 'DELETE' });
-      setOportunidades((lista) => lista.filter((o) => o.id !== op.id));
+      const atualizada = await api(`/oportunidades/${op.id}`, {
+        method: 'PUT',
+        body: {
+          ongId: op.ongId,
+          categoriaId: op.categoriaId,
+          titulo: op.titulo,
+          descricao: op.descricao,
+          data: op.data,
+          horario: op.horario,
+          cidade: op.cidade,
+          estado: op.estado,
+          vagas: op.vagas,
+          status: 'CANCELADA',
+        },
+      });
+      setOportunidades((lista) => lista.map((o) => (o.id === op.id ? atualizada : o)));
     } catch (e) {
       setErro(e.message);
+    } finally {
+      setCancelando(null);
     }
   }
 
@@ -53,14 +86,32 @@ function GerenciarOportunidades() {
         <Link to="/painel/oportunidades/nova" className="gerenciar-novo">+ Criar oportunidade</Link>
       </div>
 
+      <div className="gerenciar-filtros" role="group" aria-label="Filtrar oportunidades">
+        {FILTROS.map((f) => (
+          <button
+            key={f.chave}
+            type="button"
+            className={`gerenciar-filtro ${filtro === f.chave ? 'ativo' : ''}`}
+            aria-pressed={filtro === f.chave}
+            onClick={() => setFiltro(f.chave)}
+          >
+            {f.rotulo}
+          </button>
+        ))}
+      </div>
+
       {erro && <p className="gerenciar-erro" role="alert">{erro}</p>}
 
       {!erro && oportunidades.length === 0 && (
         <p className="gerenciar-aviso">Você ainda não publicou nenhuma oportunidade.</p>
       )}
 
+      {!erro && oportunidades.length > 0 && listaFiltrada.length === 0 && (
+        <p className="gerenciar-aviso">Nenhuma oportunidade encontrada nesse filtro.</p>
+      )}
+
       <ul className="gerenciar-lista">
-        {oportunidades.map((op) => (
+        {listaFiltrada.map((op) => (
           <li key={op.id} className="gerenciar-card">
             <Link to={`/painel/oportunidades/${op.id}/inscritos`} className="gerenciar-info" title="Ver voluntários inscritos">
               <h2>{op.titulo}</h2>
@@ -74,7 +125,16 @@ function GerenciarOportunidades() {
             </Link>
             <div className="gerenciar-botoes">
               <Link to={`/painel/oportunidades/${op.id}/editar`} className="gerenciar-editar">Editar</Link>
-              <button type="button" className="gerenciar-excluir" onClick={() => excluir(op)}>Excluir</button>
+              {op.status !== 'CANCELADA' && (
+                <button
+                  type="button"
+                  className="gerenciar-excluir"
+                  disabled={cancelando === op.id}
+                  onClick={() => cancelar(op)}
+                >
+                  {cancelando === op.id ? 'Cancelando...' : 'Cancelar'}
+                </button>
+              )}
             </div>
           </li>
         ))}

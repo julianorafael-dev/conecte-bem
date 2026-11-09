@@ -112,6 +112,12 @@ public class GlobalExceptionHandler {
         return montarResposta(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
+    /** Converte falha no envio do e-mail de contato em HTTP 502, sem expor detalhes do provedor SMTP. */
+    @ExceptionHandler(ContatoEnvioException.class)
+    public ResponseEntity<Map<String, Object>> handleContatoEnvio(ContatoEnvioException ex) {
+        return montarResposta(HttpStatus.BAD_GATEWAY, ex.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenerico(Exception ex) {
         return montarResposta(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno no servidor.");

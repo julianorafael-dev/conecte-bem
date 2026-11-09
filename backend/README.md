@@ -76,12 +76,29 @@ DB_URL=jdbc:postgresql://localhost:5432/conect-bem-db
 DB_USERNAME=postgres
 DB_PASSWORD=sua_senha_local
 JWT_SECRET=uma_chave_unica_com_pelo_menos_32_caracteres
+MAIL_USERNAME=usuario_smtp_do_mailtrap
+MAIL_PASSWORD=senha_smtp_do_mailtrap
 ```
 
-`DB_PASSWORD` e `JWT_SECRET` não possuem valor padrão e nunca devem ser enviados ao Git.
-No IntelliJ, informe-os em **Run/Debug Configurations > Environment variables**.
-No Docker, crie um arquivo `backend/.env` (ignorado pelo Git) com essas variáveis antes de
-executar `docker compose up`.
+`DB_PASSWORD`, `JWT_SECRET`, `MAIL_USERNAME` e `MAIL_PASSWORD` não possuem valor padrão e
+nunca devem ser enviados ao Git. No IntelliJ, informe-os em **Run/Debug Configurations >
+Environment variables**. No Docker, crie um arquivo `backend/.env` (ignorado pelo Git) com
+essas variáveis antes de executar `docker compose up`.
+
+## Formulário de Contato (e-mail via Mailtrap)
+
+O endpoint `POST /contato` (público, sem autenticação) envia a mensagem por e-mail usando
+SMTP. Em desenvolvimento, usamos a caixa de testes (*Sandbox*) do Mailtrap: as credenciais
+`MAIL_USERNAME`/`MAIL_PASSWORD` ficam em **Integration > SMTP** daquela caixa, e nenhum
+e-mail sai de verdade — tudo fica visível no painel do Mailtrap.
+
+| Variável | Padrão | Quando mudar |
+|---|---|---|
+| `MAIL_HOST` | `sandbox.smtp.mailtrap.io` | Trocar de provedor SMTP |
+| `MAIL_PORT` | `2525` | Trocar de provedor SMTP |
+| `MAIL_USERNAME` | — | Sempre: usuário SMTP do Mailtrap |
+| `MAIL_PASSWORD` | — | Sempre: senha SMTP do Mailtrap |
+| `CONTATO_EMAIL_DESTINO` | `matheusmolinari01@gmail.com` | Para onde as mensagens de contato devem chegar |
 
 ## Validações realizadas
 

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { api } from '../../services/api.js';
 import './VoluntariosInscritos.css';
 
+// A inscrição entra como pendente; a ONG confirma ou cancela.
 const ROTULO_STATUS = { PENDENTE: 'Pendente', CONFIRMADA: 'Confirmada', CANCELADA: 'Cancelada' };
 
 // Tela da ONG com a lista de voluntários inscritos em uma oportunidade (/painel/oportunidades/:id/inscritos)
@@ -13,6 +14,8 @@ function VoluntariosInscritos() {
   const [inscricoes, setInscricoes] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
+  const [erroAcao, setErroAcao] = useState('');
+  const [alterando, setAlterando] = useState(null);
 
   useEffect(() => {
     async function carregar() {
@@ -38,6 +41,21 @@ function VoluntariosInscritos() {
     carregar();
   }, [id]);
 
+  // acao: 'confirmar' ou 'recusar'
+  async function alterarStatus(inscricao, acao) {
+    if (acao === 'recusar' && !window.confirm(`Cancelar a inscrição de ${inscricao.nomeVoluntario}?`)) return;
+    setErroAcao('');
+    setAlterando(inscricao.id);
+    try {
+      const atualizada = await api(`/inscricoes/${inscricao.id}/${acao}`, { method: 'PUT' });
+      setInscricoes((lista) => lista.map((item) => (item.id === atualizada.id ? atualizada : item)));
+    } catch (e) {
+      setErroAcao(e.message);
+    } finally {
+      setAlterando(null);
+    }
+  }
+
   if (carregando) return <p className="gerenciar-aviso">Carregando...</p>;
 
   return (
@@ -55,6 +73,8 @@ function VoluntariosInscritos() {
 
           <h2 className="inscritos-titulo">Voluntários Inscritos</h2>
 
+          {erroAcao && <p className="gerenciar-erro" role="alert">{erroAcao}</p>}
+
           {!erro && inscricoes.length === 0 && (
             <p className="gerenciar-aviso">Nenhum voluntário se inscreveu nesta oportunidade ainda.</p>
           )}
@@ -70,9 +90,31 @@ function VoluntariosInscritos() {
                     </a>
                   </p>
                 </div>
-                <span className={`inscritos-status inscricao-${inscricao.status}`}>
-                  {ROTULO_STATUS[inscricao.status] ?? inscricao.status}
-                </span>
+                <div className="inscritos-acoes">
+                  <span className={`inscritos-status inscricao-${inscricao.status}`}>
+                    {ROTULO_STATUS[inscricao.status] ?? inscricao.status}
+                  </span>
+                  {inscricao.status === 'PENDENTE' && (
+                    <button
+                      type="button"
+                      className="inscritos-botao inscritos-confirmar"
+                      disabled={alterando === inscricao.id}
+                      onClick={() => alterarStatus(inscricao, 'confirmar')}
+                    >
+                      Confirmar
+                    </button>
+                  )}
+                  {inscricao.status !== 'CANCELADA' && (
+                    <button
+                      type="button"
+                      className="inscritos-botao inscritos-recusar"
+                      disabled={alterando === inscricao.id}
+                      onClick={() => alterarStatus(inscricao, 'recusar')}
+                    >
+                      Cancelar
+                    </button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>

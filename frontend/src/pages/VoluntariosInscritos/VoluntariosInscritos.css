@@ -51,6 +51,31 @@
 .inscricao-CONFIRMADA { background: #dcfce7; color: #15803d; }
 .inscricao-CANCELADA { background: #fee2e2; color: #b91c1c; }
 
+.inscritos-acoes {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inscritos-botao {
+  padding: 0.35rem 0.8rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: #ffffff;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.inscritos-botao:disabled { opacity: 0.6; cursor: default; }
+
+.inscritos-confirmar { color: #15803d; border: 1px solid #bbf7d0; }
+.inscritos-confirmar:hover:not(:disabled) { background: #f0fdf4; }
+
+.inscritos-recusar { color: #b91c1c; border: 1px solid #fecaca; }
+.inscritos-recusar:hover:not(:disabled) { background: #fef2f2; }
+
 @media (max-width: 600px) {
   .inscritos-card { flex-direction: column; align-items: flex-start; }
 }

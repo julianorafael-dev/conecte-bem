@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/health").permitAll()
                         .requestMatchers("/auth/**").permitAll() // Liberta as rotas de registo e login
+                        .requestMatchers(HttpMethod.POST, "/contato").permitAll() // Formulário de contato, aberto a visitantes
                         .requestMatchers("/ongs/me/**").hasRole("ONG")
                         .requestMatchers("/voluntarios/me").hasRole("VOLUNTARIO")
                         // Rotas de inscrições: regras específicas precisam vir antes
@@ -48,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/inscricoes").hasRole("VOLUNTARIO")
                         .requestMatchers(HttpMethod.GET, "/inscricoes/me").hasRole("VOLUNTARIO")
                         .requestMatchers(HttpMethod.DELETE, "/inscricoes/**").hasRole("VOLUNTARIO")
+                        .requestMatchers(HttpMethod.PUT, "/inscricoes/*/confirmar", "/inscricoes/*/recusar").hasRole("ONG")
                         .requestMatchers(HttpMethod.GET, "/ongs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/oportunidades/**").permitAll()
                         // Defesa em profundidade (alinhado com a Pessoa 2): somente

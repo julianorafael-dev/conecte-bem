@@ -26,7 +26,7 @@ function Footer() {
                     <ul>
                         <li><Link to="/entrar">Entrar</Link></li>
                         <li><Link to="/CriarConta">Criar conta</Link></li>
-                        <li><Link to="/">Recuperar senha</Link></li>
+                        <li><Link to="/entrar">Recuperar senha</Link></li>
                     </ul>
                 </div>
                 <div className="footer_sobre">

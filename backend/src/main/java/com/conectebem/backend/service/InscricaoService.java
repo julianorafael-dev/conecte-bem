@@ -147,6 +147,54 @@ public class InscricaoService {
                 .toList();
     }
 
+    /**
+     * A ONG proprietária confirma uma inscrição pendente.
+     *
+     * <p>Inscrições canceladas não podem ser confirmadas: o voluntário precisa
+     * se inscrever novamente. Confirmar uma inscrição já confirmada não muda nada.</p>
+     */
+    @Transactional
+    public InscritoResponseDTO confirmarPelaOng(Integer inscricaoId, Usuario usuario) {
+        Inscricao inscricao = obterInscricaoDaOng(inscricaoId, usuario);
+
+        if (inscricao.getStatus() == StatusInscricao.CANCELADA) {
+            throw new InscricaoConflictException("Não é possível confirmar uma inscrição cancelada.");
+        }
+
+        if (inscricao.getStatus() != StatusInscricao.CONFIRMADA) {
+            inscricao.setStatus(StatusInscricao.CONFIRMADA);
+            inscricaoRepository.save(inscricao);
+        }
+        return paraInscritoResponse(inscricao);
+    }
+
+    /**
+     * A ONG proprietária cancela uma inscrição pendente ou confirmada,
+     * liberando a vaga. Cancelar uma inscrição já cancelada não muda nada.
+     */
+    @Transactional
+    public InscritoResponseDTO cancelarPelaOng(Integer inscricaoId, Usuario usuario) {
+        Inscricao inscricao = obterInscricaoDaOng(inscricaoId, usuario);
+
+        if (inscricao.getStatus() != StatusInscricao.CANCELADA) {
+            inscricao.setStatus(StatusInscricao.CANCELADA);
+            inscricaoRepository.save(inscricao);
+        }
+        return paraInscritoResponse(inscricao);
+    }
+
+    private Inscricao obterInscricaoDaOng(Integer inscricaoId, Usuario usuario) {
+        Ong ong = obterOngDoUsuarioAutenticado(usuario);
+
+        Inscricao inscricao = inscricaoRepository.findById(inscricaoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Inscrição não encontrada. ID: " + inscricaoId));
+
+        if (!inscricao.getOportunidade().getOng().getId().equals(ong.getId())) {
+            throw new AccessDeniedException("Você só pode alterar inscrições das oportunidades da sua ONG.");
+        }
+        return inscricao;
+    }
+
     private void validarVoluntario(Usuario usuario) {
         if (usuario == null || usuario.getTipo() != TipoUsuario.VOLUNTARIO) {
             throw new AccessDeniedException("Apenas contas do tipo voluntário podem realizar esta ação.");

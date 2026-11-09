@@ -23,12 +23,15 @@ function Header() {
         <Link to="/Oportunidades">Oportunidades</Link>
         <Link to="/ComoFunciona">Como Funciona</Link>
         <Link to="/Sobre">Sobre nós</Link>
-        {usuario?.tipo === 'ONG' && <Link to="/painel">Painel da ONG</Link>}
       </nav>
 
       <div className="menu_login_cadastro">
         {usuario ? (
-          <button type="button" className="btn-sair" onClick={sair}>Sair</button>
+          <>
+            {usuario.tipo === 'VOLUNTARIO' && <Link to="/MeuCadastro">Meu cadastro</Link>}
+            {usuario.tipo === 'ONG' && <Link to="/painel">Painel da ONG</Link>}
+            <button type="button" className="btn-sair" onClick={sair}>Sair</button>
+          </>
         ) : (
           <>
             <Link to="/entrar">Entrar</Link>

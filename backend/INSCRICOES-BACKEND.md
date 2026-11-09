@@ -98,9 +98,15 @@ ocupem simultaneamente a última vaga.
   armazenar o JWT na chave de token definida pelo módulo de autenticação.
 - O fluxo visual de candidaturas e de voluntários inscritos pertence ao frontend
   da Pessoa 5. Este módulo fornece as rotas e os campos necessários para ele.
-- A confirmação de candidatura não recebeu rota nesta etapa, pois o escopo e a
-  tela responsável por essa ação ainda não foram definidos pelo grupo. O enum
-  mantém o estado `CONFIRMADA`, previsto no banco, e ele ocupa vaga normalmente.
+- A candidatura entra como `PENDENTE` e a ONG proprietária da oportunidade
+  confirma ou cancela na tela de voluntários inscritos:
+  - `PUT /inscricoes/{id}/confirmar`: `PENDENTE` -> `CONFIRMADA`. Uma inscrição
+    `CANCELADA` não pode ser confirmada (HTTP 409).
+  - `PUT /inscricoes/{id}/recusar`: `PENDENTE` ou `CONFIRMADA` -> `CANCELADA`,
+    liberando a vaga.
+  - Ambas exigem conta ONG e devolvem o inscrito atualizado. Uma ONG não altera
+    inscrições de oportunidades de outra ONG (HTTP 403).
+- `PENDENTE` e `CONFIRMADA` ocupam vaga da mesma forma.
 
 ## Como validar
 
