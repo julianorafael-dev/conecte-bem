@@ -1,6 +1,7 @@
 package com.conectebem.backend.security;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
@@ -59,9 +60,9 @@ public class JwtService {
     public String validarToken(String token) {
         try {
             Algorithm algoritmo = Algorithm.HMAC256(secret);
-            return JWT.require(algoritmo)
-                    .withIssuer("conecte-bem-api")
-                    .build()
+            JWTVerifier.BaseVerification verificacao = (JWTVerifier.BaseVerification) JWT.require(algoritmo)
+                    .withIssuer("conecte-bem-api");
+            return verificacao.build(clock)
                     .verify(token)
                     .getSubject();
         } catch (JWTVerificationException exception) {

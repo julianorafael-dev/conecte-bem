@@ -47,6 +47,20 @@ class JwtServiceTest {
     }
 
     @Test
+    void tokenDeixaDeSerValidoAoAtingirDuasHoras() {
+        Instant inicio = Instant.parse("2026-11-08T15:00:00Z");
+        JwtService emissor = new JwtService(SEGREDO_TESTE, Clock.fixed(inicio, ZoneId.of("UTC")));
+        String token = emissor.gerarToken(usuario());
+        JwtService antes = new JwtService(SEGREDO_TESTE,
+                Clock.fixed(inicio.plusSeconds(7199), ZoneId.of("UTC")));
+        JwtService noLimite = new JwtService(SEGREDO_TESTE,
+                Clock.fixed(inicio.plusSeconds(7200), ZoneId.of("UTC")));
+
+        assertEquals("voluntario@example.com", antes.validarToken(token));
+        assertNull(noLimite.validarToken(token));
+    }
+
+    @Test
     void segredoAusenteOuCurtoERejeitado() {
         assertThrows(IllegalStateException.class, () -> new JwtService("curto", Clock.systemUTC()));
     }
