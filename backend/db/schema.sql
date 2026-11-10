@@ -1,22 +1,26 @@
 -- ============================================================
--- Schema atualizado (PostgreSQL)
--- Alterações aplicadas:
---   oportunidades.estado    : char(2)      -> varchar(2)
---   oportunidades.criado_em : timestamp    -> timestamp(6)
---   oportunidades.horario   : time         -> time(0)
---   (ongs.estado e oportunidades.data já estavam nesses tipos)
+-- Schema para instalação nova (PostgreSQL) — atualizado em 10/11/2026
+-- Inclui QA-009: CPF, nascimento e telefone do voluntário;
+-- data de criação da ONG (telefone da ONG já existente).
+--
+-- Executar somente em uma base vazia. Para atualizar uma base existente,
+-- usar migrations/20261110_qa009_dados_cadastro.sql.
+-- Os campos novos são anuláveis para compatibilidade com contas antigas.
+-- QA-010: nascimento obrigatório e idade mínima de novos voluntários são
+-- validados pela aplicação; não há restrição de idade na tabela.
 -- ============================================================
 
 CREATE TABLE public.usuarios (
-    id        SERIAL PRIMARY KEY,
-    nome      varchar(150) NOT NULL,
-    email     varchar(150) NOT NULL,
-    senha     varchar(255) NOT NULL,
-    tipo      varchar(20)  NOT NULL,
-    cpf       varchar(11),
+    id              SERIAL PRIMARY KEY,
+    nome            varchar(150) NOT NULL,
+    email           varchar(150) NOT NULL,
+    senha           varchar(255) NOT NULL,
+    tipo            varchar(20)  NOT NULL,
+    -- Dados complementares do voluntário (QA-009).
+    cpf             varchar(11),
     data_nascimento date,
-    telefone  varchar(20),
-    criado_em timestamp without time zone DEFAULT now() NOT NULL,
+    telefone        varchar(20),
+    criado_em       timestamp without time zone DEFAULT now() NOT NULL,
     CONSTRAINT usuarios_email_key UNIQUE (email),
     CONSTRAINT usuarios_tipo_check
         CHECK (tipo IN ('VOLUNTARIO', 'ONG', 'ADMIN'))
@@ -29,7 +33,7 @@ CREATE TABLE public.ongs (
     cnpj       varchar(18)  NOT NULL,
     descricao  text,
     telefone   varchar(20),
-    data_criacao date,
+    data_criacao date, -- Data informada pela ONG no cadastro (QA-009).
     cidade     varchar(100),
     estado     varchar(2),
     CONSTRAINT ongs_cnpj_key       UNIQUE (cnpj),
