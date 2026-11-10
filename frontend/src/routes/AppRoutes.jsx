@@ -11,7 +11,6 @@ import VoluntariosInscritos from '../pages/VoluntariosInscritos/VoluntariosInscr
 import CriarConta from '../pages/CriarConta/CriarConta.jsx';
 import RotaVoluntario from './RotaVoluntario/RotaVoluntario.jsx';
 import MinhasCandidaturas from '../pages/MinhasCandidaturas/MinhasCandidaturas.jsx';
-import MeuCadastro from '../pages/MeuCadastro/MeuCadastro.jsx';
 import PerfilOng from "../pages/PerfilOng/PerfilOng.jsx";
 import PerfilVoluntario from "../pages/PerfilVoluntario/PerfilVoluntario.jsx";
 import PainelOng from "../pages/PainelOng/PainelOng.jsx";
@@ -35,7 +34,7 @@ function AppRoutes() {
     <Route path="/PerfilOng" element={<RotaONG><PerfilOng /></RotaONG>} />
     <Route path="/PerfilVoluntario" element={<RotaVoluntario><PerfilVoluntario /></RotaVoluntario>} />
 
-    <Route path="/MeuCadastro" element={<RotaVoluntario><MeuCadastro /></RotaVoluntario>} />
+    <Route path="/MeuCadastro" element={<RotaVoluntario><PerfilVoluntario /></RotaVoluntario>} />
     <Route path="/painel/candidaturas" element={<RotaVoluntario><MinhasCandidaturas /></RotaVoluntario>} />
 
     <Route path="/painel" element={<RotaONG><PainelOng /></RotaONG>} />
