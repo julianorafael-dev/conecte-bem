@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/inscricoes/**").hasRole("VOLUNTARIO")
                         .requestMatchers(HttpMethod.PUT, "/inscricoes/*/confirmar", "/inscricoes/*/recusar").hasRole("ONG")
                         .requestMatchers(HttpMethod.GET, "/ongs/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/ongs/**").hasRole("ONG")
                         .requestMatchers(HttpMethod.GET, "/oportunidades/**").permitAll()
                         // Defesa em profundidade (alinhado com a Pessoa 2): somente
                         // contas do tipo ONG gerenciam oportunidades. Esses matchers

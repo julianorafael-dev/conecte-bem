@@ -84,8 +84,9 @@ public class OngController {
     @PutMapping("/{id}")
     public OngResponseDTO atualizar(
             @PathVariable Integer id,
-            @Valid @RequestBody OngRequestDTO dados
+            @Valid @RequestBody OngRequestDTO dados,
+            @AuthenticationPrincipal Usuario usuario
     ) {
-        return ongService.atualizar(id, dados);
+        return ongService.atualizar(id, dados, usuario);
     }
 }

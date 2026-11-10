@@ -61,6 +61,36 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({SecurityConfig.class, JwtAuthFilter.class})
 class SecurityConfigHttpTest {
 
+    private static final String CORPO_ONG = """
+            {"usuarioId":7,"nome":"ONG teste","cnpj":"11222333000181"}
+            """;
+
+    @Test
+    void visitanteNaoPodeAlterarOng() throws Exception {
+        mockMvc.perform(put("/ongs/10").contentType(MediaType.APPLICATION_JSON).content(CORPO_ONG))
+                .andExpect(status().isUnauthorized());
+        verifyNoInteractions(ongService);
+    }
+
+    @Test
+    void voluntarioNaoPodeAlterarOng() throws Exception {
+        comTokenDe(TipoUsuario.VOLUNTARIO, 3);
+        mockMvc.perform(put("/ongs/10").header("Authorization", bearer(TipoUsuario.VOLUNTARIO, 3))
+                        .contentType(MediaType.APPLICATION_JSON).content(CORPO_ONG))
+                .andExpect(status().isForbidden());
+        verifyNoInteractions(ongService);
+    }
+
+    @Test
+    void atualizarOngEncaminhaUsuarioAutenticadoAoServico() throws Exception {
+        comTokenDe(TipoUsuario.ONG, 7);
+        mockMvc.perform(put("/ongs/10").header("Authorization", bearer(TipoUsuario.ONG, 7))
+                        .contentType(MediaType.APPLICATION_JSON).content(CORPO_ONG))
+                .andExpect(status().isOk());
+        verify(ongService).atualizar(org.mockito.ArgumentMatchers.eq(10), any(),
+                org.mockito.ArgumentMatchers.argThat(u -> u.getId().equals(7) && u.getTipo() == TipoUsuario.ONG));
+    }
+
     @Autowired
     private MockMvc mockMvc;
 
