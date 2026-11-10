@@ -3,6 +3,7 @@ package com.conectebem.backend.service;
 import com.conectebem.backend.exception.ResourceNotFoundException;
 import com.conectebem.backend.model.Ong;
 import com.conectebem.backend.repository.OngRepository;
+import com.conectebem.backend.repository.InscricaoRepository;
 import com.conectebem.backend.repository.OportunidadeRepository;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,9 @@ class OngServiceTest {
 
     private final OngRepository ongRepository = mock(OngRepository.class);
     private final OportunidadeRepository oportunidadeRepository = mock(OportunidadeRepository.class);
-    private final OngService service = new OngService(ongRepository, oportunidadeRepository);
+    private final InscricaoRepository inscricaoRepository = mock(InscricaoRepository.class);
+    private final OngService service = new OngService(
+            ongRepository, oportunidadeRepository, new OportunidadeResponseMapper(inscricaoRepository));
 
     @Test
     void resumeIndicadoresDaOngAutenticada() {

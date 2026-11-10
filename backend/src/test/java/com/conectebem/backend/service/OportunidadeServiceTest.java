@@ -2,6 +2,7 @@ package com.conectebem.backend.service;
 
 import com.conectebem.backend.dto.OportunidadeRequestDTO;
 import com.conectebem.backend.dto.OportunidadeResponseDTO;
+import com.conectebem.backend.exception.InscricaoConflictException;
 import com.conectebem.backend.exception.ResourceNotFoundException;
 import com.conectebem.backend.model.Categoria;
 import com.conectebem.backend.model.Ong;
@@ -9,6 +10,7 @@ import com.conectebem.backend.model.Oportunidade;
 import com.conectebem.backend.model.TipoUsuario;
 import com.conectebem.backend.model.Usuario;
 import com.conectebem.backend.repository.CategoriaRepository;
+import com.conectebem.backend.repository.InscricaoRepository;
 import com.conectebem.backend.repository.OngRepository;
 import com.conectebem.backend.repository.OportunidadeRepository;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,8 +36,10 @@ class OportunidadeServiceTest {
     private final OportunidadeRepository oportunidadeRepository = mock(OportunidadeRepository.class);
     private final CategoriaRepository categoriaRepository = mock(CategoriaRepository.class);
     private final OngRepository ongRepository = mock(OngRepository.class);
-    private final OportunidadeService service =
-            new OportunidadeService(oportunidadeRepository, categoriaRepository, ongRepository);
+    private final InscricaoRepository inscricaoRepository = mock(InscricaoRepository.class);
+    private final OportunidadeService service = new OportunidadeService(
+            oportunidadeRepository, categoriaRepository, ongRepository, inscricaoRepository,
+            new OportunidadeResponseMapper(inscricaoRepository));
 
     // ---------- Ajudantes ----------
 
@@ -136,7 +141,7 @@ class OportunidadeServiceTest {
     void editaOportunidadeDaPropriaOng() {
         Ong ongA = ongComId(10);
         Oportunidade existente = oportunidadeDaOng(ongA, 5);
-        when(oportunidadeRepository.findById(5)).thenReturn(Optional.of(existente));
+        when(oportunidadeRepository.findByIdForUpdate(5)).thenReturn(Optional.of(existente));
         when(ongRepository.findByUsuarioId(7)).thenReturn(Optional.of(ongA));
         when(categoriaRepository.findById(1)).thenReturn(Optional.of(categoria()));
         when(oportunidadeRepository.save(existente)).thenReturn(existente);
@@ -159,7 +164,7 @@ class OportunidadeServiceTest {
         Ong ongA = ongComId(10);
         Ong ongB = ongComId(20);
         Oportunidade existente = oportunidadeDaOng(ongA, 5);
-        when(oportunidadeRepository.findById(5)).thenReturn(Optional.of(existente));
+        when(oportunidadeRepository.findByIdForUpdate(5)).thenReturn(Optional.of(existente));
         when(ongRepository.findByUsuarioId(9)).thenReturn(Optional.of(ongB));
 
         AccessDeniedException excecao = assertThrows(AccessDeniedException.class,
@@ -201,7 +206,7 @@ class OportunidadeServiceTest {
     void voluntarioNaoPodeEditarOportunidade() {
         Ong ongA = ongComId(10);
         Oportunidade existente = oportunidadeDaOng(ongA, 5);
-        when(oportunidadeRepository.findById(5)).thenReturn(Optional.of(existente));
+        when(oportunidadeRepository.findByIdForUpdate(5)).thenReturn(Optional.of(existente));
 
         assertThrows(AccessDeniedException.class,
                 () -> service.atualizar(5, dtoComOngId(10), usuario(TipoUsuario.VOLUNTARIO, 3)));
@@ -225,7 +230,7 @@ class OportunidadeServiceTest {
 
     @Test
     void edicaoDeOportunidadeInexistenteRetornaNotFound() {
-        when(oportunidadeRepository.findById(999)).thenReturn(Optional.empty());
+        when(oportunidadeRepository.findByIdForUpdate(999)).thenReturn(Optional.empty());
 
         ResourceNotFoundException excecao = assertThrows(ResourceNotFoundException.class,
                 () -> service.atualizar(999, dtoComOngId(10), usuario(TipoUsuario.ONG, 7)));
@@ -256,5 +261,109 @@ class OportunidadeServiceTest {
 
         assertEquals("ONG do usuário autenticado não encontrada.", excecao.getMessage());
         verify(oportunidadeRepository, never()).save(any(Oportunidade.class));
+    }
+
+    // ---------- Capacidade mínima na edição (QA-008) ----------
+
+    private OportunidadeRequestDTO dtoComVagas(Integer vagas) {
+        return new OportunidadeRequestDTO(
+                10, 1, "Título da oportunidade", "Descrição",
+                LocalDate.of(2027, 1, 10), LocalTime.of(14, 0),
+                "Porto Alegre", "RS", vagas, "ABERTA");
+    }
+
+    private Oportunidade oportunidadeEditavel(Ong ong) {
+        Oportunidade existente = oportunidadeDaOng(ong, 5);
+        when(oportunidadeRepository.findByIdForUpdate(5)).thenReturn(Optional.of(existente));
+        when(ongRepository.findByUsuarioId(7)).thenReturn(Optional.of(ong));
+        when(categoriaRepository.findById(1)).thenReturn(Optional.of(categoria()));
+        when(oportunidadeRepository.save(existente)).thenReturn(existente);
+        return existente;
+    }
+
+    @Test
+    void negaReduzirVagasAbaixoDasInscricoesAtivas() {
+        Oportunidade existente = oportunidadeEditavel(ongComId(10));
+        when(inscricaoRepository.countByOportunidadeIdAndStatusIn(eq(5), anyCollection())).thenReturn(3L);
+
+        InscricaoConflictException excecao = assertThrows(InscricaoConflictException.class,
+                () -> service.atualizar(5, dtoComVagas(2), usuario(TipoUsuario.ONG, 7)));
+
+        assertTrue(excecao.getMessage().contains("3 inscrições ativas"));
+        assertEquals(5, existente.getVagas(), "As vagas originais não podem ser alteradas.");
+        verify(oportunidadeRepository, never()).save(any(Oportunidade.class));
+    }
+
+    @Test
+    void permiteReduzirVagasAteOTotalDeInscricoesAtivas() {
+        Oportunidade existente = oportunidadeEditavel(ongComId(10));
+        when(inscricaoRepository.countByOportunidadeIdAndStatusIn(eq(5), anyCollection())).thenReturn(3L);
+
+        OportunidadeResponseDTO resposta =
+                service.atualizar(5, dtoComVagas(3), usuario(TipoUsuario.ONG, 7));
+
+        assertEquals(3, resposta.vagas());
+        assertEquals(3, resposta.inscritos());
+        assertEquals(0, resposta.vagasDisponiveis());
+        verify(oportunidadeRepository).save(existente);
+    }
+
+    @Test
+    void outraOngRecebe403MesmoQuandoAsVagasFicariamAbaixoDasInscricoes() {
+        Ong ongA = ongComId(10);
+        Ong ongB = ongComId(20);
+        when(oportunidadeRepository.findByIdForUpdate(5)).thenReturn(Optional.of(oportunidadeDaOng(ongA, 5)));
+        when(ongRepository.findByUsuarioId(9)).thenReturn(Optional.of(ongB));
+        when(inscricaoRepository.countByOportunidadeIdAndStatusIn(eq(5), anyCollection())).thenReturn(3L);
+
+        assertThrows(AccessDeniedException.class,
+                () -> service.atualizar(5, dtoComVagas(1), usuario(TipoUsuario.ONG, 9)));
+
+        verify(oportunidadeRepository, never()).save(any(Oportunidade.class));
+    }
+
+    // ---------- Inscritos e vagas disponíveis na resposta (QA-003) ----------
+
+    @Test
+    void respostaInformaInscritosEVagasDisponiveis() {
+        Oportunidade existente = oportunidadeDaOng(ongComId(10), 5); // 5 vagas
+        when(oportunidadeRepository.findById(5)).thenReturn(Optional.of(existente));
+        when(inscricaoRepository.countByOportunidadeIdAndStatusIn(eq(5), anyCollection())).thenReturn(2L);
+
+        OportunidadeResponseDTO resposta = service.buscarPorId(5);
+
+        assertEquals(5, resposta.vagas());
+        assertEquals(2, resposta.inscritos());
+        assertEquals(3, resposta.vagasDisponiveis());
+    }
+
+    @Test
+    void vagasDisponiveisNuncaFicamNegativas() {
+        Oportunidade existente = oportunidadeDaOng(ongComId(10), 5); // 5 vagas
+        when(oportunidadeRepository.findById(5)).thenReturn(Optional.of(existente));
+        when(inscricaoRepository.countByOportunidadeIdAndStatusIn(eq(5), anyCollection())).thenReturn(7L);
+
+        OportunidadeResponseDTO resposta = service.buscarPorId(5);
+
+        assertEquals(7, resposta.inscritos());
+        assertEquals(0, resposta.vagasDisponiveis());
+    }
+
+    @Test
+    void listagemContaInscritosEmUmaUnicaConsulta() {
+        Oportunidade a = oportunidadeDaOng(ongComId(10), 1);
+        Oportunidade b = oportunidadeDaOng(ongComId(10), 2);
+        when(oportunidadeRepository.findAll()).thenReturn(List.of(a, b));
+        when(inscricaoRepository.contarAtivasPorOportunidades(anyCollection(), anyCollection()))
+                .thenReturn(List.<Object[]>of(new Object[]{1, 4L}));
+
+        List<OportunidadeResponseDTO> lista = service.listar();
+
+        assertEquals(2, lista.size());
+        assertEquals(4, lista.get(0).inscritos());
+        assertEquals(1, lista.get(0).vagasDisponiveis());
+        assertEquals(0, lista.get(1).inscritos());
+        assertEquals(5, lista.get(1).vagasDisponiveis());
+        verify(inscricaoRepository, never()).countByOportunidadeIdAndStatusIn(anyInt(), anyCollection());
     }
 }

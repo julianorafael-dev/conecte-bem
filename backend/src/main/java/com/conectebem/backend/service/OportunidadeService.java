@@ -2,6 +2,7 @@ package com.conectebem.backend.service;
 
 import com.conectebem.backend.dto.OportunidadeRequestDTO;
 import com.conectebem.backend.dto.OportunidadeResponseDTO;
+import com.conectebem.backend.exception.InscricaoConflictException;
 import com.conectebem.backend.exception.ResourceNotFoundException;
 import com.conectebem.backend.model.Categoria;
 import com.conectebem.backend.model.Ong;
@@ -9,10 +10,12 @@ import com.conectebem.backend.model.Oportunidade;
 import com.conectebem.backend.model.TipoUsuario;
 import com.conectebem.backend.model.Usuario;
 import com.conectebem.backend.repository.CategoriaRepository;
+import com.conectebem.backend.repository.InscricaoRepository;
 import com.conectebem.backend.repository.OngRepository;
 import com.conectebem.backend.repository.OportunidadeRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,20 +32,24 @@ public class OportunidadeService {
     private final OportunidadeRepository oportunidadeRepository;
     private final CategoriaRepository categoriaRepository;
     private final OngRepository ongRepository;
+    private final InscricaoRepository inscricaoRepository;
+    private final OportunidadeResponseMapper mapper;
 
     public OportunidadeService(OportunidadeRepository oportunidadeRepository,
                                CategoriaRepository categoriaRepository,
-                               OngRepository ongRepository) {
+                               OngRepository ongRepository,
+                               InscricaoRepository inscricaoRepository,
+                               OportunidadeResponseMapper mapper) {
         this.oportunidadeRepository = oportunidadeRepository;
         this.categoriaRepository = categoriaRepository;
         this.ongRepository = ongRepository;
+        this.inscricaoRepository = inscricaoRepository;
+        this.mapper = mapper;
     }
 
     /** Lista todas as oportunidades cadastradas e converte para DTO. */
     public List<OportunidadeResponseDTO> listar() {
-        return oportunidadeRepository.findAll().stream()
-                .map(this::paraResponse)
-                .toList();
+        return mapper.paraResponseLista(oportunidadeRepository.findAll());
     }
 
     /** Busca uma oportunidade pelo ID ou lança ResourceNotFoundException. */
@@ -88,7 +95,7 @@ public class OportunidadeService {
         oportunidade.setVagas(dados.vagas());
         oportunidade.setStatus(dados.status());
 
-        // 4. Preencher criadoEm com data atual (formato String yyyy-MM-dd)
+        // 4. Registrar o momento da criação
         oportunidade.setCriadoEm(LocalDateTime.now());
 
         // 5. Salvar no repositório
@@ -103,11 +110,14 @@ public class OportunidadeService {
      * usuário autenticado. A ONG proprietária nunca é alterada: a edição
      * não permite transferir a oportunidade para outra ONG.
      */
+    @Transactional
     public OportunidadeResponseDTO atualizar(Integer id, OportunidadeRequestDTO dados, Usuario usuario) {
         validarStatus(dados.status());
 
-        // 1. Verificar se a oportunidade existe
-        Oportunidade oportunidadeExistente = oportunidadeRepository.findById(id)
+        // 1. Verificar se a oportunidade existe. A linha fica bloqueada até o fim da
+        // transação (mesmo bloqueio usado na inscrição), para que uma nova inscrição
+        // não ocupe vaga enquanto a capacidade está sendo conferida.
+        Oportunidade oportunidadeExistente = oportunidadeRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Oportunidade não encontrada. ID: " + id));
 
         // 2. Validar propriedade: oportunidade passou a pertencer à ONG do usuário autenticado
@@ -120,6 +130,9 @@ public class OportunidadeService {
         Integer categoriaId = dados.categoriaId();
         Categoria categoria = categoriaRepository.findById(Integer.valueOf(categoriaId))
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada. ID: " + categoriaId));
+
+        // 3.1 A nova capacidade não pode ficar abaixo das inscrições ativas.
+        validarCapacidadeMinima(oportunidadeExistente.getId(), dados.vagas());
 
         // 4. Atualizar campos permitidos
         // NÃO alterar o ID
@@ -162,6 +175,18 @@ public class OportunidadeService {
         oportunidadeRepository.deleteById(id);
     }
 
+    /** Impede reduzir as vagas para menos do que o número de inscrições ativas. */
+    private void validarCapacidadeMinima(Integer oportunidadeId, Integer novasVagas) {
+        long inscricoesAtivas = inscricaoRepository.countByOportunidadeIdAndStatusIn(
+                oportunidadeId, OportunidadeResponseMapper.STATUS_QUE_OCUPAM_VAGA);
+
+        if (novasVagas < inscricoesAtivas) {
+            throw new InscricaoConflictException(
+                    "Não é possível reduzir as vagas para " + novasVagas
+                            + ": já existem " + inscricoesAtivas + " inscrições ativas.");
+        }
+    }
+
     /**
      * Resolve a ONG vinculada ao usuário autenticado.
      *
@@ -179,26 +204,20 @@ public class OportunidadeService {
 
     /** Filtra oportunidades por cidade. */
     public List<OportunidadeResponseDTO> filtrarPorCidade(String cidade) {
-        return oportunidadeRepository.findByCidade(cidade).stream()
-                .map(this::paraResponse)
-                .toList();
+        return mapper.paraResponseLista(oportunidadeRepository.findByCidade(cidade));
     }
 
     /** Filtra oportunidades pela categoria relacionada. */
     public List<OportunidadeResponseDTO> filtrarPorCategoria(Integer categoriaId) {
         Categoria categoria = categoriaRepository.findById(Integer.valueOf(categoriaId))
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada. ID: " + categoriaId));
-        return oportunidadeRepository.findByCategoria(categoria).stream()
-                .map(this::paraResponse)
-                .toList();
+        return mapper.paraResponseLista(oportunidadeRepository.findByCategoria(categoria));
     }
 
     /** Filtra oportunidades por status. */
     public List<OportunidadeResponseDTO> filtrarPorStatus(String status) {
         validarStatus(status);
-        return oportunidadeRepository.findByStatus(status).stream()
-                .map(this::paraResponse)
-                .toList();
+        return mapper.paraResponseLista(oportunidadeRepository.findByStatus(status));
     }
 
     /** Garante que o status seja compatível com a constraint do banco. */
@@ -210,23 +229,8 @@ public class OportunidadeService {
         }
     }
 
-    /** Converte entidade Oportunidade para DTO de resposta. */
+    /** Converte entidade Oportunidade para DTO de resposta (com inscritos e vagas disponíveis). */
     private OportunidadeResponseDTO paraResponse(Oportunidade oportunidade) {
-        return new OportunidadeResponseDTO(
-                oportunidade.getId(),
-                oportunidade.getOng().getId(),
-                oportunidade.getOng().getNome(),
-                oportunidade.getCategoria().getId(),
-                oportunidade.getCategoria().getNome(),
-                oportunidade.getTitulo(),
-                oportunidade.getDescricao(),
-                oportunidade.getData(),
-                oportunidade.getHorario(),
-                oportunidade.getCidade(),
-                oportunidade.getEstado(),
-                oportunidade.getVagas(),
-                oportunidade.getStatus(),
-                oportunidade.getCriadoEm()
-        );
+        return mapper.paraResponse(oportunidade);
     }
 }

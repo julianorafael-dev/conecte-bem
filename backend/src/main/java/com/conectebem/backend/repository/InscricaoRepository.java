@@ -3,6 +3,8 @@ package com.conectebem.backend.repository;
 import com.conectebem.backend.model.Inscricao;
 import com.conectebem.backend.model.StatusInscricao;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
@@ -34,5 +36,22 @@ public interface InscricaoRepository extends JpaRepository<Inscricao, Integer> {
     long countByOportunidadeIdAndStatusIn(
             Integer oportunidadeId,
             Collection<StatusInscricao> status
+    );
+
+    /**
+     * Conta, em uma única consulta, as inscrições que ocupam vaga de várias
+     * oportunidades. Cada linha do resultado traz {@code [oportunidadeId, total]};
+     * oportunidades sem inscrições ativas não aparecem na lista.
+     */
+    @Query("""
+            SELECT i.oportunidade.id, COUNT(i)
+            FROM Inscricao i
+            WHERE i.oportunidade.id IN :oportunidadeIds
+              AND i.status IN :status
+            GROUP BY i.oportunidade.id
+            """)
+    List<Object[]> contarAtivasPorOportunidades(
+            @Param("oportunidadeIds") Collection<Integer> oportunidadeIds,
+            @Param("status") Collection<StatusInscricao> status
     );
 }

@@ -15,6 +15,11 @@ const FORM_VAZIO = {
   status: 'ABERTA',
 };
 
+const UFS = [
+  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA',
+  'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
+];
+
 // Mesmo formulário para CRIAR (/painel/oportunidades/nova) e EDITAR (/painel/oportunidades/:id/editar)
 function FormOportunidade() {
   const { id } = useParams();
@@ -26,6 +31,8 @@ function FormOportunidade() {
   const [ongId, setOngId] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
+  // erro que impede o uso da tela (ex.: oportunidade inexistente) x erro ao enviar o formulário
+  const [erroCarregamento, setErroCarregamento] = useState('');
   const [erro, setErro] = useState('');
 
   useEffect(() => {
@@ -41,7 +48,7 @@ function FormOportunidade() {
         if (editando) {
           const op = await api(`/oportunidades/${id}`);
           if (op.ongId !== minhaOng.id) {
-            setErro('Você só pode editar oportunidades da sua própria ONG.');
+            setErroCarregamento('Você só pode editar oportunidades da sua própria ONG.');
           } else {
             setForm({
               titulo: op.titulo ?? '',
@@ -57,7 +64,7 @@ function FormOportunidade() {
           }
         }
       } catch (e) {
-        setErro(e.message);
+        setErroCarregamento(e.message);
       } finally {
         setCarregando(false);
       }
@@ -76,11 +83,6 @@ function FormOportunidade() {
   async function enviar(e) {
     e.preventDefault();
     setErro('');
-
-    if (form.estado && form.estado.length !== 2) {
-      setErro('O estado deve ter 2 letras (ex: RS).');
-      return;
-    }
 
     const payload = {
       ongId,
@@ -111,6 +113,17 @@ function FormOportunidade() {
   }
 
   if (carregando) return <p className="form-op-aviso">Carregando...</p>;
+
+  // Sem o recurso (ou sem permissão) não há o que editar: não mostra o formulário.
+  if (erroCarregamento) {
+    return (
+      <main className="form-op">
+        <h1>{editando ? 'Editar oportunidade' : 'Criar oportunidade'}</h1>
+        <p className="form-op-erro" role="alert">{erroCarregamento}</p>
+        <Link to="/painel/oportunidades" className="form-op-cancelar">Voltar para minhas oportunidades</Link>
+      </main>
+    );
+  }
 
   return (
     <main className="form-op">
@@ -158,7 +171,12 @@ function FormOportunidade() {
           </label>
           <label>
             Estado
-            <input name="estado" value={form.estado} onChange={alterar} maxLength={2} placeholder="RS" />
+            <select name="estado" value={form.estado} onChange={alterar}>
+              <option value="">UF</option>
+              {UFS.map((uf) => (
+                <option key={uf} value={uf}>{uf}</option>
+              ))}
+            </select>
           </label>
         </div>
 
