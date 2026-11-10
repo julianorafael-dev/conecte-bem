@@ -61,6 +61,47 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({SecurityConfig.class, JwtAuthFilter.class})
 class SecurityConfigHttpTest {
 
+    @Test
+    void visitanteNaoPodeModificarCategorias() throws Exception {
+        verificarEscritasCategoriasBloqueadas(null, 401);
+    }
+
+    @Test
+    void voluntarioNaoPodeModificarCategorias() throws Exception {
+        comTokenDe(TipoUsuario.VOLUNTARIO, 3);
+        verificarEscritasCategoriasBloqueadas(bearer(TipoUsuario.VOLUNTARIO, 3), 403);
+    }
+
+    @Test
+    void ongNaoPodeModificarCategorias() throws Exception {
+        comTokenDe(TipoUsuario.ONG, 7);
+        verificarEscritasCategoriasBloqueadas(bearer(TipoUsuario.ONG, 7), 403);
+    }
+
+    private void verificarEscritasCategoriasBloqueadas(String autorizacao, int statusEsperado) throws Exception {
+        String corpo = """
+                {"nome":"Categoria de teste","descricao":"Teste de autorização"}
+                """;
+        var requisicoes = List.of(
+                post("/categorias").contentType(MediaType.APPLICATION_JSON).content(corpo),
+                put("/categorias/1").contentType(MediaType.APPLICATION_JSON).content(corpo),
+                delete("/categorias/1"));
+        for (var requisicao : requisicoes) {
+            if (autorizacao != null) requisicao.header("Authorization", autorizacao);
+            mockMvc.perform(requisicao).andExpect(status().is(statusEsperado));
+        }
+        verifyNoInteractions(categoriaService);
+    }
+
+    @Test
+    void consultaPublicaDeCategoriaPorIdContinuaDisponivel() throws Exception {
+        when(categoriaService.buscarPorId(1)).thenReturn(Optional.of(
+                new com.conectebem.backend.dto.CategoriaResponse(1, "Educação", "Apoio educacional")));
+        mockMvc.perform(get("/categorias/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nome").value("Educação"));
+    }
+
     private static final String CORPO_ONG = """
             {"usuarioId":7,"nome":"ONG teste","cnpj":"11222333000181"}
             """;

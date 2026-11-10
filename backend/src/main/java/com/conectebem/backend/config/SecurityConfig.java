@@ -60,6 +60,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/oportunidades/**").hasRole("ONG")
                         .requestMatchers(HttpMethod.DELETE, "/oportunidades/**").hasRole("ONG")
                         .requestMatchers(HttpMethod.GET, "/categorias/**").permitAll()
+                        // Categorias globais são mantidas pelo banco até existir um perfil administrador.
+                        .requestMatchers("/categorias", "/categorias/**").denyAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

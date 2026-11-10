@@ -1,5 +1,13 @@
 # Backend — Módulo ONG
 
+## Manutenção das categorias globais
+
+As categorias são administradas diretamente no banco de dados enquanto não existir
+um perfil de administrador. A API mantém `GET /categorias` e `GET /categorias/{id}`
+públicos. Criação, edição e exclusão pela API estão bloqueadas para todos os perfis,
+inclusive ONG e voluntário. Essa restrição não impede a criação de oportunidades
+com as categorias existentes.
+
 Este documento descreve a implementação do módulo de ONGs no backend do ConecteBem e serve como guia de revisão e integração para a equipe.
 
 ## Escopo implementado
