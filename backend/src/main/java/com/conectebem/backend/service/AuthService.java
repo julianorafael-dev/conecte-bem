@@ -22,11 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.conectebem.backend.dto.GoogleLoginRequestDTO;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
-import java.util.Collections;
-import java.util.UUID;
 
 
 @Service
@@ -57,6 +52,10 @@ public class AuthService {
      */
     @Transactional
     public UsuarioResponseDTO registrar(RegistroRequestDTO dto) {
+        if (dto.getTipo() == TipoUsuario.VOLUNTARIO) {
+            IdadeMinima.validar(dto.getDataNascimento(),
+                    java.time.LocalDate.now(java.time.ZoneId.of("America/Sao_Paulo")));
+        }
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("E-mail já cadastrado no sistema");
         }
@@ -85,6 +84,13 @@ public class AuthService {
                 .tipo(dto.getTipo())
                 .build();
 
+        if (dto.getTipo() == TipoUsuario.VOLUNTARIO) {
+            String cpf = vazioParaNulo(dto.getCpf());
+            novoUsuario.setCpf(cpf == null ? null : cpf.replaceAll("[.\\-]", ""));
+            novoUsuario.setDataNascimento(dto.getDataNascimento());
+            novoUsuario.setTelefone(vazioParaNulo(dto.getTelefone()));
+        }
+
         Usuario usuarioSalvo = usuarioRepository.save(novoUsuario);
 
         if (dto.getTipo() == TipoUsuario.ONG) {
@@ -94,6 +100,7 @@ public class AuthService {
             ong.setCnpj(cnpj);
             ong.setDescricao(vazioParaNulo(dto.getDescricao()));
             ong.setTelefone(vazioParaNulo(dto.getTelefone()));
+            ong.setDataCriacao(dto.getDataCriacao());
             ong.setCidade(vazioParaNulo(dto.getCidade()));
             ong.setEstado(estado);
             ongRepository.save(ong);
@@ -136,17 +143,10 @@ public class AuthService {
         // 1. Valida o token e extrai os dados via GoogleTokenService
         GoogleIdToken.Payload payload = googleTokenService.verificar(dto.idToken());
         String email = payload.getEmail();
-        String nome = (String) payload.get("name");
-
-        // 2. Busca o usuário ou cadastra caso seja o primeiro acesso
-        Usuario usuario = usuarioRepository.findByEmail(email).orElseGet(() -> {
-            Usuario novo = new Usuario();
-            novo.setNome(nome != null ? nome : "Usuário Google");
-            novo.setEmail(email);
-            novo.setTipo(TipoUsuario.VOLUNTARIO);
-            novo.setSenha(passwordEncoder.encode(UUID.randomUUID().toString()));
-            return usuarioRepository.save(novo);
-        });
+        // 2. Busca uma conta já cadastrada
+        // O token Google não informa nascimento. Evita criar conta sem verificar idade.
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() ->
+                new IllegalArgumentException("Crie sua conta pelo formulário de cadastro, informando sua data de nascimento, antes de entrar com Google."));
 
         // 3. Emite o JWT do ConecteBem
         String token = jwtService.gerarToken(usuario);

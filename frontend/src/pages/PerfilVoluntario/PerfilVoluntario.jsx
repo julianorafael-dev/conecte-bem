@@ -88,6 +88,19 @@ function PerfilVoluntario() {
                             <input className="form-control" id="voluntario-email" type="email" value={dados.email} readOnly autoComplete="email" aria-describedby="voluntario-email-ajuda" />
                             <small id="voluntario-email-ajuda">O e-mail da conta está disponível apenas para consulta.</small>
                         </div>
+                        <div className="form-grupo">
+                            <label htmlFor="voluntario-cpf">CPF</label>
+                            <input className="form-control" id="voluntario-cpf" value={dados.cpf ?? ''} readOnly placeholder="Não informado" />
+                        </div>
+                        <div className="form-grupo">
+                            <label htmlFor="voluntario-nascimento">Data de nascimento</label>
+                            <input className="form-control" id="voluntario-nascimento" type="date" value={dados.dataNascimento ?? ''} readOnly />
+                        </div>
+                        <div className="form-grupo">
+                            <label htmlFor="voluntario-telefone">Telefone</label>
+                            <input className="form-control" id="voluntario-telefone" type="tel" value={dados.telefone ?? ''} readOnly placeholder="Não informado" />
+                        </div>
+                        <small>CPF, data de nascimento e telefone estão disponíveis apenas para consulta.</small>
                     </fieldset>
                     <div className="perfil-voluntario-acoes">
                         <button className="btn" type="button" disabled={salvando} onClick={cancelar}>Cancelar alterações</button>

@@ -1,6 +1,6 @@
 package com.conectebem.backend.controller;
 
-import com.conectebem.backend.dto.UsuarioResponseDTO;
+import com.conectebem.backend.dto.VoluntarioPerfilResponseDTO;
 import com.conectebem.backend.dto.VoluntarioPerfilRequestDTO;
 import com.conectebem.backend.model.Usuario;
 import com.conectebem.backend.service.VoluntarioService;
@@ -22,12 +22,12 @@ public class VoluntarioController {
     }
 
     @GetMapping
-    public UsuarioResponseDTO meuPerfil(@AuthenticationPrincipal Usuario usuario) {
+    public VoluntarioPerfilResponseDTO meuPerfil(@AuthenticationPrincipal Usuario usuario) {
         return voluntarioService.buscarPerfil(usuario.getId());
     }
 
     @PutMapping
-    public UsuarioResponseDTO atualizarMeuPerfil(
+    public VoluntarioPerfilResponseDTO atualizarMeuPerfil(
             @AuthenticationPrincipal Usuario usuario,
             @Valid @RequestBody VoluntarioPerfilRequestDTO dados) {
         return voluntarioService.atualizarPerfil(usuario.getId(), dados);

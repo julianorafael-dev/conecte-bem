@@ -13,6 +13,9 @@ CREATE TABLE public.usuarios (
     email     varchar(150) NOT NULL,
     senha     varchar(255) NOT NULL,
     tipo      varchar(20)  NOT NULL,
+    cpf       varchar(11),
+    data_nascimento date,
+    telefone  varchar(20),
     criado_em timestamp without time zone DEFAULT now() NOT NULL,
     CONSTRAINT usuarios_email_key UNIQUE (email),
     CONSTRAINT usuarios_tipo_check
@@ -26,6 +29,7 @@ CREATE TABLE public.ongs (
     cnpj       varchar(18)  NOT NULL,
     descricao  text,
     telefone   varchar(20),
+    data_criacao date,
     cidade     varchar(100),
     estado     varchar(2),
     CONSTRAINT ongs_cnpj_key       UNIQUE (cnpj),

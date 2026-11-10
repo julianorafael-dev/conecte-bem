@@ -58,6 +58,7 @@ class AuthServiceTest {
         dto.setEmail("ong@example.com");
         dto.setSenha("123456");
         dto.setTipo(tipo);
+        if (tipo == TipoUsuario.VOLUNTARIO) dto.setDataNascimento(java.time.LocalDate.of(1990, 1, 1));
         dto.setCnpj(cnpj);
         return dto;
     }
@@ -180,5 +181,34 @@ class AuthServiceTest {
         dto.setSenha("certa");
 
         assertEquals("jwt-abc", service.login(dto).getToken());
+    }
+
+    @Test
+    void googleNaoCriaContaSemValidarNascimento() {
+        var google = mock(com.conectebem.backend.security.GoogleTokenService.class);
+        ReflectionTestUtils.setField(service, "googleTokenService", google);
+        var payload = new com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload();
+        payload.setEmail("novo@example.com");
+        when(google.verificar("token-google")).thenReturn(payload);
+        assertThrows(IllegalArgumentException.class, () -> service.loginComGoogle(
+                new com.conectebem.backend.dto.GoogleLoginRequestDTO("token-google")));
+        verify(usuarioRepository, never()).save(any());
+        verify(jwtService, never()).gerarToken(any());
+    }
+
+    @Test
+    void googlePreservaLoginDeContaExistenteSemNascimento() {
+        var google = mock(com.conectebem.backend.security.GoogleTokenService.class);
+        ReflectionTestUtils.setField(service, "googleTokenService", google);
+        var payload = new com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload();
+        payload.setEmail("antigo@example.com");
+        when(google.verificar("token-google")).thenReturn(payload);
+        Usuario usuario = Usuario.builder().id(7).email("antigo@example.com")
+                .tipo(TipoUsuario.VOLUNTARIO).build();
+        when(usuarioRepository.findByEmail("antigo@example.com")).thenReturn(Optional.of(usuario));
+        when(jwtService.gerarToken(usuario)).thenReturn("jwt-existente");
+        assertEquals("jwt-existente", service.loginComGoogle(
+                new com.conectebem.backend.dto.GoogleLoginRequestDTO("token-google")).getToken());
+        verify(usuarioRepository, never()).save(any());
     }
 }

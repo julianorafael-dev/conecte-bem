@@ -200,7 +200,8 @@ public class OngService {
                 ong.getDescricao(),
                 ong.getTelefone(),
                 ong.getCidade(),
-                ong.getEstado()
+                ong.getEstado(),
+                ong.getDataCriacao()
         );
     }
 }

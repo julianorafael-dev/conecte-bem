@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 
 /**
  * Representa a ONG persistida na tabela {@code ongs}.
@@ -35,6 +36,17 @@ public class Ong {
 
     @Column(length = 20)
     private String telefone;
+
+    @Column(name = "data_criacao")
+    private LocalDate dataCriacao;
+
+    public LocalDate getDataCriacao() {
+        return dataCriacao;
+    }
+
+    public void setDataCriacao(LocalDate dataCriacao) {
+        this.dataCriacao = dataCriacao;
+    }
 
     @Column(length = 100)
     private String cidade;

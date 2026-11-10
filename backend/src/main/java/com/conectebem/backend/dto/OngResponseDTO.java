@@ -13,6 +13,7 @@ public record OngResponseDTO(
         String descricao,
         String telefone,
         String cidade,
-        String estado
+        String estado,
+        java.time.LocalDate dataCriacao
 ) {
 }

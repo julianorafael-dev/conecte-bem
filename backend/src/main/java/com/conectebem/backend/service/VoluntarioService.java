@@ -1,6 +1,6 @@
 package com.conectebem.backend.service;
 
-import com.conectebem.backend.dto.UsuarioResponseDTO;
+import com.conectebem.backend.dto.VoluntarioPerfilResponseDTO;
 import com.conectebem.backend.dto.VoluntarioPerfilRequestDTO;
 import com.conectebem.backend.exception.ResourceNotFoundException;
 import com.conectebem.backend.model.Usuario;
@@ -16,15 +16,15 @@ public class VoluntarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public UsuarioResponseDTO buscarPerfil(Integer usuarioId) {
-        return UsuarioResponseDTO.fromEntity(buscarUsuario(usuarioId));
+    public VoluntarioPerfilResponseDTO buscarPerfil(Integer usuarioId) {
+        return VoluntarioPerfilResponseDTO.fromEntity(buscarUsuario(usuarioId));
     }
 
     @Transactional
-    public UsuarioResponseDTO atualizarPerfil(Integer usuarioId, VoluntarioPerfilRequestDTO dados) {
+    public VoluntarioPerfilResponseDTO atualizarPerfil(Integer usuarioId, VoluntarioPerfilRequestDTO dados) {
         Usuario usuario = buscarUsuario(usuarioId);
         usuario.setNome(dados.nome().trim());
-        return UsuarioResponseDTO.fromEntity(usuarioRepository.save(usuario));
+        return VoluntarioPerfilResponseDTO.fromEntity(usuarioRepository.save(usuario));
     }
 
     private Usuario buscarUsuario(Integer usuarioId) {
