@@ -39,6 +39,7 @@ function Header() {
         {usuario ? (
           <>
             {usuario.tipo === 'VOLUNTARIO' && <Link to="/MeuCadastro">Meu cadastro</Link>}
+            {usuario.tipo === 'VOLUNTARIO' && <Link to="/painel/candidaturas">Minhas inscrições</Link>}
             {usuario.tipo === 'ONG' && <Link to="/painel">Painel da ONG</Link>}
             <button type="button" className="btn-sair" onClick={sair}>Sair</button>
           </>
