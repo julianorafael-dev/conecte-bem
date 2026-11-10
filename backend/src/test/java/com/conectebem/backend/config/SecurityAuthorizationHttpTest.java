@@ -30,6 +30,21 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class SecurityAuthorizationHttpTest {
+
+    @Test
+    void metodoNaoSuportadoRetorna405SemEncerrarAutenticacao() throws Exception {
+        String token = jwt.gerarToken(criar(TipoUsuario.VOLUNTARIO));
+        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/voluntarios/me"))
+                .timeout(Duration.ofSeconds(15))
+                .header("Authorization", "Bearer " + token)
+                .method("PATCH", HttpRequest.BodyPublishers.noBody()).build();
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(405, response.statusCode());
+        assertTrue(response.body().contains("\"status\":405"));
+        assertTrue(response.headers().firstValue("Allow").orElse("").contains("GET"));
+        assertTrue(response.headers().firstValue("Allow").orElse("").contains("PUT"));
+        assertEquals(200, get("/voluntarios/me", token).statusCode());
+    }
     @Value("${local.server.port}")
     private int port;
     @Value("${api.security.token.secret}")
