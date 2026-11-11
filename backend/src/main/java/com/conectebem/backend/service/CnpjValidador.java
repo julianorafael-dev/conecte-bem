@@ -8,6 +8,14 @@ final class CnpjValidador {
     private CnpjValidador() {
     }
 
+    static String normalizar(String valor) {
+        String digitos = somenteDigitos(valor);
+        if (!valido(digitos)) {
+            throw new IllegalArgumentException("CNPJ inválido");
+        }
+        return digitos;
+    }
+
     /** Remove tudo que não for dígito (aceita "11.222.333/0001-81" ou "11222333000181"). */
     static String somenteDigitos(String cnpj) {
         return cnpj == null ? "" : cnpj.replaceAll("\\D", "");

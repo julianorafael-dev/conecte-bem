@@ -72,6 +72,37 @@ class OngServiceTest {
     }
 
     @Test
+    void cadastroLegadoNaoGravaVinculoInformadoNoCorpo() {
+        assertThrows(AccessDeniedException.class, () -> service.criar(dados));
+        org.mockito.Mockito.verifyNoInteractions(ongRepository);
+    }
+
+    @Test
+    void rejeitaCnpjInvalidoSemAlterarCadastro() {
+        Ong ong = ongDoUsuario7();
+        var invalido = new OngRequestDTO(7, dados.nome(), "1234", null, null, null, null);
+        assertThrows(IllegalArgumentException.class, () -> service.atualizar(10, invalido, usuario(TipoUsuario.ONG, 7)));
+        assertEquals("Nome original", ong.getNome());
+        verify(ongRepository, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void normalizaCnpjPontuadoNaAtualizacao() {
+        Ong ong = ongDoUsuario7();
+        when(ongRepository.save(ong)).thenReturn(ong);
+        var pontuado = new OngRequestDTO(7, dados.nome(), "11.222.333/0001-81", null, null, null, null);
+        assertEquals("11222333000181", service.atualizar(10, pontuado, usuario(TipoUsuario.ONG, 7)).cnpj());
+    }
+
+    @Test
+    void rejeitaCnpjDeOutraOng() {
+        ongDoUsuario7();
+        when(ongRepository.existsByCnpjAndIdNot(dados.cnpj(), 10)).thenReturn(true);
+        assertThrows(IllegalArgumentException.class, () -> service.atualizar(10, dados, usuario(TipoUsuario.ONG, 7)));
+        verify(ongRepository, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
     void ongInexistenteRetornaNaoEncontradoParaContaOng() {
         when(ongRepository.findById(10)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class,

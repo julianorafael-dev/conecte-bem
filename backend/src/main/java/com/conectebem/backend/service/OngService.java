@@ -114,19 +114,9 @@ public class OngService {
         return paraResponse(buscarEntidade(id));
     }
 
-    /**
-     * Cria uma ONG vinculada a um usuário já existente.
-     *
-     * <p>Na integração com autenticação, o {@code usuarioId} deve corresponder
-     * ao perfil de ONG criado no fluxo de registro.</p>
-     */
+    /** Cadastro legado desativado: a conta e a ONG são criadas juntas no AuthService. */
     public OngResponseDTO criar(OngRequestDTO dados) {
-        Ong ong = new Ong();
-
-        ong.setUsuarioId(dados.usuarioId());
-        preencherDados(ong, dados);
-
-        return paraResponse(ongRepository.save(ong));
+        throw new AccessDeniedException("Cadastre a ONG pelo registro de conta.");
     }
 
     /**
@@ -142,7 +132,12 @@ public class OngService {
             throw new AccessDeniedException("Você só pode alterar sua própria ONG.");
         }
 
+        String cnpj = CnpjValidador.normalizar(dados.cnpj());
+        if (ongRepository.existsByCnpjAndIdNot(cnpj, id)) {
+            throw new IllegalArgumentException("CNPJ já cadastrado no sistema.");
+        }
         preencherDados(ong, dados);
+        ong.setCnpj(cnpj);
 
         return paraResponse(ongRepository.save(ong));
     }

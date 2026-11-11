@@ -24,6 +24,32 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 class CadastroDadosHttpTest {
+    @Test
+    void cadastroLegadoBloqueiaTodosOsPerfisSemGravar() throws Exception {
+        long quantidade = ongs.count();
+        for (TipoUsuario tipo : TipoUsuario.values()) {
+            Usuario usuario = usuarios.save(Usuario.builder().nome("QA legado").email(email()).senha("hash").tipo(tipo).build());
+            mvc.perform(post("/ongs").header("Authorization", "Bearer " + jwt.gerarToken(usuario))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"usuarioId\":" + usuario.getId() + ",\"nome\":\"ONG indevida\",\"cnpj\":\"11222333000181\"}"))
+                    .andExpect(status().isForbidden());
+        }
+        assertEquals(quantidade, ongs.count());
+    }
+
+    @Test
+    void repositorioDetectaCnpjLegadoPontuadoENaoConfundeProprioCadastro() {
+        Usuario usuario = usuarios.save(Usuario.builder().nome("QA CNPJ").email(email()).senha("hash").tipo(TipoUsuario.ONG).build());
+        var ong = new com.conectebem.backend.model.Ong();
+        ong.setUsuarioId(usuario.getId());
+        ong.setNome("QA CNPJ");
+        ong.setCnpj("11.222.333/0001-81");
+        ong = ongs.saveAndFlush(ong);
+        assertTrue(ongs.existsByCnpj("11222333000181"));
+        assertFalse(ongs.existsByCnpjAndIdNot("11222333000181", ong.getId()));
+        assertTrue(ongs.existsByCnpjAndIdNot("11222333000181", -1));
+    }
+
     @Autowired MockMvc mvc;
     @Autowired UsuarioRepository usuarios;
     @Autowired OngRepository ongs;
