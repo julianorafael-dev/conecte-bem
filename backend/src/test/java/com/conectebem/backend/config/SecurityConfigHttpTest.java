@@ -182,7 +182,7 @@ class SecurityConfigHttpTest {
                 99, 10, "ONG 10", 1, "Doação", "Título", "d",
                 LocalDate.of(2027, 1, 10), LocalTime.of(14, 0),
                 "Porto Alegre", "RS", 5, "ABERTA",
-                LocalDateTime.of(2026, 10, 30, 12, 0));
+                LocalDateTime.of(2026, 10, 30, 12, 0), 0, 5);
         when(oportunidadeService.criar(any(), any())).thenReturn(resposta);
 
         mockMvc.perform(post("/oportunidades")
@@ -272,7 +272,7 @@ class SecurityConfigHttpTest {
                 99, 10, "ONG 10", 1, "Doação", "Título", "d",
                 LocalDate.of(2027, 1, 10), LocalTime.of(14, 0),
                 "Porto Alegre", "RS", 5, "ABERTA",
-                LocalDateTime.of(2026, 10, 30, 12, 0));
+                LocalDateTime.of(2026, 10, 30, 12, 0), 0, 5);
         when(oportunidadeService.criar(any(), any())).thenReturn(resposta);
 
         mockMvc.perform(post("/oportunidades")

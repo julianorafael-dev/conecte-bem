@@ -47,10 +47,14 @@ public class OngService {
 
     private final OngRepository ongRepository;
     private final OportunidadeRepository oportunidadeRepository;
+    private final OportunidadeResponseMapper oportunidadeMapper;
 
-    public OngService(OngRepository ongRepository, OportunidadeRepository oportunidadeRepository) {
+    public OngService(OngRepository ongRepository,
+                      OportunidadeRepository oportunidadeRepository,
+                      OportunidadeResponseMapper oportunidadeMapper) {
         this.ongRepository = ongRepository;
         this.oportunidadeRepository = oportunidadeRepository;
+        this.oportunidadeMapper = oportunidadeMapper;
     }
 
     /**
@@ -87,32 +91,7 @@ public class OngService {
     public List<OportunidadeResponseDTO> listarOportunidadesDoUsuario(Integer usuarioId) {
         buscarPorUsuario(usuarioId);
 
-        return oportunidadeRepository.findByOngUsuarioId(usuarioId)
-                .stream()
-                .map(this::paraResponseOportunidade)
-                .toList();
-    }
-
-    /**
-     * Converte uma oportunidade da ONG autenticada para o formato público da API.
-     */
-    private OportunidadeResponseDTO paraResponseOportunidade(Oportunidade oportunidade) {
-        return new OportunidadeResponseDTO(
-                oportunidade.getId(),
-                oportunidade.getOng().getId(),
-                oportunidade.getOng().getNome(),
-                oportunidade.getCategoria().getId(),
-                oportunidade.getCategoria().getNome(),
-                oportunidade.getTitulo(),
-                oportunidade.getDescricao(),
-                oportunidade.getData(),
-                oportunidade.getHorario(),
-                oportunidade.getCidade(),
-                oportunidade.getEstado(),
-                oportunidade.getVagas(),
-                oportunidade.getStatus(),
-                oportunidade.getCriadoEm()
-        );
+        return oportunidadeMapper.paraResponseLista(oportunidadeRepository.findByOngUsuarioId(usuarioId));
     }
 
     /**

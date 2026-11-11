@@ -8,6 +8,7 @@ import com.conectebem.backend.model.Oportunidade;
 import com.conectebem.backend.model.TipoUsuario;
 import com.conectebem.backend.model.Usuario;
 import com.conectebem.backend.repository.CategoriaRepository;
+import com.conectebem.backend.repository.InscricaoRepository;
 import com.conectebem.backend.repository.OngRepository;
 import com.conectebem.backend.repository.OportunidadeRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -54,9 +55,11 @@ class OportunidadeServiceHttpTest {
     private final OportunidadeRepository oportunidadeRepository = mock(OportunidadeRepository.class);
     private final CategoriaRepository categoriaRepository = mock(CategoriaRepository.class);
     private final OngRepository ongRepository = mock(OngRepository.class);
+    private final InscricaoRepository inscricaoRepository = mock(InscricaoRepository.class);
 
-    private final OportunidadeService service =
-            new OportunidadeService(oportunidadeRepository, categoriaRepository, ongRepository);
+    private final OportunidadeService service = new OportunidadeService(
+            oportunidadeRepository, categoriaRepository, ongRepository, inscricaoRepository,
+            new OportunidadeResponseMapper(inscricaoRepository));
 
     private MockMvc mockMvc;
 
@@ -188,7 +191,7 @@ class OportunidadeServiceHttpTest {
     void ongAtualizaPropriaOportunidadeRetorna200() throws Exception {
         Ong ongA = ongComId(10);
         Oportunidade existente = oportunidadeDaOng(ongA, 5);
-        when(oportunidadeRepository.findById(5)).thenReturn(Optional.of(existente));
+        when(oportunidadeRepository.findByIdForUpdate(5)).thenReturn(Optional.of(existente));
         when(oportunidadeRepository.save(existente)).thenReturn(existente);
         preparaOngDoUsuario(7, ongA);
         autenticado(TipoUsuario.ONG, 7);
@@ -199,6 +202,30 @@ class OportunidadeServiceHttpTest {
                 .andExpect(jsonPath("$.id").value(5))
                 .andExpect(jsonPath("$.ongId").value(10))
                 .andExpect(jsonPath("$.titulo").value("Título da oportunidade"));
+    }
+
+    // ---------- Cenário 2b: reduzir vagas abaixo das inscrições ativas -> 409 ----------
+
+    @Test
+    void ongReduzVagasAbaixoDasInscricoesAtivasRetorna409() throws Exception {
+        Ong ongA = ongComId(10);
+        Oportunidade existente = oportunidadeDaOng(ongA, 5); // 5 vagas
+        when(oportunidadeRepository.findByIdForUpdate(5)).thenReturn(Optional.of(existente));
+        when(inscricaoRepository.countByOportunidadeIdAndStatusIn(any(), any())).thenReturn(3L);
+        preparaOngDoUsuario(7, ongA);
+        autenticado(TipoUsuario.ONG, 7);
+
+        String corpoComVagasReduzidas = corpoValido.replace("\"vagas\":5", "\"vagas\":2");
+
+        mockMvc.perform(put("/oportunidades/5")
+                        .contentType(MediaType.APPLICATION_JSON).content(corpoComVagasReduzidas))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.mensagem")
+                        .value("Não é possível reduzir as vagas para 2: já existem 3 inscrições ativas."));
+
+        verify(oportunidadeRepository, never()).save(any(Oportunidade.class));
+        assertEquals(5, existente.getVagas(), "As vagas originais não podem ser alteradas.");
     }
 
     // ---------- Cenário 3: ONG autenticada exclui sua oportunidade -> 204 ----------
@@ -221,7 +248,7 @@ class OportunidadeServiceHttpTest {
     @Test
     void ongBEditaOportunidadeDaOngARetorna403ComJson() throws Exception {
         Ong ongA = ongComId(10);
-        when(oportunidadeRepository.findById(5)).thenReturn(Optional.of(oportunidadeDaOng(ongA, 5)));
+        when(oportunidadeRepository.findByIdForUpdate(5)).thenReturn(Optional.of(oportunidadeDaOng(ongA, 5)));
         preparaOngDoUsuario(9, ongComId(20));
         autenticado(TipoUsuario.ONG, 9);
 
@@ -257,7 +284,7 @@ class OportunidadeServiceHttpTest {
 
     @Test
     void edicaoDeOportunidadeInexistenteRetorna404() throws Exception {
-        when(oportunidadeRepository.findById(999)).thenReturn(Optional.empty());
+        when(oportunidadeRepository.findByIdForUpdate(999)).thenReturn(Optional.empty());
         preparaOngDoUsuario(7, ongComId(10));
         autenticado(TipoUsuario.ONG, 7);
 

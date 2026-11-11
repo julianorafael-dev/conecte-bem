@@ -118,7 +118,7 @@ function GerenciarOportunidades() {
               <p>
                 {op.nomeCategoria} · {formatarData(op.data)} às {(op.horario ?? '').slice(0, 5)}
               </p>
-              <p>{op.cidade}{op.estado ? `/${op.estado}` : ''} · {op.vagas} vaga(s)</p>
+              <p>{op.cidade}{op.estado ? `/${op.estado}` : ''} · {op.inscritos ?? 0}/{op.vagas} vagas preenchidas</p>
               <span className={`gerenciar-status status-${op.status}`}>
                 {ROTULO_STATUS[op.status] ?? op.status}
               </span>

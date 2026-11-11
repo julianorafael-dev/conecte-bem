@@ -10,6 +10,11 @@ import java.time.LocalTime;
  * <p>Este DTO não expõe entidades JPA (Ong ou Categoria) diretamente.
  * Os IDs e nomes das ONG e Categoria são incluídos como campos separados
  * para evitar expor a camada de persistência na resposta da API.</p>
+ *
+ * <p>{@code vagas} é a capacidade total da oportunidade. {@code inscritos}
+ * conta apenas as inscrições ativas (PENDENTE e CONFIRMADA) e
+ * {@code vagasDisponiveis} é calculado no servidor como capacidade menos
+ * inscritos, sem nunca ficar negativo.</p>
  */
 public record OportunidadeResponseDTO(
         Integer id,
@@ -25,6 +30,8 @@ public record OportunidadeResponseDTO(
         String estado,
         Integer vagas,
         String status,
-        LocalDateTime criadoEm
+        LocalDateTime criadoEm,
+        Integer inscritos,
+        Integer vagasDisponiveis
 ) {
 }
