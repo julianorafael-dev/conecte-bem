@@ -59,7 +59,7 @@ public class InscricaoService {
         validarOportunidadeAberta(oportunidade);
 
         // Correção QA-003: Impede inscrições em oportunidades cuja data já passou
-        if (oportunidade.getData() != null && oportunidade.getData().isBefore(LocalDate.now())) {
+        if (oportunidade.getData() != null && oportunidade.getData().isBefore(LocalDate.now(java.time.ZoneId.of("America/Sao_Paulo")))) {
             throw new InscricaoConflictException("Esta oportunidade já ocorreu e não aceita novas inscrições.");
         }
 

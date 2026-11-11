@@ -266,6 +266,39 @@ class OportunidadeServiceTest {
         verifyNoInteractions(inscricaoRepository);
     }
 
+    @Test
+    void naoPublicaOportunidadeAbertaNoPassado() {
+        Ong ong = ongComId(10);
+        when(ongRepository.findByUsuarioId(7)).thenReturn(Optional.of(ong));
+        OportunidadeRequestDTO dados = dtoComOngId(10);
+        var passado = new OportunidadeRequestDTO(10, 1, dados.titulo(), dados.descricao(),
+                LocalDate.now(java.time.ZoneId.of("America/Sao_Paulo")).minusDays(1), dados.horario(),
+                dados.cidade(), dados.estado(), dados.vagas(), "ABERTA");
+        assertThrows(IllegalArgumentException.class, () -> service.criar(passado, usuario(TipoUsuario.ONG, 7)));
+        verify(oportunidadeRepository, never()).save(any());
+    }
+
+    @Test
+    void permiteCancelarOportunidadeQueJaOcorreu() {
+        Ong ong = ongComId(10);
+        Oportunidade existente = oportunidadeEditavel(ong);
+        existente.setData(LocalDate.of(2020, 1, 1));
+        var dados = new OportunidadeRequestDTO(10, 1, existente.getTitulo(), existente.getDescricao(),
+                existente.getData(), existente.getHorario(), existente.getCidade(), existente.getEstado(), 5, "CANCELADA");
+        assertEquals("CANCELADA", service.atualizar(5, dados, usuario(TipoUsuario.ONG, 7)).status());
+    }
+
+    @Test
+    void naoReabreOportunidadeEncerradaNoPassado() {
+        Ong ong = ongComId(10);
+        Oportunidade existente = oportunidadeEditavel(ong);
+        existente.setData(LocalDate.of(2020, 1, 1));
+        existente.setStatus("ENCERRADA");
+        var dados = new OportunidadeRequestDTO(10, 1, existente.getTitulo(), existente.getDescricao(),
+                existente.getData(), existente.getHorario(), existente.getCidade(), existente.getEstado(), 5, "ABERTA");
+        assertThrows(IllegalArgumentException.class, () -> service.atualizar(5, dados, usuario(TipoUsuario.ONG, 7)));
+    }
+
     // ---------- Cenário 8: conta ONG sem registro de ONG ----------
 
     @Test

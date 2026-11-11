@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../services/api.js';
+import { hojeNoBrasil } from '../../services/idade.js';
 import './FormOportunidade.css';
 
 const FORM_VAZIO = {
@@ -156,7 +157,7 @@ function FormOportunidade() {
         <div className="form-op-linha">
           <label>
             Data
-            <input type="date" name="data" value={form.data} onChange={alterar} required />
+            <input type="date" name="data" value={form.data} onChange={alterar} min={editando ? undefined : hojeNoBrasil()} required />
           </label>
           <label>
             Horário
