@@ -64,10 +64,7 @@ public class AuthService {
         String cnpj = null;
         String estado = null;
         if (dto.getTipo() == TipoUsuario.ONG) {
-            cnpj = CnpjValidador.somenteDigitos(dto.getCnpj());
-            if (!CnpjValidador.valido(cnpj)) {
-                throw new IllegalArgumentException("CNPJ inválido");
-            }
+            cnpj = CnpjValidador.normalizar(dto.getCnpj());
             if (ongRepository.existsByCnpj(cnpj)) {
                 throw new IllegalArgumentException("CNPJ já cadastrado no sistema");
             }

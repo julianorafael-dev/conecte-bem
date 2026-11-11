@@ -248,14 +248,17 @@ class OportunidadeServiceHttpTest {
     @Test
     void ongExcluiPropriaOportunidadeRetorna204() throws Exception {
         Ong ongA = ongComId(10);
-        when(oportunidadeRepository.findById(5)).thenReturn(Optional.of(oportunidadeDaOng(ongA, 5)));
+        Oportunidade existente = oportunidadeDaOng(ongA, 5);
+        when(oportunidadeRepository.findByIdForUpdate(5)).thenReturn(Optional.of(existente));
         preparaOngDoUsuario(7, ongA);
         autenticado(TipoUsuario.ONG, 7);
 
         mockMvc.perform(delete("/oportunidades/5"))
                 .andExpect(status().isNoContent());
 
-        verify(oportunidadeRepository).deleteById(5);
+        assertEquals("CANCELADA", existente.getStatus());
+        verify(oportunidadeRepository).save(existente);
+        verify(oportunidadeRepository, never()).deleteById(5);
     }
 
     // ---------- Cenário 4: ONG B tenta editar oportunidade da ONG A -> 403 com JSON ----------
@@ -282,7 +285,7 @@ class OportunidadeServiceHttpTest {
     @Test
     void ongBExcluiOportunidadeDaOngARetorna403ComJson() throws Exception {
         Ong ongA = ongComId(10);
-        when(oportunidadeRepository.findById(5)).thenReturn(Optional.of(oportunidadeDaOng(ongA, 5)));
+        when(oportunidadeRepository.findByIdForUpdate(5)).thenReturn(Optional.of(oportunidadeDaOng(ongA, 5)));
         preparaOngDoUsuario(9, ongComId(20));
         autenticado(TipoUsuario.ONG, 9);
 

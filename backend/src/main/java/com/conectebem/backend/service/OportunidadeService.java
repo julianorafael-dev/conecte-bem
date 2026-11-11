@@ -80,6 +80,7 @@ public class OportunidadeService {
 
         // 1. Resolver a ONG pelo usuário autenticado (não pelo ongId do corpo)
         Ong ong = ongDoUsuarioAutenticado(usuario);
+        validarDataAberta(dados, null);
 
         // 2. Buscar Categoria pelo categoriaId
         Integer categoriaId = dados.categoriaId();
@@ -134,6 +135,8 @@ public class OportunidadeService {
             throw new AccessDeniedException("Você só pode alterar oportunidades da sua própria ONG.");
         }
 
+        validarDataAberta(dados, oportunidadeExistente);
+
         // 3. Buscar Categoria (validar existência)
         Integer categoriaId = dados.categoriaId();
         Categoria categoria = categoriaRepository.findById(Integer.valueOf(categoriaId))
@@ -165,13 +168,13 @@ public class OportunidadeService {
     /**
      * Exclui uma oportunidade da ONG do usuário autenticado.
      *
-     * <p>A exclusão continua física (comportamento atual). Verificação de
-     * inscrições ativas e o tratamento delas dependem de acordo com a
-     * Pessoa 4 e NÃO foram alterados aqui.</p>
+     * <p>O DELETE cancela a oportunidade, preservando as inscrições e o histórico.
+     * O bloqueio é compartilhado com a inscrição para serializar as duas ações.</p>
      */
+    @Transactional
     public void excluir(Integer id, Usuario usuario) {
         // Verificar se existe antes de excluir (404 quando inexistente)
-        Oportunidade oportunidade = oportunidadeRepository.findById(id)
+        Oportunidade oportunidade = oportunidadeRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Oportunidade não encontrada. ID: " + id));
 
         // Validar propriedade: apenas a ONG dona pode excluir (403 caso contrário)
@@ -180,7 +183,18 @@ public class OportunidadeService {
             throw new AccessDeniedException("Você só pode excluir oportunidades da sua própria ONG.");
         }
 
-        oportunidadeRepository.deleteById(id);
+        oportunidade.setStatus("CANCELADA");
+        oportunidadeRepository.save(oportunidade);
+    }
+
+    private void validarDataAberta(OportunidadeRequestDTO dados, Oportunidade existente) {
+        LocalDate hoje = LocalDate.now(java.time.ZoneId.of("America/Sao_Paulo"));
+        boolean mantemHistorico = existente != null
+                && "ABERTA".equals(existente.getStatus())
+                && dados.data().equals(existente.getData());
+        if ("ABERTA".equals(dados.status()) && dados.data().isBefore(hoje) && !mantemHistorico) {
+            throw new IllegalArgumentException("Uma oportunidade aberta não pode ser publicada com data passada.");
+        }
     }
 
     /** Impede reduzir as vagas para menos do que o número de inscrições ativas. */

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { FaSearch, FaTimes } from 'react-icons/fa';
 import { api } from '../../services/api.js';
 import { getUsuario } from '../../services/auth.js';
+import { useAuth } from '../../hooks/useAuth.js';
+import { motivoIndisponibilidade } from '../../services/oportunidades.js';
 import './Oportunidade.css';
 
 // "2026-10-25" -> "25/10/2026" (sem usar Date, para não deslocar o dia por fuso horário)
@@ -31,6 +33,9 @@ const MENSAGEM_ERRO_CATEGORIAS =
     'Não foi possível carregar as categorias. O filtro por categoria está indisponível.';
 
 function Oportunidades() {
+  const { usuario: usuarioAtual } = useAuth();
+  const [inscricoesAtuais, setInscricoesAtuais] = useState(null);
+  const [erroConsultaInscricoes, setErroConsultaInscricoes] = useState('');
   const [oportunidades, setOportunidades] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -50,6 +55,26 @@ function Oportunidades() {
   const [inscritasNestaSessao, setInscritasNestaSessao] = useState([]);
   const [carregandoInscricao, setCarregandoInscricao] = useState(false);
   const [erroInscricao, setErroInscricao] = useState('');
+
+  useEffect(() => {
+    let ativo = true;
+    async function carregar() {
+      try {
+        const lista = usuarioAtual?.tipo === 'VOLUNTARIO' ? await api('/inscricoes/me') : [];
+        if (ativo) {
+          setInscricoesAtuais({ usuarioId: usuarioAtual?.id, ids: lista.filter(i => i.statusInscricao !== 'CANCELADA').map(i => i.oportunidadeId) });
+          setErroConsultaInscricoes('');
+        }
+      } catch (error) {
+        if (ativo) {
+          setInscricoesAtuais({ usuarioId: usuarioAtual?.id, ids: [] });
+          setErroConsultaInscricoes(error.message);
+        }
+      }
+    }
+    carregar();
+    return () => { ativo = false; };
+  }, [usuarioAtual?.id, usuarioAtual?.tipo]);
 
   const carregarCategorias = useCallback(async () => {
     setCarregandoCategorias(true);
@@ -161,6 +186,12 @@ function Oportunidades() {
         body: { oportunidadeId: oportunidadeSelecionada.id },
       });
       setInscritasNestaSessao((anteriores) => [...anteriores, oportunidadeSelecionada.id]);
+      setInscricoesAtuais(atual => ({ usuarioId: usuarioAtual.id, ids: [...(atual?.ids ?? []), oportunidadeSelecionada.id] }));
+      const atualizar = op => op && op.id === oportunidadeSelecionada.id
+        ? { ...op, inscritos: (op.inscritos ?? 0) + 1, vagasDisponiveis: Math.max(0, (op.vagasDisponiveis ?? op.vagas) - 1) }
+        : op;
+      setOportunidades(lista => lista.map(atualizar));
+      setOportunidadeSelecionada(atualizar);
     } catch (error) {
       setErroInscricao(error.message || 'Erro ao realizar inscrição. Tente novamente.');
     } finally {
@@ -192,8 +223,11 @@ function Oportunidades() {
     );
   }
 
-  const usuarioAtual = getUsuario();
   const podeInscrever = usuarioAtual && usuarioAtual.tipo === 'VOLUNTARIO';
+  const verificandoInscricoes = podeInscrever && inscricoesAtuais?.usuarioId !== usuarioAtual.id;
+  const jaInscrito = oportunidadeSelecionada && inscricoesAtuais?.usuarioId === usuarioAtual?.id
+    && inscricoesAtuais?.ids.includes(oportunidadeSelecionada.id);
+  const indisponibilidade = oportunidadeSelecionada ? motivoIndisponibilidade(oportunidadeSelecionada) : '';
 
   return (
       <div className="oportunidades-page">
@@ -201,6 +235,7 @@ function Oportunidades() {
         <p className="oportunidades-subtitle">
           Encontre a causa perfeita para você e faça a diferença.
         </p>
+        {erroConsultaInscricoes && <p role="alert">Não foi possível verificar suas inscrições: {erroConsultaInscricoes}</p>}
 
         <div className="oportunidades-search-wrapper">
           <div className="oportunidades-search">
@@ -336,8 +371,8 @@ function Oportunidades() {
 
                       <div className="oportunidades-card-footer">
                   <span className="oportunidades-vagas">
-                    Capacidade: {oportunidade.vagas}{' '}
-                    {oportunidade.vagas === 1 ? 'vaga' : 'vagas'}
+                    Vagas disponíveis: {oportunidade.vagasDisponiveis ?? oportunidade.vagas}{' '}
+                    {(oportunidade.vagasDisponiveis ?? oportunidade.vagas) === 1 ? 'vaga' : 'vagas'}
                   </span>
                         <button
                             className="oportunidades-button"
@@ -410,8 +445,8 @@ function Oportunidades() {
 
                 <div className="modal-action-box">
                   <p className="modal-vagas-info">
-                    Capacidade: {oportunidadeSelecionada.vagas}{' '}
-                    {oportunidadeSelecionada.vagas === 1 ? 'vaga' : 'vagas'}
+                    Vagas disponíveis: {oportunidadeSelecionada.vagasDisponiveis ?? oportunidadeSelecionada.vagas}{' '}
+                    {(oportunidadeSelecionada.vagasDisponiveis ?? oportunidadeSelecionada.vagas) === 1 ? 'vaga' : 'vagas'}
                   </p>
 
                   {erroInscricao && (
@@ -467,24 +502,23 @@ function Oportunidades() {
                       <button
                           type="button"
                           className={`modal-btn-inscrever ${
-                              oportunidadeSelecionada.status !== 'ABERTA' ||
-                              inscritasNestaSessao.includes(oportunidadeSelecionada.id)
+                              indisponibilidade || jaInscrito
                                   ? 'esgotada'
                                   : ''
                           }`}
                           disabled={
-                              oportunidadeSelecionada.status !== 'ABERTA' ||
-                              inscritasNestaSessao.includes(oportunidadeSelecionada.id) ||
+                              !!indisponibilidade || jaInscrito || verificandoInscricoes || !!erroConsultaInscricoes ||
                               carregandoInscricao
                           }
                           onClick={inscrever}
                       >
-                        {inscritasNestaSessao.includes(oportunidadeSelecionada.id)
+                        {jaInscrito
                             ? 'Inscrito'
                             : carregandoInscricao
                                 ? 'Processando...'
-                                : oportunidadeSelecionada.status !== 'ABERTA'
-                                    ? 'Inscrições encerradas'
+                                : verificandoInscricoes ? 'Verificando inscrição...'
+                                : indisponibilidade
+                                    ? indisponibilidade
                                     : 'Quero me inscrever'}
                       </button>
                   )}
