@@ -6,12 +6,15 @@ import com.conectebem.backend.model.Usuario;
 import com.conectebem.backend.service.OportunidadeService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/oportunidades")
@@ -23,12 +26,14 @@ public class OportunidadeController {
         this.oportunidadeService = oportunidadeService;
     }
 
+    /** Busca uma oportunidade pelo ID. */
     @GetMapping("/{id}")
     public ResponseEntity<OportunidadeResponseDTO> buscarPorId(@PathVariable Integer id) {
         OportunidadeResponseDTO dto = oportunidadeService.buscarPorId(id);
         return ResponseEntity.ok(dto);
     }
 
+    /** Cria uma nova oportunidade vinculada à ONG do usuário autenticado. */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OportunidadeResponseDTO criar(
@@ -38,6 +43,7 @@ public class OportunidadeController {
         return oportunidadeService.criar(dados, usuario);
     }
 
+    /** Atualiza uma oportunidade existente da ONG do usuário autenticado. */
     @PutMapping("/{id}")
     public ResponseEntity<OportunidadeResponseDTO> atualizar(
             @PathVariable Integer id,
@@ -48,6 +54,7 @@ public class OportunidadeController {
         return ResponseEntity.ok(dto);
     }
 
+    /** Exclui uma oportunidade da ONG do usuário autenticado. */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(
@@ -57,17 +64,27 @@ public class OportunidadeController {
         oportunidadeService.excluir(id, usuario);
     }
 
+    /** Tamanho máximo de página aceito em GET /oportunidades (QA-015). */
+    private static final int TAMANHO_MAXIMO = 100;
+
     /**
-     * Correção QA-015: Adicionado suporte à paginação (Pageable) para evitar
-     * que consultas descarreguem todos os dados do banco simultaneamente.
+     * Lista oportunidades, com filtro opcional por cidade, categoria ou status
+     * (um filtro por vez). O corpo continua sendo uma lista JSON; a listagem é
+     * limitada por página ({@code page} e {@code size}, no máximo 100) e o total
+     * de registros vem no cabeçalho {@code X-Total-Count}.
      */
     @GetMapping
-    public ResponseEntity<Page<OportunidadeResponseDTO>> filtrar(
+    public ResponseEntity<List<OportunidadeResponseDTO>> filtrar(
             @RequestParam(value = "cidade", required = false) String cidade,
             @RequestParam(value = "categoria", required = false) Integer categoria,
             @RequestParam(value = "status", required = false) String status,
-            @PageableDefault(size = 12) Pageable pageable
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "100") int size
     ) {
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 0),
+                Math.min(Math.max(size, 1), TAMANHO_MAXIMO),
+                Sort.by("id"));
         Page<OportunidadeResponseDTO> pagina;
 
         if (cidade != null && categoria == null && status == null) {
@@ -77,9 +94,13 @@ public class OportunidadeController {
         } else if (cidade == null && categoria == null && status != null) {
             pagina = oportunidadeService.filtrarPorStatus(status, pageable);
         } else {
+            // Nenhum filtro, ou mais de um filtro ao mesmo tempo (combinação
+            // de filtros ainda não suportada nesta sprint): lista sem filtro.
             pagina = oportunidadeService.listar(pageable);
         }
 
-        return ResponseEntity.ok(pagina);
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(pagina.getTotalElements()))
+                .body(pagina.getContent());
     }
 }

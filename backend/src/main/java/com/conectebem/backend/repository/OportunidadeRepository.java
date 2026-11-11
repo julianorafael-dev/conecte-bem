@@ -22,7 +22,6 @@ import java.util.Optional;
  */
 public interface OportunidadeRepository extends JpaRepository<Oportunidade, Integer> {
 
-    // Correção QA-015: Atualizados para retornar Page e receber Pageable
     /** Busca oportunidades filtradas por cidade. */
     Page<Oportunidade> findByCidade(String cidade, Pageable pageable);
 

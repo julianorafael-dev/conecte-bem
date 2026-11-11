@@ -35,7 +35,7 @@ CREATE TABLE public.ongs (
     telefone   varchar(20),
     data_criacao date, -- Data informada pela ONG no cadastro (QA-009).
     cidade     varchar(100),
-    estado     varchar(2),
+    estado     char(2)    ,
     CONSTRAINT ongs_cnpj_key       UNIQUE (cnpj),
     CONSTRAINT ongs_usuario_id_key UNIQUE (usuario_id),
     CONSTRAINT uq_ongs_usuario_id  UNIQUE (usuario_id),
@@ -59,7 +59,7 @@ CREATE TABLE public.oportunidades (
     data         date         NOT NULL,
     horario      time(0) without time zone,
     cidade       varchar(100),
-    estado       varchar(2),
+    estado       char(2)    ,
     vagas        integer      NOT NULL,
     status       varchar(20)  DEFAULT 'ABERTA' NOT NULL,
     criado_em    timestamp(6) without time zone DEFAULT now() NOT NULL,

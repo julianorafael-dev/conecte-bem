@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDate;
 
 /**
@@ -51,7 +53,8 @@ public class Ong {
     @Column(length = 100)
     private String cidade;
 
-    @Column(columnDefinition = "CHAR(2)")
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "estado", length = 2, columnDefinition = "char(2)")
     private String estado;
 
     public Integer getId() {

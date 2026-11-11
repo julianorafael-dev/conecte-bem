@@ -1,6 +1,8 @@
 package com.conectebem.backend.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -38,8 +40,8 @@ public class Oportunidade {
     @Column(length = 100)
     private String cidade;
 
-    // QA-014: Retirada da restrição extra "char(2)", espelhando o varchar(2) do banco
-    @Column(name = "estado", length = 2)
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "estado", length = 2, columnDefinition = "char(2)")
     private String estado;
 
     @Column(nullable = false)
