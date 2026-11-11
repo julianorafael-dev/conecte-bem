@@ -35,7 +35,7 @@ CREATE TABLE public.ongs (
     telefone   varchar(20),
     data_criacao date, -- Data informada pela ONG no cadastro (QA-009).
     cidade     varchar(100),
-    estado     char(2)    ,
+    estado     varchar(2),
     CONSTRAINT ongs_cnpj_key       UNIQUE (cnpj),
     CONSTRAINT ongs_usuario_id_key UNIQUE (usuario_id),
     CONSTRAINT uq_ongs_usuario_id  UNIQUE (usuario_id),
