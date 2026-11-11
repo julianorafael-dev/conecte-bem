@@ -14,7 +14,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -36,7 +35,20 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Sem autenticação (ou token inválido/expirado) -> 401; autenticado sem papel -> 403.
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, exception) -> {
+                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(
+                                    "{\"status\":401,\"erro\":\"Unauthorized\",\"mensagem\":\"Entre na sua conta para continuar.\"}");
+                        })
+                        // Não usar sendError: o encaminhamento para /error pode resultar em 401.
+                        .accessDeniedHandler((request, response, exception) -> {
+                            response.setStatus(HttpStatus.FORBIDDEN.value());
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(
+                                    "{\"status\":403,\"erro\":\"Forbidden\",\"mensagem\":\"Você não tem permissão para realizar esta ação.\"}");
+                        }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/health").permitAll()
                         .requestMatchers("/auth/**").permitAll() // Liberta as rotas de registo e login
@@ -51,6 +63,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/inscricoes/**").hasRole("VOLUNTARIO")
                         .requestMatchers(HttpMethod.PUT, "/inscricoes/*/confirmar", "/inscricoes/*/recusar").hasRole("ONG")
                         .requestMatchers(HttpMethod.GET, "/ongs/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/ongs/**").hasRole("ONG")
                         .requestMatchers(HttpMethod.GET, "/oportunidades/**").permitAll()
                         // Defesa em profundidade (alinhado com a Pessoa 2): somente
                         // contas do tipo ONG gerenciam oportunidades. Esses matchers
@@ -59,6 +72,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/oportunidades/**").hasRole("ONG")
                         .requestMatchers(HttpMethod.DELETE, "/oportunidades/**").hasRole("ONG")
                         .requestMatchers(HttpMethod.GET, "/categorias/**").permitAll()
+                        // Categorias globais são mantidas pelo banco até existir um perfil administrador.
+                        .requestMatchers("/categorias", "/categorias/**").denyAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

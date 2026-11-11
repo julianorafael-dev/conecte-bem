@@ -92,6 +92,11 @@ function PerfilOng() {
                             <input className="form-control" id="cnpj" value={dados.cnpj} readOnly />
                         </div>
                         <div className="form-grupo">
+                            <label htmlFor="ong-data-criacao">Data de criação da ONG</label>
+                            <input className="form-control" id="ong-data-criacao" type="date" value={dados.dataCriacao || ''} readOnly />
+                            <small>A data de criação está disponível apenas para consulta.</small>
+                        </div>
+                        <div className="form-grupo">
                             <label htmlFor="descricao">Descrição da ONG</label>
                             <textarea className="form-control" id="descricao" name="descricao" value={dados.descricao} onChange={alterar} placeholder="Conte sobre a atuação da ONG" />
                         </div>

@@ -7,6 +7,9 @@ import com.conectebem.backend.dto.PainelOngResponseDTO;
 import com.conectebem.backend.exception.ResourceNotFoundException;
 import com.conectebem.backend.model.Ong;
 import com.conectebem.backend.model.Oportunidade;
+import com.conectebem.backend.model.TipoUsuario;
+import com.conectebem.backend.model.Usuario;
+import org.springframework.security.access.AccessDeniedException;
 import com.conectebem.backend.repository.OngRepository;
 import com.conectebem.backend.repository.OportunidadeRepository;
 import org.springframework.stereotype.Service;
@@ -129,8 +132,15 @@ public class OngService {
     /**
      * Atualiza os dados editáveis de uma ONG sem trocar o vínculo com o usuário.
      */
-    public OngResponseDTO atualizar(Integer id, OngRequestDTO dados) {
+    public OngResponseDTO atualizar(Integer id, OngRequestDTO dados, Usuario usuario) {
+        if (usuario == null || usuario.getTipo() != TipoUsuario.ONG || usuario.getId() == null) {
+            throw new AccessDeniedException("Apenas contas do tipo ONG podem alterar ONGs.");
+        }
         Ong ong = buscarEntidade(id);
+
+        if (!usuario.getId().equals(ong.getUsuarioId())) {
+            throw new AccessDeniedException("Você só pode alterar sua própria ONG.");
+        }
 
         preencherDados(ong, dados);
 
@@ -169,7 +179,8 @@ public class OngService {
                 ong.getDescricao(),
                 ong.getTelefone(),
                 ong.getCidade(),
-                ong.getEstado()
+                ong.getEstado(),
+                ong.getDataCriacao()
         );
     }
 }

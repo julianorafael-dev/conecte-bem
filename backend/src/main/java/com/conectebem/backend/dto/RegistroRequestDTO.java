@@ -7,6 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import java.time.LocalDate;
+import jakarta.validation.constraints.PastOrPresent;
+import org.hibernate.validator.constraints.br.CPF;
 
 @Getter
 @Setter
@@ -28,8 +31,18 @@ public class RegistroRequestDTO {
     @NotNull(message = "O tipo de usuário é obrigatório")
     private TipoUsuario tipo;
 
-    // Campos complementares utilizados quando tipo == ONG (CNPJ é obrigatório nesse caso;
-    // a validação específica fica no AuthService). Para VOLUNTARIO são ignorados.
+    // CPF opcional. Nascimento é exigido pelo serviço para novos voluntários (QA-010).
+    @CPF(message = "CPF inválido")
+    @Size(max = 14, message = "O CPF deve ter no máximo 14 caracteres")
+    private String cpf;
+
+    @PastOrPresent(message = "A data de nascimento não pode estar no futuro")
+    private LocalDate dataNascimento;
+
+    @PastOrPresent(message = "A data de criação da ONG não pode estar no futuro")
+    private LocalDate dataCriacao;
+
+    // Campos da ONG; telefone é utilizado por ambos os tipos de conta.
     @Size(max = 18, message = "O CNPJ deve ter no máximo 18 caracteres")
     private String cnpj;
 

@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoEye, IoEyeOff } from 'react-icons/io5';
 import { useAuth } from '../../hooks/useAuth.js';
 import './CriarConta.css';
+import { hojeNoBrasil, limiteNascimento } from '../../services/idade.js';
 
 function CriarConta() {
     const { registrar, login } = useAuth();
     const navigate = useNavigate();
     const [erro, setErro] = useState('');
     const [enviando, setEnviando] = useState(false);
+    const dataRef = useRef(null);
 
     // 1. Estados do Formulário
     const [formData, setFormData] = useState({
@@ -23,7 +25,8 @@ function CriarConta() {
     });
 
     // Data de hoje, usada como limite do campo de data
-    const dataHoje = new Date().toLocaleDateString('en-CA');
+    const dataHoje = hojeNoBrasil();
+    const dataLimiteNascimento = limiteNascimento(dataHoje);
 
     const senhasDiferentes = formData.confirmarSenha !== '' && formData.senha !== formData.confirmarSenha;
 
@@ -55,6 +58,7 @@ function CriarConta() {
 
     // 4. Função para campos de texto normais
     const handleChange = (e) => {
+        dataRef.current?.setCustomValidity('');
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -73,6 +77,10 @@ function CriarConta() {
 
         // Pessoa Jurídica = conta de ONG (exige CNPJ); Pessoa Física = voluntário.
         const ehOng = formData.tipoPessoa === 'CNPJ';
+        if (!ehOng && (!formData.dataNascimento || formData.dataNascimento > limiteNascimento())) {
+            setErro('É preciso ter 18 anos ou mais para criar uma conta.');
+            return;
+        }
         if (ehOng && formData.cpfCnpj.length !== 14) {
             setErro('Informe o CNPJ com 14 números.');
             return;
@@ -86,8 +94,12 @@ function CriarConta() {
         };
         if (ehOng) {
             dados.cnpj = formData.cpfCnpj;
-            if (formData.telefone) dados.telefone = formData.telefone;
+            dados.dataCriacao = formData.dataNascimento || null;
+        } else {
+            dados.cpf = formData.cpfCnpj || null;
+            dados.dataNascimento = formData.dataNascimento || null;
         }
+        dados.telefone = formData.telefone || null;
 
         setEnviando(true);
         try {
@@ -181,11 +193,18 @@ function CriarConta() {
                     <label htmlFor="data-de-nascimento">{formData.tipoPessoa === 'CPF' ? 'Insira sua data de nascimento' : 'Insira a data de criação da ONG'}</label>
                     <input 
                         id="data-de-nascimento" 
+                        ref={dataRef}
                         name="dataNascimento" 
                         type="date" 
                         className="form-control" 
                         required
-                        max={dataHoje}
+                        max={formData.tipoPessoa === 'CPF' ? dataLimiteNascimento : dataHoje}
+                        onInvalid={(e) => {
+                            if (formData.tipoPessoa === 'CPF' && e.target.validity.rangeOverflow) {
+                                e.target.setCustomValidity('É preciso ter 18 anos ou mais para criar uma conta.');
+                            }
+                        }}
+                        onInput={(e) => e.target.setCustomValidity('')}
                         value={formData.dataNascimento}
                         onChange={handleChange}
                     />

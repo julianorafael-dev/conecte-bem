@@ -1,5 +1,13 @@
 # Backend — Módulo ONG
 
+## Manutenção das categorias globais
+
+As categorias são administradas diretamente no banco de dados enquanto não existir
+um perfil de administrador. A API mantém `GET /categorias` e `GET /categorias/{id}`
+públicos. Criação, edição e exclusão pela API estão bloqueadas para todos os perfis,
+inclusive ONG e voluntário. Essa restrição não impede a criação de oportunidades
+com as categorias existentes.
+
 Este documento descreve a implementação do módulo de ONGs no backend do ConecteBem e serve como guia de revisão e integração para a equipe.
 
 ## Escopo implementado
@@ -66,6 +74,27 @@ O tratamento global de erros retorna:
 O `usuarioId` precisa existir na tabela `usuarios`, pois o banco possui chave estrangeira para esse registro.
 
 ## Configuração local do PostgreSQL
+
+### Credenciais que já apareceram no Git
+
+Remover uma senha da configuração atual não a remove dos commits antigos.
+Se uma credencial foi versionada, troque-a no serviço correspondente antes de
+considerar a exposição resolvida. Não copie a senha antiga para exemplos ou PRs.
+
+Para o PostgreSQL local, no pgAdmin, abra **Login/Group Roles**, selecione o usuário
+utilizado pelo backend e altere a senha em **Properties > Definition > Password**.
+Depois atualize `DB_PASSWORD` em `backend/.env.local` e nas variáveis de execução
+do IntelliJ, caso estejam configuradas; variáveis do processo têm precedência.
+Atualize também a conexão salva do pgAdmin e reinicie o backend para testar.
+
+`backend/.env.local` é ignorado pelo Git e carregado quando o backend é iniciado
+pela raiz do projeto ou pela pasta `backend`. Credenciais de SMTP e JWT também
+devem permanecer fora dos arquivos versionados. Se foram expostas, precisam de
+rotação nos respectivos serviços; trocar JWT_SECRET invalida tokens anteriores.
+
+Uma eventual limpeza do histórico deve ser combinada com toda a equipe, pois
+altera os identificadores dos commits e exige tratamento dos clones existentes.
+Ela não substitui a rotação e não deve ser feita com force push sem coordenação.
 
 O backend usa a base local `conect-bem-db` em `localhost:5432`.
 

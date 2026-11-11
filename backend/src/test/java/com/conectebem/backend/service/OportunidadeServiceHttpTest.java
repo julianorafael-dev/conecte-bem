@@ -52,6 +52,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 class OportunidadeServiceHttpTest {
 
+    @Test
+    void metodoNaoSuportadoRetorna405ComMetodosPermitidos() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .patch("/oportunidades").contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.status").value(405))
+                .andExpect(jsonPath("$.erro").value("Method Not Allowed"))
+                .andExpect(jsonPath("$.mensagem").value("Método HTTP não permitido para este endereço."))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                        .string("Allow", org.hamcrest.Matchers.containsString("GET")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                        .string("Allow", org.hamcrest.Matchers.containsString("POST")));
+        org.mockito.Mockito.verifyNoInteractions(oportunidadeRepository, categoriaRepository, ongRepository);
+    }
+
     private final OportunidadeRepository oportunidadeRepository = mock(OportunidadeRepository.class);
     private final CategoriaRepository categoriaRepository = mock(CategoriaRepository.class);
     private final OngRepository ongRepository = mock(OngRepository.class);
