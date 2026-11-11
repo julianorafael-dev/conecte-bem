@@ -165,13 +165,13 @@ public class OportunidadeService {
     /**
      * Exclui uma oportunidade da ONG do usuário autenticado.
      *
-     * <p>A exclusão continua física (comportamento atual). Verificação de
-     * inscrições ativas e o tratamento delas dependem de acordo com a
-     * Pessoa 4 e NÃO foram alterados aqui.</p>
+     * <p>O DELETE cancela a oportunidade, preservando as inscrições e o histórico.
+     * O bloqueio é compartilhado com a inscrição para serializar as duas ações.</p>
      */
+    @Transactional
     public void excluir(Integer id, Usuario usuario) {
         // Verificar se existe antes de excluir (404 quando inexistente)
-        Oportunidade oportunidade = oportunidadeRepository.findById(id)
+        Oportunidade oportunidade = oportunidadeRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Oportunidade não encontrada. ID: " + id));
 
         // Validar propriedade: apenas a ONG dona pode excluir (403 caso contrário)
@@ -180,7 +180,8 @@ public class OportunidadeService {
             throw new AccessDeniedException("Você só pode excluir oportunidades da sua própria ONG.");
         }
 
-        oportunidadeRepository.deleteById(id);
+        oportunidade.setStatus("CANCELADA");
+        oportunidadeRepository.save(oportunidade);
     }
 
     /** Impede reduzir as vagas para menos do que o número de inscrições ativas. */

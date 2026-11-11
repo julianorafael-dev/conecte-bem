@@ -55,6 +55,37 @@ class CadastroDadosHttpTest {
     @Autowired OngRepository ongs;
     @Autowired EntityManager em;
     @Autowired JwtService jwt;
+    @Autowired com.conectebem.backend.repository.OportunidadeRepository oportunidades;
+    @Autowired com.conectebem.backend.repository.InscricaoRepository inscricoes;
+    @Autowired com.conectebem.backend.repository.CategoriaRepository categorias;
+
+    @Test
+    void deletePreservaOportunidadeEInscricaoNoBanco() throws Exception {
+        Usuario dono = usuarios.save(Usuario.builder().nome("ONG QA").email(email()).senha("hash").tipo(TipoUsuario.ONG).build());
+        Usuario voluntario = usuarios.save(Usuario.builder().nome("Voluntário QA").email(email()).senha("hash").tipo(TipoUsuario.VOLUNTARIO).build());
+        var ong = new com.conectebem.backend.model.Ong();
+        ong.setUsuarioId(dono.getId()); ong.setNome("ONG QA"); ong.setCnpj("11222333000181");
+        ong = ongs.save(ong);
+        var categoria = new com.conectebem.backend.model.Categoria();
+        categoria.setNome("QA " + UUID.randomUUID()); categoria.setDescricao("Teste");
+        categoria = categorias.save(categoria);
+        var op = new com.conectebem.backend.model.Oportunidade();
+        op.setOng(ong); op.setCategoria(categoria); op.setTitulo("QA histórico");
+        op.setData(LocalDate.now().plusDays(1)); op.setHorario(java.time.LocalTime.NOON);
+        op.setVagas(1); op.setStatus("ABERTA"); op.setCriadoEm(java.time.LocalDateTime.now());
+        op = oportunidades.save(op);
+        var inscricao = new com.conectebem.backend.model.Inscricao();
+        inscricao.setUsuario(voluntario); inscricao.setOportunidade(op);
+        inscricao = inscricoes.saveAndFlush(inscricao);
+        mvc.perform(delete("/oportunidades/" + op.getId()).header("Authorization", "Bearer " + jwt.gerarToken(dono)))
+                .andExpect(status().isNoContent());
+        em.flush(); em.clear();
+        assertEquals("CANCELADA", oportunidades.findById(op.getId()).orElseThrow().getStatus());
+        assertTrue(inscricoes.existsById(inscricao.getId()));
+        mvc.perform(get("/inscricoes/me").header("Authorization", "Bearer " + jwt.gerarToken(voluntario)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].statusOportunidade").value("CANCELADA"));
+    }
 
     private String email() { return UUID.randomUUID() + "@example.com"; }
 

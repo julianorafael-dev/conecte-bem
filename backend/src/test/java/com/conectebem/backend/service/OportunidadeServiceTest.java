@@ -184,7 +184,7 @@ class OportunidadeServiceTest {
         Ong ongA = ongComId(10);
         Ong ongB = ongComId(20);
         Oportunidade existente = oportunidadeDaOng(ongA, 5);
-        when(oportunidadeRepository.findById(5)).thenReturn(Optional.of(existente));
+        when(oportunidadeRepository.findByIdForUpdate(5)).thenReturn(Optional.of(existente));
         when(ongRepository.findByUsuarioId(9)).thenReturn(Optional.of(ongB));
 
         AccessDeniedException excecao = assertThrows(AccessDeniedException.class,
@@ -221,7 +221,7 @@ class OportunidadeServiceTest {
     void voluntarioNaoPodeExcluirOportunidade() {
         Ong ongA = ongComId(10);
         Oportunidade existente = oportunidadeDaOng(ongA, 5);
-        when(oportunidadeRepository.findById(5)).thenReturn(Optional.of(existente));
+        when(oportunidadeRepository.findByIdForUpdate(5)).thenReturn(Optional.of(existente));
 
         assertThrows(AccessDeniedException.class,
                 () -> service.excluir(5, usuario(TipoUsuario.VOLUNTARIO, 3)));
@@ -244,13 +244,26 @@ class OportunidadeServiceTest {
 
     @Test
     void exclusaoDeOportunidadeInexistenteRetornaNotFound() {
-        when(oportunidadeRepository.findById(999)).thenReturn(Optional.empty());
+        when(oportunidadeRepository.findByIdForUpdate(999)).thenReturn(Optional.empty());
 
         ResourceNotFoundException excecao = assertThrows(ResourceNotFoundException.class,
                 () -> service.excluir(999, usuario(TipoUsuario.ONG, 7)));
 
         assertEquals("Oportunidade não encontrada. ID: 999", excecao.getMessage());
         verify(oportunidadeRepository, never()).deleteById(999);
+    }
+
+    @Test
+    void exclusaoCancelaSemApagarHistorico() {
+        Ong ong = ongComId(10);
+        Oportunidade existente = oportunidadeDaOng(ong, 5);
+        when(oportunidadeRepository.findByIdForUpdate(5)).thenReturn(Optional.of(existente));
+        when(ongRepository.findByUsuarioId(7)).thenReturn(Optional.of(ong));
+        service.excluir(5, usuario(TipoUsuario.ONG, 7));
+        assertEquals("CANCELADA", existente.getStatus());
+        verify(oportunidadeRepository).save(existente);
+        verify(oportunidadeRepository, never()).deleteById(anyInt());
+        verifyNoInteractions(inscricaoRepository);
     }
 
     // ---------- Cenário 8: conta ONG sem registro de ONG ----------
