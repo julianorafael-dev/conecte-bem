@@ -18,16 +18,13 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 
 /**
  * Centraliza as regras de negócio das candidaturas a oportunidades.
- *
- * <p>As regras aplicadas são: somente voluntários se inscrevem, apenas
- * oportunidades abertas recebem candidaturas, vagas ativas não podem exceder
- * a capacidade e uma ONG só visualiza inscritos das próprias oportunidades.</p>
  */
 @Service
 public class InscricaoService {
@@ -50,12 +47,6 @@ public class InscricaoService {
         this.ongRepository = ongRepository;
     }
 
-    /**
-     * Cria uma candidatura ou reativa uma candidatura anteriormente cancelada.
-     *
-     * <p>A oportunidade é bloqueada durante a conferência de vagas. Assim,
-     * duas requisições simultâneas não conseguem ocupar a mesma última vaga.</p>
-     */
     @Transactional
     public InscricaoResponseDTO inscrever(InscricaoRequestDTO dados, Usuario usuario) {
         validarVoluntario(usuario);
@@ -66,6 +57,11 @@ public class InscricaoService {
                 ));
 
         validarOportunidadeAberta(oportunidade);
+
+        // Correção QA-003: Impede inscrições em oportunidades cuja data já passou
+        if (oportunidade.getData() != null && oportunidade.getData().isBefore(LocalDate.now())) {
+            throw new InscricaoConflictException("Esta oportunidade já ocorreu e não aceita novas inscrições.");
+        }
 
         Inscricao inscricaoExistente = inscricaoRepository
                 .findByUsuarioIdAndOportunidadeId(usuario.getId(), oportunidade.getId())
@@ -93,7 +89,6 @@ public class InscricaoService {
         return paraResponse(inscricaoRepository.save(inscricao));
     }
 
-    /** Lista as candidaturas do voluntário autenticado. */
     @Transactional(readOnly = true)
     public List<InscricaoResponseDTO> listarMinhas(Usuario usuario) {
         validarVoluntario(usuario);
@@ -104,7 +99,6 @@ public class InscricaoService {
                 .toList();
     }
 
-    /** Cancela a inscrição pertencente ao voluntário autenticado. */
     @Transactional
     public void cancelar(Integer inscricaoId, Usuario usuario) {
         validarVoluntario(usuario);
@@ -122,12 +116,6 @@ public class InscricaoService {
         }
     }
 
-    /**
-     * Lista os inscritos de uma oportunidade apenas para a ONG proprietária.
-     *
-     * <p>Inscrições canceladas também são devolvidas, identificadas pelo
-     * status, para preservar o histórico de candidaturas da oportunidade.</p>
-     */
     @Transactional(readOnly = true)
     public List<InscritoResponseDTO> listarInscritosDaOportunidade(Integer oportunidadeId, Usuario usuario) {
         Ong ong = obterOngDoUsuarioAutenticado(usuario);
@@ -147,12 +135,6 @@ public class InscricaoService {
                 .toList();
     }
 
-    /**
-     * A ONG proprietária confirma uma inscrição pendente.
-     *
-     * <p>Inscrições canceladas não podem ser confirmadas: o voluntário precisa
-     * se inscrever novamente. Confirmar uma inscrição já confirmada não muda nada.</p>
-     */
     @Transactional
     public InscritoResponseDTO confirmarPelaOng(Integer inscricaoId, Usuario usuario) {
         Inscricao inscricao = obterInscricaoDaOng(inscricaoId, usuario);
@@ -168,10 +150,6 @@ public class InscricaoService {
         return paraInscritoResponse(inscricao);
     }
 
-    /**
-     * A ONG proprietária cancela uma inscrição pendente ou confirmada,
-     * liberando a vaga. Cancelar uma inscrição já cancelada não muda nada.
-     */
     @Transactional
     public InscritoResponseDTO cancelarPelaOng(Integer inscricaoId, Usuario usuario) {
         Inscricao inscricao = obterInscricaoDaOng(inscricaoId, usuario);

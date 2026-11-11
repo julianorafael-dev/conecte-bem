@@ -111,7 +111,7 @@ MAIL_PASSWORD=senha_smtp_do_mailtrap
 
 `DB_PASSWORD`, `JWT_SECRET`, `MAIL_USERNAME` e `MAIL_PASSWORD` não possuem valor padrão e
 nunca devem ser enviados ao Git. No IntelliJ, informe-os em **Run/Debug Configurations >
-Environment variables**. No Docker, crie um arquivo `backend/.env` (ignorado pelo Git) com
+Environment variables**. No Docker, crie um arquivo `.env. local` (ignorado pelo Git) com
 essas variáveis antes de executar `docker compose up`.
 
 ## Formulário de Contato (e-mail via Mailtrap)

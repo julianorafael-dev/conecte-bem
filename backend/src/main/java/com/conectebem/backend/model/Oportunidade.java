@@ -1,20 +1,11 @@
 package com.conectebem.backend.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
 
-/**
- * Representa uma oportunidade de voluntariado cadastrada no sistema.
- *
- * <p>Esta entidade relaciona uma ONG e uma Categoria, permitindo o filtro
- * de oportunidades por cidade, categoria e status.</p>
- */
 @Entity
 @Table(name = "oportunidades")
 public class Oportunidade {
@@ -40,20 +31,22 @@ public class Oportunidade {
     @Column(nullable = false)
     private LocalDate data;
 
-    @Column(nullable = false)
+    // QA-014: Removido "nullable = false" pois no schema.sql "horario time(0)" permite NULL
+    @Column
     private LocalTime horario;
 
     @Column(length = 100)
     private String cidade;
 
-    @JdbcTypeCode(SqlTypes.CHAR)
-    @Column(name = "estado", length = 2, columnDefinition = "char(2)")
+    // QA-014: Retirada da restrição extra "char(2)", espelhando o varchar(2) do banco
+    @Column(name = "estado", length = 2)
     private String estado;
 
     @Column(nullable = false)
     private Integer vagas;
 
-    @Column(length = 20)
+    // QA-014: Adicionado "nullable = false", espelhando a not-null constraint do schema
+    @Column(nullable = false, length = 20)
     private String status;
 
     @Column(name = "criado_em", nullable = false, updatable = false)

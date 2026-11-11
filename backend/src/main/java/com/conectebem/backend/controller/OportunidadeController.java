@@ -5,12 +5,13 @@ import com.conectebem.backend.dto.OportunidadeResponseDTO;
 import com.conectebem.backend.model.Usuario;
 import com.conectebem.backend.service.OportunidadeService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/oportunidades")
@@ -22,14 +23,12 @@ public class OportunidadeController {
         this.oportunidadeService = oportunidadeService;
     }
 
-    /** Busca uma oportunidade pelo ID. */
     @GetMapping("/{id}")
     public ResponseEntity<OportunidadeResponseDTO> buscarPorId(@PathVariable Integer id) {
         OportunidadeResponseDTO dto = oportunidadeService.buscarPorId(id);
         return ResponseEntity.ok(dto);
     }
 
-    /** Cria uma nova oportunidade vinculada à ONG do usuário autenticado. */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OportunidadeResponseDTO criar(
@@ -39,7 +38,6 @@ public class OportunidadeController {
         return oportunidadeService.criar(dados, usuario);
     }
 
-    /** Atualiza uma oportunidade existente da ONG do usuário autenticado. */
     @PutMapping("/{id}")
     public ResponseEntity<OportunidadeResponseDTO> atualizar(
             @PathVariable Integer id,
@@ -50,7 +48,6 @@ public class OportunidadeController {
         return ResponseEntity.ok(dto);
     }
 
-    /** Exclui uma oportunidade da ONG do usuário autenticado. */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(
@@ -61,32 +58,28 @@ public class OportunidadeController {
     }
 
     /**
-     * Lista oportunidades, com filtro opcional por cidade, categoria ou status
-     * (um filtro por vez — era aqui e no método listar() antigo que tínhamos
-     * duas rotas GET /oportunidades, causando "Ambiguous mapping". Esse método
-     * agora é o único handler de GET /oportunidades; sem nenhum parâmetro, ele
-     * já cai no "else" e devolve tudo, substituindo o antigo listar()).
+     * Correção QA-015: Adicionado suporte à paginação (Pageable) para evitar
+     * que consultas descarreguem todos os dados do banco simultaneamente.
      */
     @GetMapping
-    public ResponseEntity<List<OportunidadeResponseDTO>> filtrar(
+    public ResponseEntity<Page<OportunidadeResponseDTO>> filtrar(
             @RequestParam(value = "cidade", required = false) String cidade,
             @RequestParam(value = "categoria", required = false) Integer categoria,
-            @RequestParam(value = "status", required = false) String status
+            @RequestParam(value = "status", required = false) String status,
+            @PageableDefault(size = 12) Pageable pageable
     ) {
-        List<OportunidadeResponseDTO> lista;
+        Page<OportunidadeResponseDTO> pagina;
 
         if (cidade != null && categoria == null && status == null) {
-            lista = oportunidadeService.filtrarPorCidade(cidade);
+            pagina = oportunidadeService.filtrarPorCidade(cidade, pageable);
         } else if (cidade == null && categoria != null && status == null) {
-            lista = oportunidadeService.filtrarPorCategoria(categoria);
+            pagina = oportunidadeService.filtrarPorCategoria(categoria, pageable);
         } else if (cidade == null && categoria == null && status != null) {
-            lista = oportunidadeService.filtrarPorStatus(status);
+            pagina = oportunidadeService.filtrarPorStatus(status, pageable);
         } else {
-            // Nenhum filtro, ou mais de um filtro ao mesmo tempo (combinação
-            // de filtros ainda não suportada nesta sprint): devolve tudo.
-            lista = oportunidadeService.listar();
+            pagina = oportunidadeService.listar(pageable);
         }
 
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(pagina);
     }
 }
