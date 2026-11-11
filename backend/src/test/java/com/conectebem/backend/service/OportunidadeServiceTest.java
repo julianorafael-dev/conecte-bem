@@ -15,6 +15,9 @@ import com.conectebem.backend.repository.OngRepository;
 import com.conectebem.backend.repository.OportunidadeRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
@@ -353,11 +356,11 @@ class OportunidadeServiceTest {
     void listagemContaInscritosEmUmaUnicaConsulta() {
         Oportunidade a = oportunidadeDaOng(ongComId(10), 1);
         Oportunidade b = oportunidadeDaOng(ongComId(10), 2);
-        when(oportunidadeRepository.findAll()).thenReturn(List.of(a, b));
+        when(oportunidadeRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(a, b)));
         when(inscricaoRepository.contarAtivasPorOportunidades(anyCollection(), anyCollection()))
                 .thenReturn(List.<Object[]>of(new Object[]{1, 4L}));
 
-        List<OportunidadeResponseDTO> lista = service.listar();
+        List<OportunidadeResponseDTO> lista = service.listar(PageRequest.of(0, 50)).getContent();
 
         assertEquals(2, lista.size());
         assertEquals(4, lista.get(0).inscritos());

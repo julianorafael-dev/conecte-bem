@@ -13,6 +13,9 @@ import com.conectebem.backend.repository.CategoriaRepository;
 import com.conectebem.backend.repository.InscricaoRepository;
 import com.conectebem.backend.repository.OngRepository;
 import com.conectebem.backend.repository.OportunidadeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,8 +51,13 @@ public class OportunidadeService {
     }
 
     /** Lista todas as oportunidades cadastradas e converte para DTO. */
-    public List<OportunidadeResponseDTO> listar() {
-        return mapper.paraResponseLista(oportunidadeRepository.findAll());
+    // QA-015: listagem paginada (o contador de inscritos continua sendo feito em lote)
+    public Page<OportunidadeResponseDTO> listar(Pageable pageable) {
+        return paraPagina(oportunidadeRepository.findAll(pageable), pageable);
+    }
+
+    private Page<OportunidadeResponseDTO> paraPagina(Page<Oportunidade> pagina, Pageable pageable) {
+        return new PageImpl<>(mapper.paraResponseLista(pagina.getContent()), pageable, pagina.getTotalElements());
     }
 
     /** Busca uma oportunidade pelo ID ou lança ResourceNotFoundException. */
@@ -203,21 +211,21 @@ public class OportunidadeService {
     }
 
     /** Filtra oportunidades por cidade. */
-    public List<OportunidadeResponseDTO> filtrarPorCidade(String cidade) {
-        return mapper.paraResponseLista(oportunidadeRepository.findByCidade(cidade));
+    public Page<OportunidadeResponseDTO> filtrarPorCidade(String cidade, Pageable pageable) {
+        return paraPagina(oportunidadeRepository.findByCidade(cidade, pageable), pageable);
     }
 
     /** Filtra oportunidades pela categoria relacionada. */
-    public List<OportunidadeResponseDTO> filtrarPorCategoria(Integer categoriaId) {
+    public Page<OportunidadeResponseDTO> filtrarPorCategoria(Integer categoriaId, Pageable pageable) {
         Categoria categoria = categoriaRepository.findById(Integer.valueOf(categoriaId))
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada. ID: " + categoriaId));
-        return mapper.paraResponseLista(oportunidadeRepository.findByCategoria(categoria));
+        return paraPagina(oportunidadeRepository.findByCategoria(categoria, pageable), pageable);
     }
 
     /** Filtra oportunidades por status. */
-    public List<OportunidadeResponseDTO> filtrarPorStatus(String status) {
+    public Page<OportunidadeResponseDTO> filtrarPorStatus(String status, Pageable pageable) {
         validarStatus(status);
-        return mapper.paraResponseLista(oportunidadeRepository.findByStatus(status));
+        return paraPagina(oportunidadeRepository.findByStatus(status, pageable), pageable);
     }
 
     /** Garante que o status seja compatível com a constraint do banco. */

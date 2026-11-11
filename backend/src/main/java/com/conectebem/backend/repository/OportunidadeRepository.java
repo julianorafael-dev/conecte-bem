@@ -3,6 +3,8 @@ package com.conectebem.backend.repository;
 import com.conectebem.backend.model.Categoria;
 import com.conectebem.backend.model.Oportunidade;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -21,13 +23,13 @@ import java.util.Optional;
 public interface OportunidadeRepository extends JpaRepository<Oportunidade, Integer> {
 
     /** Busca oportunidades filtradas por cidade. */
-    List<Oportunidade> findByCidade(String cidade);
+    Page<Oportunidade> findByCidade(String cidade, Pageable pageable);
 
     /** Busca oportunidades filtradas pela categoria relacionada. */
-    List<Oportunidade> findByCategoria(Categoria categoria);
+    Page<Oportunidade> findByCategoria(Categoria categoria, Pageable pageable);
 
     /** Busca oportunidades filtradas por status. */
-    List<Oportunidade> findByStatus(String status);
+    Page<Oportunidade> findByStatus(String status, Pageable pageable);
 
     /** Conta todas as oportunidades pertencentes à ONG vinculada ao usuário. */
     long countByOngUsuarioId(Integer usuarioId);

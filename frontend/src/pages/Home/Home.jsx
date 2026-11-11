@@ -4,9 +4,9 @@ import '../../styles/global.css';
 import './Home.css';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faBookOpen, faHandHoldingMedical, faLeaf, 
-  faPeopleArrows, faPeopleGroup, faPeopleRoof, faTimes 
+import {
+  faBookOpen, faHandHoldingMedical, faLeaf,
+  faPeopleArrows, faPeopleGroup, faPeopleRoof, faTimes
 } from '@fortawesome/free-solid-svg-icons';
 
 const AREAS_VOLUNTARIADO = [
@@ -54,65 +54,77 @@ function Home() {
   const fecharModal = () => setCardSelecionado(null);
 
   return (
-    <div className="home-container">
-      <main className="conteudo_principal">
-        <section className="titulo_principal">
-          <h1>Conectando voluntários a ONGs</h1>
-          <p className="texto_secundario">Transformando realidades através do voluntariado.</p>
-        </section>
+      <div className="home-container">
+        <main className="conteudo_principal">
+          <section className="titulo_principal">
+            <h1>Conectando voluntários a ONGs</h1>
+            <p className="texto_secundario">Transformando realidades através do voluntariado.</p>
+          </section>
 
-        <section className="container_cards">
-          <h2>Conheça as áreas do Voluntariado</h2>
-          <p className="texto_secundario">Busque causas que combinem com você.</p>
-          
-          <div className="conteudo_card">
-            {AREAS_VOLUNTARIADO.map((item) => {
-              const estaAberto = cardSelecionado === item.id;
+          <section className="container_cards">
+            <h2>Conheça as áreas do Voluntariado</h2>
+            <p className="texto_secundario">Busque causas que combinem com você.</p>
 
-              return (
-                <div 
-                  key={item.id} 
-                  className="card-wrapper"
-                >
-                  {/* O CARD NORMAL */}
-                  <div 
-                    className="card" 
-                    onClick={() => setCardSelecionado(item.id)}
-                  >
-                    <div className="card_titulo">
-                      <span>{item.titulo}</span>
-                    </div>
-                    <FontAwesomeIcon icon={item.icone} />
-                  </div>
+            <div className="conteudo_card">
+              {AREAS_VOLUNTARIADO.map((item) => {
+                const estaAberto = cardSelecionado === item.id;
 
-                  {/* MODAL POSICIONADO POR CIMA DO CARD */}
-                  {estaAberto && (
-                    <div className="modal-card-overlay" onClick={(e) => e.stopPropagation()}>
-                      <div className="modal-card-content">
-                        <div className="modal-card-header">
-                          <FontAwesomeIcon icon={item.icone} className="modal-icon" />
-                          <h3>{item.titulo}</h3>
+                return (
+                    <div
+                        key={item.id}
+                        className="card-wrapper"
+                    >
+                      {/* O CARD NORMAL (QA-013: Acessibilidade via Teclado) */}
+                      <div
+                          className="card"
+                          tabIndex="0"
+                          onClick={() => setCardSelecionado(item.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              setCardSelecionado(item.id);
+                            }
+                          }}
+                      >
+                        <div className="card_titulo">
+                          <span>{item.titulo}</span>
                         </div>
-                        <div className="modal-card-body">
-                          <p>{item.descricao}</p>
-                        </div>
-                        <div className="modal-card-footer">
-                          <button className="modal-close-btn" onClick={fecharModal} title="Fechar">
-                            <FontAwesomeIcon icon={faTimes} />
-                          </button>
-                        </div>
+                        <FontAwesomeIcon icon={item.icone} />
                       </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
 
-          <Link to="/Oportunidades" className="botao_oportunidades">Conhecer Oportunidades</Link>
-        </section>
-      </main>
-    </div>
+                      {/* MODAL POSICIONADO POR CIMA DO CARD (QA-012: Diálogo Acessível) */}
+                      {estaAberto && (
+                          <div className="modal-card-overlay" onClick={(e) => e.stopPropagation()}>
+                            <div
+                                className="modal-card-content"
+                                role="dialog"
+                                aria-modal="true"
+                                aria-labelledby={`modal-titulo-${item.id}`}
+                            >
+                              <div className="modal-card-header">
+                                <FontAwesomeIcon icon={item.icone} className="modal-icon" />
+                                <h3 id={`modal-titulo-${item.id}`}>{item.titulo}</h3>
+                              </div>
+                              <div className="modal-card-body">
+                                <p>{item.descricao}</p>
+                              </div>
+                              <div className="modal-card-footer">
+                                <button className="modal-close-btn" onClick={fecharModal} title="Fechar">
+                                  <FontAwesomeIcon icon={faTimes} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                      )}
+                    </div>
+                );
+              })}
+            </div>
+
+            <Link to="/Oportunidades" className="botao_oportunidades">Conhecer Oportunidades</Link>
+          </section>
+        </main>
+      </div>
   );
 }
 

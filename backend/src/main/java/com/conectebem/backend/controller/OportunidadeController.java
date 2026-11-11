@@ -5,6 +5,10 @@ import com.conectebem.backend.dto.OportunidadeResponseDTO;
 import com.conectebem.backend.model.Usuario;
 import com.conectebem.backend.service.OportunidadeService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -60,33 +64,43 @@ public class OportunidadeController {
         oportunidadeService.excluir(id, usuario);
     }
 
+    /** Tamanho máximo de página aceito em GET /oportunidades (QA-015). */
+    private static final int TAMANHO_MAXIMO = 100;
+
     /**
      * Lista oportunidades, com filtro opcional por cidade, categoria ou status
-     * (um filtro por vez — era aqui e no método listar() antigo que tínhamos
-     * duas rotas GET /oportunidades, causando "Ambiguous mapping". Esse método
-     * agora é o único handler de GET /oportunidades; sem nenhum parâmetro, ele
-     * já cai no "else" e devolve tudo, substituindo o antigo listar()).
+     * (um filtro por vez). O corpo continua sendo uma lista JSON; a listagem é
+     * limitada por página ({@code page} e {@code size}, no máximo 100) e o total
+     * de registros vem no cabeçalho {@code X-Total-Count}.
      */
     @GetMapping
     public ResponseEntity<List<OportunidadeResponseDTO>> filtrar(
             @RequestParam(value = "cidade", required = false) String cidade,
             @RequestParam(value = "categoria", required = false) Integer categoria,
-            @RequestParam(value = "status", required = false) String status
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "100") int size
     ) {
-        List<OportunidadeResponseDTO> lista;
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 0),
+                Math.min(Math.max(size, 1), TAMANHO_MAXIMO),
+                Sort.by("id"));
+        Page<OportunidadeResponseDTO> pagina;
 
         if (cidade != null && categoria == null && status == null) {
-            lista = oportunidadeService.filtrarPorCidade(cidade);
+            pagina = oportunidadeService.filtrarPorCidade(cidade, pageable);
         } else if (cidade == null && categoria != null && status == null) {
-            lista = oportunidadeService.filtrarPorCategoria(categoria);
+            pagina = oportunidadeService.filtrarPorCategoria(categoria, pageable);
         } else if (cidade == null && categoria == null && status != null) {
-            lista = oportunidadeService.filtrarPorStatus(status);
+            pagina = oportunidadeService.filtrarPorStatus(status, pageable);
         } else {
             // Nenhum filtro, ou mais de um filtro ao mesmo tempo (combinação
-            // de filtros ainda não suportada nesta sprint): devolve tudo.
-            lista = oportunidadeService.listar();
+            // de filtros ainda não suportada nesta sprint): lista sem filtro.
+            pagina = oportunidadeService.listar(pageable);
         }
 
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(pagina.getTotalElements()))
+                .body(pagina.getContent());
     }
 }

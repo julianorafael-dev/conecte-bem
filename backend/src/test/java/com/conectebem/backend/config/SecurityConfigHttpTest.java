@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
@@ -197,7 +198,7 @@ class SecurityConfigHttpTest {
 
     @Test
     void getOportunidadesSemTokenRetorna200() throws Exception {
-        when(oportunidadeService.listar()).thenReturn(List.of());
+        when(oportunidadeService.listar(any())).thenReturn(Page.empty());
 
         mockMvc.perform(get("/oportunidades"))
                 .andExpect(status().isOk());
@@ -286,7 +287,7 @@ class SecurityConfigHttpTest {
     void getsPublicosSemTokenRetornam200() throws Exception {
         when(ongService.listar()).thenReturn(List.of());
         when(categoriaService.listarTodas()).thenReturn(List.of());
-        when(oportunidadeService.listar()).thenReturn(List.of());
+        when(oportunidadeService.listar(any())).thenReturn(Page.empty());
 
         mockMvc.perform(get("/oportunidades")).andExpect(status().isOk());
         mockMvc.perform(get("/ongs")).andExpect(status().isOk());
