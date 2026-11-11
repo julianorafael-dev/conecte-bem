@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../../services/api.js';
+import { candidaturaCancelada, pertenceAoFiltro } from '../../services/oportunidades.js';
 import './MinhasCandidaturas.css';
 
 // "2026-10-25" -> "25/10/2026" (sem usar Date, para não deslocar o dia por fuso horário)
@@ -17,16 +18,6 @@ const FILTROS = [
   { chave: 'finalizadas', rotulo: 'Finalizadas' },
   { chave: 'canceladas', rotulo: 'Canceladas' },
 ];
-
-function pertenceAoFiltro(candidatura, filtro) {
-  // Correção QA-011: Se o filtro for 'todas', retorna verdadeiro para todos os status
-  if (filtro === 'todas') return true;
-  if (filtro === 'canceladas') return candidatura.statusInscricao === 'CANCELADA';
-  if (candidatura.statusInscricao === 'CANCELADA') return false;
-  if (filtro === 'finalizadas') return candidatura.statusOportunidade === 'ENCERRADA';
-  if (filtro === 'ativas') return candidatura.statusOportunidade === 'ABERTA';
-  return true;
-}
 
 function MinhasCandidaturas() {
   const [candidaturas, setCandidaturas] = useState([]);
@@ -102,8 +93,8 @@ function MinhasCandidaturas() {
                   <h2>{c.tituloOportunidade}</h2>
                   <p>ONG: {c.nomeOng}</p>
                   <p>Data: {formatarData(c.data)}{c.horario ? ` às ${c.horario.slice(0, 5)}` : ''}</p>
-                  <span className={`candidaturas-status status-${c.statusInscricao}`}>
-                {ROTULO_STATUS[c.statusInscricao] ?? c.statusInscricao}
+                  <span className={`candidaturas-status status-${candidaturaCancelada(c) ? 'CANCELADA' : c.statusInscricao}`}>
+                {c.statusOportunidade === 'CANCELADA' ? 'Oportunidade cancelada' : ROTULO_STATUS[c.statusInscricao] ?? c.statusInscricao}
               </span>
                   {expandida === c.id && (
                       <p className="candidaturas-extra">
@@ -120,7 +111,7 @@ function MinhasCandidaturas() {
                   >
                     {expandida === c.id ? 'Ocultar detalhes' : 'Ver detalhes'}
                   </button>
-                  {c.statusInscricao !== 'CANCELADA' && (
+                  {!candidaturaCancelada(c) && (
                       <button
                           type="button"
                           className="candidaturas-cancelar"
