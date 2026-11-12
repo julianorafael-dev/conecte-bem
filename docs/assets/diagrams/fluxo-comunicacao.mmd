@@ -1,0 +1,34 @@
+sequenceDiagram
+    autonumber
+    actor U as Visitante / Voluntário
+    participant F as Frontend React
+    participant B as API Spring Boot
+    participant D as PostgreSQL
+
+    U->>F: Acessa /Oportunidades
+    F->>B: GET /oportunidades
+    B->>D: SELECT oportunidades + ONG + categoria
+    D-->>B: Registros
+    B-->>F: 200 [OportunidadeResponseDTO]
+    F-->>U: Lista, filtros e detalhes
+
+    U->>F: Clica em "Quero me inscrever"
+    F->>B: POST /inscricoes<br/>{ oportunidadeId }<br/>Bearer JWT
+    B->>B: JwtAuthFilter valida o token
+    B->>D: Bloqueia oportunidade e conta inscrições ativas
+    D-->>B: Dados da oportunidade
+    alt Há vaga e a oportunidade está ABERTA
+        B->>D: INSERT/UPDATE inscricao (PENDENTE)
+        D-->>B: Inscrição persistida
+        B-->>F: 201 InscricaoResponseDTO
+        F-->>U: Confirmação da inscrição
+    else Sem vaga, duplicidade ou oportunidade fechada
+        B-->>F: 409 Conflict
+        F-->>U: Mensagem de erro
+    end
+
+    U->>F: ONG abre /painel/oportunidades
+    F->>B: GET /ongs/me/oportunidades<br/>Bearer JWT
+    B->>D: SELECT por ong.usuario_id
+    D-->>B: Oportunidades da ONG
+    B-->>F: 200 [OportunidadeResponseDTO]

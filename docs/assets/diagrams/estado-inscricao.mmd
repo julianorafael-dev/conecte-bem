@@ -1,0 +1,9 @@
+stateDiagram-v2
+    [*] --> PENDENTE: POST /inscricoes
+    PENDENTE --> CONFIRMADA: PUT /inscricoes/{id}/confirmar (ONG)
+    PENDENTE --> CANCELADA: DELETE /inscricoes/{id} (voluntário)
+    PENDENTE --> CANCELADA: PUT /inscricoes/{id}/recusar (ONG)
+    CONFIRMADA --> CANCELADA: DELETE /inscricoes/{id} (voluntário)
+    CONFIRMADA --> CANCELADA: PUT /inscricoes/{id}/recusar (ONG)
+    CANCELADA --> PENDENTE: novo POST /inscricoes reativa o registro
+    CANCELADA --> [*]: histórico preservado
