@@ -1,0 +1,172 @@
+# Backend — Módulo ONG (documento legado)
+
+> **Documento preservado para histórico.** Este era o conteúdo original de
+> `backend/README.md`, escrito durante a evolução do módulo de ONGs. Algumas
+> afirmações podem estar desatualizadas em relação ao código atual — por
+> exemplo, a configuração de segurança e a quantidade de testes. A documentação
+> vigente está em [../../backend/README.md](../../backend/README.md).
+
+
+## Manutenção das categorias globais
+
+As categorias são administradas diretamente no banco de dados enquanto não existir
+um perfil de administrador. A API mantém `GET /categorias` e `GET /categorias/{id}`
+públicos. Criação, edição e exclusão pela API estão bloqueadas para todos os perfis,
+inclusive ONG e voluntário. Essa restrição não impede a criação de oportunidades
+com as categorias existentes.
+
+Este documento descreve a implementação do módulo de ONGs no backend do ConecteBem e serve como guia de revisão e integração para a equipe.
+
+## Escopo implementado
+
+O módulo permite consultar, cadastrar e atualizar ONGs.
+
+- `GET /ongs`: lista todas as ONGs.
+- `GET /ongs/{id}`: busca uma ONG pelo identificador.
+- `POST /ongs`: cadastra uma ONG usando o `usuarioId` de um usuário já existente.
+- `PUT /ongs/{id}`: atualiza os dados de uma ONG existente.
+
+## Estrutura do módulo
+
+- `model/Ong`: entidade JPA mapeada para a tabela `ongs`.
+- `repository/OngRepository`: acesso ao banco por meio de `JpaRepository`.
+- `dto/OngRequestDTO`: dados recebidos pela API e regras de validação.
+- `dto/OngResponseDTO`: dados devolvidos pela API, sem expor o vínculo interno `usuarioId`.
+- `service/OngService`: regras de negócio, conversão entre entidade e DTO e operações no banco.
+- `controller/OngController`: definição das rotas HTTP do módulo.
+
+## Banco de dados
+
+A tabela `ongs` possui os campos `id`, `usuario_id`, `nome`, `cnpj`, `descricao`, `telefone`, `cidade` e `estado`.
+
+O relacionamento definido para o projeto é um para um: cada perfil de ONG pode ter uma única ONG. Por isso, além da chave estrangeira para `usuarios(id)`, o banco precisa manter a regra abaixo:
+
+```sql
+CONSTRAINT uq_ongs_usuario UNIQUE (usuario_id)
+```
+
+Também há unicidade para o CNPJ. A entidade `Ong` mantém essas duas regras com `unique = true`.
+
+> Importante: a regra `uq_ongs_usuario` foi aplicada no banco local para refletir a decisão da equipe. Ela deve ser incluída no arquivo oficial de schema quando ele for versionado.
+
+## Validações e respostas de erro
+
+No cadastro e na atualização:
+
+- `usuarioId`, `nome` e `cnpj` são obrigatórios;
+- `nome`, `cnpj`, `telefone` e `cidade` possuem limites de tamanho;
+- `estado`, quando informado, deve ter duas letras maiúsculas, por exemplo `RS`.
+
+O tratamento global de erros retorna:
+
+- `400 Bad Request` para dados inválidos;
+- `404 Not Found` quando a ONG não existe;
+- `409 Conflict` para CNPJ repetido ou tentativa de uma segunda ONG para o mesmo usuário;
+- `500 Internal Server Error` para erros não previstos.
+
+## Exemplo de cadastro
+
+```json
+{
+  "usuarioId": 1,
+  "nome": "ONG Exemplo",
+  "cnpj": "12.345.678/0001-90",
+  "descricao": "Projeto de exemplo.",
+  "telefone": "(51) 99999-9999",
+  "cidade": "Porto Alegre",
+  "estado": "RS"
+}
+```
+
+O `usuarioId` precisa existir na tabela `usuarios`, pois o banco possui chave estrangeira para esse registro.
+
+## Configuração local do PostgreSQL
+
+### Credenciais que já apareceram no Git
+
+Remover uma senha da configuração atual não a remove dos commits antigos.
+Se uma credencial foi versionada, troque-a no serviço correspondente antes de
+considerar a exposição resolvida. Não copie a senha antiga para exemplos ou PRs.
+
+Para o PostgreSQL local, no pgAdmin, abra **Login/Group Roles**, selecione o usuário
+utilizado pelo backend e altere a senha em **Properties > Definition > Password**.
+Depois atualize `DB_PASSWORD` em `backend/.env.local` e nas variáveis de execução
+do IntelliJ, caso estejam configuradas; variáveis do processo têm precedência.
+Atualize também a conexão salva do pgAdmin e reinicie o backend para testar.
+
+`backend/.env.local` é ignorado pelo Git e carregado quando o backend é iniciado
+pela raiz do projeto ou pela pasta `backend`. Credenciais de SMTP e JWT também
+devem permanecer fora dos arquivos versionados. Se foram expostas, precisam de
+rotação nos respectivos serviços; trocar JWT_SECRET invalida tokens anteriores.
+
+Uma eventual limpeza do histórico deve ser combinada com toda a equipe, pois
+altera os identificadores dos commits e exige tratamento dos clones existentes.
+Ela não substitui a rotação e não deve ser feita com force push sem coordenação.
+
+O backend usa a base local `conect-bem-db` em `localhost:5432`.
+
+Para não versionar credenciais, a configuração usa variáveis de ambiente:
+
+```properties
+DB_URL=jdbc:postgresql://localhost:5432/conect-bem-db
+DB_USERNAME=postgres
+DB_PASSWORD=sua_senha_local
+JWT_SECRET=uma_chave_unica_com_pelo_menos_32_caracteres
+MAIL_USERNAME=usuario_smtp_do_mailtrap
+MAIL_PASSWORD=senha_smtp_do_mailtrap
+```
+
+`DB_PASSWORD`, `JWT_SECRET`, `MAIL_USERNAME` e `MAIL_PASSWORD` não possuem valor padrão e
+nunca devem ser enviados ao Git. No IntelliJ, informe-os em **Run/Debug Configurations >
+Environment variables**. No Docker, crie um arquivo `backend/.env` (ignorado pelo Git) com
+essas variáveis antes de executar `docker compose up`.
+
+## Formulário de Contato (e-mail via Mailtrap)
+
+O endpoint `POST /contato` (público, sem autenticação) envia a mensagem por e-mail usando
+SMTP. Em desenvolvimento, usamos a caixa de testes (*Sandbox*) do Mailtrap: as credenciais
+`MAIL_USERNAME`/`MAIL_PASSWORD` ficam em **Integration > SMTP** daquela caixa, e nenhum
+e-mail sai de verdade — tudo fica visível no painel do Mailtrap.
+
+| Variável | Padrão | Quando mudar |
+|---|---|---|
+| `MAIL_HOST` | `sandbox.smtp.mailtrap.io` | Trocar de provedor SMTP |
+| `MAIL_PORT` | `2525` | Trocar de provedor SMTP |
+| `MAIL_USERNAME` | — | Sempre: usuário SMTP do Mailtrap |
+| `MAIL_PASSWORD` | — | Sempre: senha SMTP do Mailtrap |
+| `CONTATO_EMAIL_DESTINO` | `destino@exemplo.com` | Para onde as mensagens de contato devem chegar |
+
+## Validações realizadas
+
+- O schema foi importado no banco local `conect-bem-db`.
+- As tabelas `usuarios`, `ongs`, `categorias`, `oportunidades` e `inscricoes` foram confirmadas.
+- As constraints da tabela `ongs` foram conferidas, incluindo chave primária, chave estrangeira, CNPJ único e `usuario_id` único.
+- O projeto compilou no IntelliJ.
+- A aplicação iniciou e conectou ao PostgreSQL.
+- `GET /health` respondeu `OK`.
+- A suíte Maven executou com sucesso: 1 teste, 0 falhas e 0 erros.
+
+## Dependências de integração
+
+No estado atual, a configuração de segurança libera apenas `GET /health`; as rotas `/ongs` retornam `403` até a integração da autenticação/JWT. Isso não é um erro do módulo ONG: a requisição é bloqueada antes de chegar ao controller.
+
+### Integração com a Pessoa 1 — segurança
+
+- A configuração atual protege todas as rotas, exceto `/health`.
+- Para utilizar o módulo ONG, a camada de segurança deve autenticar a requisição antes de ela chegar ao controller.
+- Após a implementação do JWT, as rotas `/ongs` devem receber o usuário autenticado pelo token.
+- O CORS já permite o frontend local em `http://localhost:5173`; outros endereços de frontend precisam ser adicionados pela configuração de segurança.
+
+### Integração com a Pessoa 2 — usuários e autenticação
+
+- O módulo de usuários deve criar um registro em `usuarios` com tipo `ong` antes de existir uma ONG.
+- O ID desse usuário é o valor usado em `usuarioId` no `POST /ongs`.
+- A tabela `ongs` possui chave estrangeira para `usuarios(id)` e `UNIQUE(usuario_id)`: um perfil de ONG só pode possuir uma ONG.
+- No fluxo final, a equipe pode manter o `POST /ongs` ou criar a ONG na mesma transação do registro do usuário. Se optar pela segunda opção, deve reutilizar os campos e validações de `OngRequestDTO`.
+- O `OngResponseDTO` não devolve `usuarioId`; após o login, o vínculo deve ser identificado pelo token, não por dados enviados pelo frontend.
+
+### Contrato para demais módulos
+
+- O módulo de oportunidades deve usar `ongs.id` como chave estrangeira em `oportunidades.ong_id`.
+- Antes de criar oportunidade, a ONG precisa estar cadastrada.
+- A exclusão de ONG não foi implementada no escopo atual. Como o schema usa `ON DELETE CASCADE`, remover uma ONG também pode remover oportunidades e inscrições relacionadas. Essa rota deve ser adicionada futuramente junto com regras de autorização, permitindo a exclusão apenas pela própria ONG ou por um administrador.
