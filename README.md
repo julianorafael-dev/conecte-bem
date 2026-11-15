@@ -609,9 +609,6 @@ A suíte Jest possui **43 testes em 6 arquivos** (`tests/jest/`). O relatório c
 | [docs/QA-009-CADASTRO.md](docs/QA-009-CADASTRO.md) | Dados coletados no cadastro. |
 | [docs/QA-010-IDADE-MINIMA.md](docs/QA-010-IDADE-MINIMA.md) | Regra de idade mínima. |
 | [qa-report/RELATORIO-TESTES-JUNIT-JEST.md](qa-report/RELATORIO-TESTES-JUNIT-JEST.md) | Resultados e escopo das suítes JUnit e Jest. |
-| [backend/INSCRICOES-BACKEND.md](backend/INSCRICOES-BACKEND.md) | Contrato detalhado do módulo de inscrições. |
-| [backend/PENDENCIAS-VOLUNTARIOS-INSCRITOS.md](backend/PENDENCIAS-VOLUNTARIOS-INSCRITOS.md) | Integração da tela de voluntários inscritos. |
-| [AUDITORIA-PESSOA3-ETAPA1.md](AUDITORIA-PESSOA3-ETAPA1.md) | Auditoria técnica histórica. |
 
 ---
 
