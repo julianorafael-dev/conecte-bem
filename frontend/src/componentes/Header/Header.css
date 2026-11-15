@@ -9,6 +9,15 @@
     border-bottom: 1px solid #ccc;
 }
 
+.header-navigation { display: contents; }
+.menu-toggle { display: none; }
+
+.site-header a:focus-visible,
+.site-header button:focus-visible {
+    outline: 3px solid #2254d7;
+    outline-offset: 3px;
+}
+
 /* Logo */
 .header--autenticado {
     height: auto;
@@ -175,129 +184,129 @@
     outline-offset: 2px;
 }
 
-@media (max-width: 768px) {
-    .header {
+@media (max-width: 1024px) {
+    .header,
+    .header--autenticado {
+        box-sizing: border-box;
         height: auto;
-        padding: 18px 20px;
+        min-height: 68px;
+        padding: 12px 20px;
         flex-wrap: wrap;
-        justify-content: center;
-        gap: 14px;
+        gap: 0;
     }
 
-    .logo {
-        width: 100%;
+    .logo { min-width: 0; }
+
+    .menu-toggle {
+        display: inline-flex;
+        align-items: center;
         justify-content: center;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border: 1px solid #dbe3f2;
+        border-radius: 8px;
+        background: #f3f6fc;
+        color: #234481;
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    .menu-toggle:hover { background: #e2eafb; }
+
+    .header-navigation,
+    .header:not(.header--autenticado) .menu_login_cadastro { display: none; }
+
+    .site-header--aberto .header:not(.header--autenticado) .menu_login_cadastro {
+        display: flex;
+    }
+
+    .site-header--aberto .header-navigation {
+        display: flex;
+        order: 2;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 12px;
+        padding-top: 8px;
+        border-top: 1px solid #dbe3f2;
     }
 
     .menu {
-        width: 100%;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px 18px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
     }
 
-    .menu a {
-        font-size: 14px;
+    .menu a,
+    .menu_login_cadastro a,
+    .menu_login_cadastro .btn-sair {
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-size: 15px;
+    }
+
+    .menu a:hover,
+    .menu_login_cadastro a:hover,
+    .menu_login_cadastro .btn-sair:hover {
+        transform: none;
+        padding: 10px 12px;
     }
 
     .menu_login_cadastro {
+        order: 3;
         width: 100%;
-        justify-content: center;
         flex-wrap: wrap;
-    }
-
-    .header--autenticado {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-    }
-
-    .header--autenticado .logo {
-        justify-content: flex-start;
-    }
-
-    .header--autenticado .menu_login_cadastro {
-        grid-column: 1 / -1;
-        grid-row: 2;
-        width: 100%;
-        flex-wrap: nowrap;
-    }
-
-    .header--autenticado .logo {
-        grid-column: 1 / -1;
-        justify-content: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 8px;
+        padding-top: 12px;
+        border-top: 1px solid #dbe3f2;
     }
 
     .header-saudacao {
-        max-width: min(240px, calc(100vw - 110px));
-    }
-
-    .header--autenticado .btn-sair {
-        min-height: 44px;
-    }
-
-    .header--autenticado .menu {
-        grid-column: 1 / -1;
+        flex: 1;
+        max-width: none;
+        padding-left: 12px;
     }
 
     .menu-conta {
-        padding: 8px 14px;
+        padding: 12px 20px;
         grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
     }
 
     .menu-conta-titulo {
-        display: none;
+        text-align: center;
     }
 
     .menu-conta-links {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        width: 100%;
-    }
-
-    .menu-conta-links a {
-        padding: 10px 8px;
+        gap: 4px;
     }
 
     .menu-conta-links--ong {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    .menu-conta-links--ong a {
+    .menu-conta-links a {
+        justify-content: center;
         padding: 10px 4px;
-        font-size: 13px;
+        text-align: center;
         overflow-wrap: anywhere;
     }
 }
 
 @media (max-width: 480px) {
-    .header {
-        padding: 16px 14px;
-    }
-
-    .logo strong {
-        font-size: 18px;
-    }
-
+    .header { padding: 12px 14px; }
+    .logo strong { font-size: 18px; }
     .coracao {
         width: 28px;
         height: 28px;
         font-size: 24px;
-    }
-
-    .menu {
-        gap: 8px 12px;
-    }
-
-    .menu a,
-    .menu_login_cadastro a {
-        font-size: 13px;
-    }
-
-    .menu_login_cadastro {
-        gap: 8px;
-    }
-
-    .menu_login_cadastro a {
-        padding: 6px 10px;
     }
 }
