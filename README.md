@@ -372,12 +372,10 @@ conecte-bem/
 │   └── RELATORIO-TESTES-JUNIT-JEST.md
 ├── .github/
 ├── .gitignore
-├── AUDITORIA-PESSOA3-ETAPA1.md
 ├── package-lock.json
 └── README.md
 ```
 
-> Diretórios gerados como `backend/target/`, `frontend/dist/` e `node_modules/` não fazem parte do código-fonte versionado.
 
 ---
 
@@ -631,9 +629,9 @@ Projeto desenvolvido como **Projeto Final de Conclusão +Prati — Bootcamp Full
 | Matheus Molinari | `Matheus Molinari` |
 | Maykon Scheffer | `Maykon Scheffer` |
 | Pablo Bastos | `PabloBastos` |
-| Tamires | — (não identificada no histórico de commits) |
+| Tamires | — (`duartetamires13`) |
 
-> A equipe é formada por **nove integrantes**: Cassia Luz, Fernanda, Gilmar Souza, Juliano Rafael, Kamilla, Matheus Molinari, Maykon Scheffer, Pablo Bastos e Tamires. As funções individuais não estão formalizadas no repositório; recomenda-se registrá-las no documento de entrega acadêmica. Os nomes foram extraídos do histórico de commits, sem exposição de e-mails; Fernanda e Tamires não aparecem como autoras nos commits e não tiveram sobrenomes inventados.
+> A equipe é formada por **nove integrantes**: Cassia Luz, Fernanda, Gilmar Souza, Juliano Rafael, Kamilla, Matheus Molinari, Maykon Scheffer, Pablo Bastos e Tamires. As funções individuais não estão formalizadas no repositório.
 
 ---
 
