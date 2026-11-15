@@ -622,14 +622,14 @@ Projeto desenvolvido como **Projeto Final de Conclusão +Prati — Bootcamp Full
 | Integrante (identificação nos commits) | Identificador no repositório |
 |---|---|
 | Cassia Luz | `cassialuz` |
-| Fernanda | — (não identificada no histórico de commits) |
+| Fernanda | `fernandamaronez19-ops` |
 | Gilmar Souza | `gilmar.souza1302-lang` / `gilmarsouza1302-lang` |
 | Juliano Rafael | `julianorafael-dev` |
 | Kamilla | `kamillaxr` |
 | Matheus Molinari | `Matheus Molinari` |
 | Maykon Scheffer | `Maykon Scheffer` |
 | Pablo Bastos | `PabloBastos` |
-| Tamires | — (`duartetamires13`) |
+| Tamires | `duartetamires13` |
 
 > A equipe é formada por **nove integrantes**: Cassia Luz, Fernanda, Gilmar Souza, Juliano Rafael, Kamilla, Matheus Molinari, Maykon Scheffer, Pablo Bastos e Tamires. As funções individuais não estão formalizadas no repositório.
 
