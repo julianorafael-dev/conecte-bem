@@ -1,0 +1,30 @@
+flowchart TB
+    subgraph HTTP["Camada HTTP"]
+        SEC["SecurityConfig<br/>JwtAuthFilter"]
+        C["Controllers REST<br/>Auth, ONG, Oportunidade,<br/>Inscrição, Voluntário,<br/>Categoria, Contato, Health"]
+    end
+
+    subgraph APLICACAO["Camada de aplicação"]
+        DTO["DTOs de entrada e saída"]
+        S["Services<br/>regras de negócio e autorização"]
+        VAL["Validadores<br/>IdadeMinima · CnpjValidador"]
+        MAP["OportunidadeResponseMapper<br/>inscritos e vagas disponíveis"]
+        EX["GlobalExceptionHandler<br/>respostas de erro padronizadas"]
+    end
+
+    subgraph PERSISTENCIA["Camada de persistência"]
+        R["Repositories<br/>Spring Data JPA"]
+        E["Entities JPA<br/>Usuario, Ong, Categoria,<br/>Oportunidade, Inscricao"]
+    end
+
+    DB[("PostgreSQL")]
+
+    SEC --> C
+    C --> DTO
+    C --> S
+    C -. erros .-> EX
+    S --> VAL
+    S --> MAP
+    S --> R
+    R --> E
+    E --> DB

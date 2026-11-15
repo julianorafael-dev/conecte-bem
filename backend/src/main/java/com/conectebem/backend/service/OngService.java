@@ -1,0 +1,181 @@
+package com.conectebem.backend.service;
+
+import com.conectebem.backend.dto.OngRequestDTO;
+import com.conectebem.backend.dto.OngResponseDTO;
+import com.conectebem.backend.dto.OportunidadeResponseDTO;
+import com.conectebem.backend.dto.PainelOngResponseDTO;
+import com.conectebem.backend.exception.ResourceNotFoundException;
+import com.conectebem.backend.model.Ong;
+import com.conectebem.backend.model.Oportunidade;
+import com.conectebem.backend.model.TipoUsuario;
+import com.conectebem.backend.model.Usuario;
+import org.springframework.security.access.AccessDeniedException;
+import com.conectebem.backend.repository.OngRepository;
+import com.conectebem.backend.repository.OportunidadeRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+/**
+ * Contém as regras de negócio do módulo ONG.
+ *
+ * <p>Esta camada recebe dados do controller, usa o repositório para acessar o
+ * banco e devolve DTOs para evitar expor a entidade diretamente pela API.</p>
+ */
+@Service
+public class OngService {
+
+    private static final String STATUS_ABERTA = "ABERTA";
+    private static final String STATUS_ENCERRADA = "ENCERRADA";
+
+    public OngResponseDTO buscarPerfil(Integer usuarioId) {
+        return paraResponse(buscarPorUsuario(usuarioId));
+    }
+
+    public OngResponseDTO atualizarPerfil(Integer usuarioId, com.conectebem.backend.dto.OngPerfilRequestDTO dados) {
+        Ong ong = buscarPorUsuario(usuarioId);
+        ong.setNome(dados.nome().trim());
+        ong.setDescricao(dados.descricao());
+        ong.setTelefone(dados.telefone());
+        ong.setCidade(dados.cidade());
+        ong.setEstado(dados.estado());
+        return paraResponse(ongRepository.save(ong));
+    }
+
+    private Ong buscarPorUsuario(Integer usuarioId) {
+        return ongRepository.findByUsuarioId(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("ONG não encontrada."));
+    }
+
+    private final OngRepository ongRepository;
+    private final OportunidadeRepository oportunidadeRepository;
+    private final OportunidadeResponseMapper oportunidadeMapper;
+
+    public OngService(OngRepository ongRepository,
+                      OportunidadeRepository oportunidadeRepository,
+                      OportunidadeResponseMapper oportunidadeMapper) {
+        this.ongRepository = ongRepository;
+        this.oportunidadeRepository = oportunidadeRepository;
+        this.oportunidadeMapper = oportunidadeMapper;
+    }
+
+    /**
+     * Retorna os indicadores da ONG vinculada ao usuário autenticado.
+     *
+     * <p>A busca prévia da ONG assegura que somente uma conta com perfil de
+     * ONG cadastrado receba os dados do painel.</p>
+     */
+    @Transactional(readOnly = true)
+    public PainelOngResponseDTO buscarResumoPainel(Integer usuarioId) {
+        Ong ong = buscarPorUsuario(usuarioId);
+
+        return new PainelOngResponseDTO(
+                ong.getNome(),
+                oportunidadeRepository.countByOngUsuarioId(usuarioId),
+                oportunidadeRepository.countByOngUsuarioIdAndStatus(usuarioId, STATUS_ABERTA),
+                oportunidadeRepository.countByOngUsuarioIdAndStatus(usuarioId, STATUS_ENCERRADA),
+                oportunidadeRepository.countInscricoesByOngUsuarioId(usuarioId)
+        );
+    }
+
+    /**
+     * Lista as oportunidades da ONG vinculada ao usuário autenticado.
+     *
+     * <p>A busca prévia da ONG assegura que apenas contas com perfil de ONG
+     * cadastrado recebam a listagem; caso contrário, o usuário recebe a
+     * resposta padrão de recurso não encontrado.</p>
+     *
+     * <p>O filtro é feito no servidor pelo {@code usuarioId} da ONG — o
+     * {@code ongId} informado em qualquer requisição nunca é usado como
+     * critério de autorização.</p>
+     */
+    @Transactional(readOnly = true)
+    public List<OportunidadeResponseDTO> listarOportunidadesDoUsuario(Integer usuarioId) {
+        buscarPorUsuario(usuarioId);
+
+        return oportunidadeMapper.paraResponseLista(oportunidadeRepository.findByOngUsuarioId(usuarioId));
+    }
+
+    /**
+     * Busca todas as ONGs cadastradas e converte cada entidade para resposta da API.
+     */
+    public List<OngResponseDTO> listar() {
+        return ongRepository.findAll()
+                .stream()
+                .map(this::paraResponse)
+                .toList();
+    }
+
+    /**
+     * Busca uma ONG pelo ID ou produz a resposta 404 definida no tratamento global.
+     */
+    public OngResponseDTO buscarPorId(Integer id) {
+        return paraResponse(buscarEntidade(id));
+    }
+
+    /** Cadastro legado desativado: a conta e a ONG são criadas juntas no AuthService. */
+    public OngResponseDTO criar(OngRequestDTO dados) {
+        throw new AccessDeniedException("Cadastre a ONG pelo registro de conta.");
+    }
+
+    /**
+     * Atualiza os dados editáveis de uma ONG sem trocar o vínculo com o usuário.
+     */
+    public OngResponseDTO atualizar(Integer id, OngRequestDTO dados, Usuario usuario) {
+        if (usuario == null || usuario.getTipo() != TipoUsuario.ONG || usuario.getId() == null) {
+            throw new AccessDeniedException("Apenas contas do tipo ONG podem alterar ONGs.");
+        }
+        Ong ong = buscarEntidade(id);
+
+        if (!usuario.getId().equals(ong.getUsuarioId())) {
+            throw new AccessDeniedException("Você só pode alterar sua própria ONG.");
+        }
+
+        String cnpj = CnpjValidador.normalizar(dados.cnpj());
+        if (ongRepository.existsByCnpjAndIdNot(cnpj, id)) {
+            throw new IllegalArgumentException("CNPJ já cadastrado no sistema.");
+        }
+        preencherDados(ong, dados);
+        ong.setCnpj(cnpj);
+
+        return paraResponse(ongRepository.save(ong));
+    }
+
+    /**
+     * Localiza a entidade e padroniza o caso de ONG inexistente.
+     */
+    private Ong buscarEntidade(Integer id) {
+        return ongRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ONG não encontrada."));
+    }
+
+    /**
+     * Copia os campos que podem ser informados no cadastro ou na atualização.
+     * O {@code usuarioId} é definido somente na criação para preservar o vínculo 1-1.
+     */
+    private void preencherDados(Ong ong, OngRequestDTO dados) {
+        ong.setNome(dados.nome());
+        ong.setCnpj(dados.cnpj());
+        ong.setDescricao(dados.descricao());
+        ong.setTelefone(dados.telefone());
+        ong.setCidade(dados.cidade());
+        ong.setEstado(dados.estado());
+    }
+
+    /**
+     * Converte a entidade persistida no formato público da API.
+     */
+    private OngResponseDTO paraResponse(Ong ong) {
+        return new OngResponseDTO(
+                ong.getId(),
+                ong.getNome(),
+                ong.getCnpj(),
+                ong.getDescricao(),
+                ong.getTelefone(),
+                ong.getCidade(),
+                ong.getEstado(),
+                ong.getDataCriacao()
+        );
+    }
+}

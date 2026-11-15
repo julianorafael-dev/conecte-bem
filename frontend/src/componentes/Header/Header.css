@@ -1,4 +1,6 @@
 .header {
+    max-width: 1100px;
+    margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -7,7 +9,37 @@
     border-bottom: 1px solid #ccc;
 }
 
+.header-navigation { display: contents; }
+.menu-toggle { display: none; }
+
+.site-header a:focus-visible,
+.site-header button:focus-visible {
+    outline: 3px solid #2254d7;
+    outline-offset: 3px;
+}
+
 /* Logo */
+.header--autenticado {
+    height: auto;
+    min-height: 60px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.header-saudacao {
+    min-width: 0;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #334155;
+    font-size: 14px;
+}
+
+.header--autenticado .btn-sair {
+    flex-shrink: 0;
+}
+
 .logo {
     display: flex;
     align-items: center;
@@ -23,18 +55,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
     width: 34px;
     height: 34px;
-
     margin-right: 8px;
-
     border-radius: 9px;
-
     color: white;
     background-color: #2254d7;
-
-    font-size: 22px;
+    font-size: 30px;
     line-height: 1;
 }
 
@@ -52,7 +79,12 @@
 }
 
 .menu a:hover {
-    color: #2254d7;
+    transform: scale(1.1);
+    color: #2254D7;
+    background-color: #e6e6e6;
+    border-radius: 5px;
+    padding: 4px;
+    text-decoration: underline;
 }
 
 /* Login / Cadastro */
@@ -73,6 +105,208 @@
 }
 
 .menu_login_cadastro a:hover {
+    transform: scale(1.1);
     background-color: #2254d7;
+    text-decoration: underline;
     color: #fff;
+}
+
+.menu_login_cadastro .btn-sair {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    background: transparent;
+    color: #000;
+    font: inherit;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.menu_login_cadastro .btn-sair:hover {
+    transform: scale(1.1);
+    background-color: #2254d7;
+    text-decoration: underline;
+    color: #fff;
+}
+
+.menu-conta {
+    box-sizing: border-box;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 8px 30px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 24px;
+    background: #f3f6fc;
+    border-bottom: 1px solid #dbe3f2;
+}
+
+.menu-conta-titulo {
+    color: #46536b;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.menu-conta-links {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.menu-conta-links a {
+    box-sizing: border-box;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 6px;
+    color: #234481;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.menu-conta-links a:hover {
+    background: #e2eafb;
+    text-decoration: underline;
+}
+
+.menu-conta-links a[aria-current="page"] {
+    background: #2254d7;
+    color: #fff;
+}
+
+.menu-conta-links a:focus-visible {
+    outline: 3px solid #163778;
+    outline-offset: 2px;
+}
+
+@media (max-width: 1024px) {
+    .header,
+    .header--autenticado {
+        box-sizing: border-box;
+        height: auto;
+        min-height: 68px;
+        padding: 12px 20px;
+        flex-wrap: wrap;
+        gap: 0;
+    }
+
+    .logo { min-width: 0; }
+
+    .menu-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border: 1px solid #dbe3f2;
+        border-radius: 8px;
+        background: #f3f6fc;
+        color: #234481;
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    .menu-toggle:hover { background: #e2eafb; }
+
+    .header-navigation,
+    .header:not(.header--autenticado) .menu_login_cadastro { display: none; }
+
+    .site-header--aberto .header:not(.header--autenticado) .menu_login_cadastro {
+        display: flex;
+    }
+
+    .site-header--aberto .header-navigation {
+        display: flex;
+        order: 2;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 12px;
+        padding-top: 8px;
+        border-top: 1px solid #dbe3f2;
+    }
+
+    .menu {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+    }
+
+    .menu a,
+    .menu_login_cadastro a,
+    .menu_login_cadastro .btn-sair {
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-size: 15px;
+    }
+
+    .menu a:hover,
+    .menu_login_cadastro a:hover,
+    .menu_login_cadastro .btn-sair:hover {
+        transform: none;
+        padding: 10px 12px;
+    }
+
+    .menu_login_cadastro {
+        order: 3;
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 8px;
+        padding-top: 12px;
+        border-top: 1px solid #dbe3f2;
+    }
+
+    .header-saudacao {
+        flex: 1;
+        max-width: none;
+        padding-left: 12px;
+    }
+
+    .menu-conta {
+        padding: 12px 20px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .menu-conta-titulo {
+        text-align: center;
+    }
+
+    .menu-conta-links {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4px;
+    }
+
+    .menu-conta-links--ong {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .menu-conta-links a {
+        justify-content: center;
+        padding: 10px 4px;
+        text-align: center;
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (max-width: 480px) {
+    .header { padding: 12px 14px; }
+    .logo strong { font-size: 18px; }
+    .coracao {
+        width: 28px;
+        height: 28px;
+        font-size: 24px;
+    }
 }

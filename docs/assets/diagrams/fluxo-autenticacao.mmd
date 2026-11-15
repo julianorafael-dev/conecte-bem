@@ -1,0 +1,34 @@
+sequenceDiagram
+    autonumber
+    actor U as Usuário
+    participant F as Frontend React
+    participant A as AuthController
+    participant S as AuthService
+    participant J as JwtService
+    participant D as PostgreSQL
+
+    U->>F: Informa e-mail e senha
+    F->>A: POST /auth/login
+    A->>S: login(LoginRequestDTO)
+    S->>D: findByEmail
+    D-->>S: Usuário + hash BCrypt
+    S->>S: passwordEncoder.matches(senha, hash)
+
+    alt Credenciais válidas
+        S->>J: gerarToken(usuario)
+        J-->>S: JWT HMAC256 (2 horas)
+        S-->>A: TokenResponseDTO
+        A-->>F: 200 { token, tipo: "Bearer" }
+        F->>F: Salva o JWT no localStorage
+    else Credenciais inválidas
+        S-->>A: CredenciaisInvalidasException
+        A-->>F: 401 Unauthorized
+    end
+
+    U->>F: Acessa uma rota protegida
+    F->>A: Requisição com Authorization: Bearer JWT
+    A->>J: JwtAuthFilter valida assinatura e expiração
+    J->>D: Busca usuário pelo e-mail (subject)
+    D-->>J: Usuário e tipo
+    J-->>A: Authentication com ROLE_ONG ou ROLE_VOLUNTARIO
+    A-->>F: Resposta da rota, conforme o papel e a propriedade do recurso

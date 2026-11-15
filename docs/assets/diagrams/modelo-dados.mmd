@@ -1,0 +1,59 @@
+erDiagram
+    USUARIOS ||--o| ONGS : "possui perfil"
+    USUARIOS ||--o{ INSCRICOES : "realiza"
+    ONGS ||--o{ OPORTUNIDADES : "publica"
+    CATEGORIAS ||--o{ OPORTUNIDADES : "classifica"
+    OPORTUNIDADES ||--o{ INSCRICOES : "recebe"
+
+    USUARIOS {
+        serial id PK
+        varchar nome
+        varchar email UK
+        varchar senha
+        varchar tipo
+        varchar cpf
+        date data_nascimento
+        varchar telefone
+        timestamp criado_em
+    }
+
+    ONGS {
+        serial id PK
+        integer usuario_id FK,UK
+        varchar nome
+        varchar cnpj UK
+        text descricao
+        varchar telefone
+        date data_criacao
+        varchar cidade
+        varchar estado
+    }
+
+    CATEGORIAS {
+        serial id PK
+        varchar nome UK
+        text descricao
+    }
+
+    OPORTUNIDADES {
+        serial id PK
+        integer ong_id FK
+        integer categoria_id FK
+        varchar titulo
+        text descricao
+        date data
+        time horario
+        varchar cidade
+        varchar estado
+        integer vagas
+        varchar status
+        timestamp criado_em
+    }
+
+    INSCRICOES {
+        serial id PK
+        integer usuario_id FK
+        integer oportunidade_id FK
+        timestamp data_inscricao
+        varchar status
+    }

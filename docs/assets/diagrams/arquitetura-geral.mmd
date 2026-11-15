@@ -1,0 +1,21 @@
+flowchart LR
+    subgraph Cliente["Navegador do usuário"]
+        UI["SPA React 19 + Vite<br/>React Router DOM"]
+        STORAGE[("localStorage<br/>JWT")]
+    end
+
+    subgraph Servidor["Servidor de aplicação"]
+        API["API REST<br/>Spring Boot 4.1.1 / Java 21"]
+        SEC["Spring Security<br/>JwtAuthFilter"]
+        MAIL["SMTP<br/>Mailtrap em desenvolvimento"]
+        GOOGLE["Google Identity<br/>validação de idToken"]
+    end
+
+    DB[("PostgreSQL 16<br/>5 tabelas")]
+
+    UI -- "HTTP/JSON<br/>Authorization: Bearer JWT" --> API
+    UI --- STORAGE
+    SEC --> API
+    API -- "Spring Data JPA / JDBC" --> DB
+    API -- "Spring Mail" --> MAIL
+    API -- "Google API Client" --> GOOGLE
