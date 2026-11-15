@@ -51,18 +51,13 @@
     font-size: 20px;
 }
 
-.coracao {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+.logo-emblema {
+    display: block;
+    flex-shrink: 0;
+    object-fit: contain;
     width: 34px;
     height: 34px;
     margin-right: 8px;
-    border-radius: 9px;
-    color: white;
-    background-color: #2254d7;
-    font-size: 30px;
-    line-height: 1;
 }
 
 /* Menu */
@@ -304,9 +299,8 @@
 @media (max-width: 480px) {
     .header { padding: 12px 14px; }
     .logo strong { font-size: 18px; }
-    .coracao {
+    .logo-emblema {
         width: 28px;
         height: 28px;
-        font-size: 24px;
     }
 }

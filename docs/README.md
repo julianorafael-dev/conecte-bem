@@ -52,9 +52,6 @@ Esta pasta concentra materiais que complementam os READMEs dos módulos. A docum
 | Registros de QA | [`QA-009-CADASTRO.md`](QA-009-CADASTRO.md) e [`QA-010-IDADE-MINIMA.md`](QA-010-IDADE-MINIMA.md) |
 | Relatório de testes JUnit e Jest | [`../qa-report/RELATORIO-TESTES-JUNIT-JEST.md`](../qa-report/RELATORIO-TESTES-JUNIT-JEST.md) |
 | Documento de funcionalidade | [`PAINEL-ONG.md`](PAINEL-ONG.md) |
-| Contrato de inscrições | [`../backend/INSCRICOES-BACKEND.md`](../backend/INSCRICOES-BACKEND.md) |
-| Integração da tela de inscritos | [`../backend/PENDENCIAS-VOLUNTARIOS-INSCRITOS.md`](../backend/PENDENCIAS-VOLUNTARIOS-INSCRITOS.md) |
-| Auditoria técnica histórica | [`../AUDITORIA-PESSOA3-ETAPA1.md`](../AUDITORIA-PESSOA3-ETAPA1.md) |
 | Material preservado | [`referencia/MODULO-ONG-README-LEGADO.md`](referencia/MODULO-ONG-README-LEGADO.md) |
 
 ---
@@ -260,35 +257,7 @@ Fluxos candidatos a GIF futuro:
 
 ## 7. Documentos históricos e complementares
 
-### 7.1 Contrato do módulo de inscrições
-
-[`../backend/INSCRICOES-BACKEND.md`](../backend/INSCRICOES-BACKEND.md)
-
-Descreve o backend das candidaturas:
-
-- rotas de criação, listagem, cancelamento e consulta de inscritos;
-- contratos JSON usados pelo frontend;
-- regra de identificação do usuário pelo JWT;
-- preservação de inscrições canceladas no histórico.
-
-### 7.2 Integração da tela “Voluntários Inscritos”
-
-[`../backend/PENDENCIAS-VOLUNTARIOS-INSCRITOS.md`](../backend/PENDENCIAS-VOLUNTARIOS-INSCRITOS.md)
-
-Registra a integração da tela do painel da ONG:
-
-- endpoint `GET /oportunidades/{id}/inscricoes`;
-- regras de acesso e propriedade;
-- formato da resposta;
-- dependências já atendidas pelo backend.
-
-### 7.3 Auditoria técnica — Pessoa 3, Etapa 1
-
-[`../AUDITORIA-PESSOA3-ETAPA1.md`](../AUDITORIA-PESSOA3-ETAPA1.md)
-
-Registro histórico de auditoria do backend e do repositório. Contém informações de uma etapa anterior do desenvolvimento, como branch, commits e estado do código naquele momento. **Não representa necessariamente o estado atual**; consulte os READMEs vigentes.
-
-### 7.4 README legado do módulo ONG
+### 7.1 README legado do módulo ONG
 
 [`referencia/MODULO-ONG-README-LEGADO.md`](referencia/MODULO-ONG-README-LEGADO.md)
 

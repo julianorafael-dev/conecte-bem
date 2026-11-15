@@ -1962,8 +1962,6 @@ Relatórios gerados em `target/surefire-reports/`.
 | [README principal](../README.md) | Visão geral, instalação e execução do projeto. |
 | [frontend/README.md](../frontend/README.md) | Páginas, rotas e integração do React. |
 | [docs/README.md](../docs/README.md) | Central de documentação. |
-| [INSCRICOES-BACKEND.md](INSCRICOES-BACKEND.md) | Contrato detalhado do módulo de inscrições. |
-| [PENDENCIAS-VOLUNTARIOS-INSCRITOS.md](PENDENCIAS-VOLUNTARIOS-INSCRITOS.md) | Integração da tela de inscritos. |
 | [db/schema.sql](db/schema.sql) | Schema completo do PostgreSQL. |
 | [docs/QA-009-CADASTRO.md](../docs/QA-009-CADASTRO.md) | Campos coletados no cadastro. |
 | [docs/QA-010-IDADE-MINIMA.md](../docs/QA-010-IDADE-MINIMA.md) | Regra de idade mínima. |
