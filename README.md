@@ -630,7 +630,7 @@ Projeto desenvolvido como **Projeto Final de Conclusão +Prati — Bootcamp Full
 | Kamilla | `kamillaxr` |
 | Matheus Molinari | `Matheus Molinari` |
 | Maykon Scheffer | `Maykon Scheffer` |
-| Pablo Bastos | `EngPabloBastos` / `Pablo Bastos` |
+| Pablo Bastos | `PabloBastos` |
 | Tamires | — (não identificada no histórico de commits) |
 
 > A equipe é formada por **nove integrantes**: Cassia Luz, Fernanda, Gilmar Souza, Juliano Rafael, Kamilla, Matheus Molinari, Maykon Scheffer, Pablo Bastos e Tamires. As funções individuais não estão formalizadas no repositório; recomenda-se registrá-las no documento de entrega acadêmica. Os nomes foram extraídos do histórico de commits, sem exposição de e-mails; Fernanda e Tamires não aparecem como autoras nos commits e não tiveram sobrenomes inventados.
