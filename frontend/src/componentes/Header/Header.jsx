@@ -5,6 +5,7 @@ import { api } from '../../services/api.js';
 import './Header.css';
 import MenuVoluntario from './MenuVoluntario.jsx';
 import MenuOng from './MenuOng.jsx';
+import emblema from '../../assets/emblema.png';
 
 function Header() {
   const { usuario, logout } = useAuth();
@@ -72,7 +73,7 @@ function Header() {
       <div className={`site-header${menuAberto ? ' site-header--aberto' : ''}`} onClick={fecharAoNavegar}>
         <header className={`header${usuario ? ' header--autenticado' : ''}`}>
           <Link to="/Home" className="logo">
-            <span className="coracao">&#9825;</span>
+            <img className="logo-emblema" src={emblema} alt="" width="34" height="34" />
             <strong>Conecte-Bem</strong>
           </Link>
 

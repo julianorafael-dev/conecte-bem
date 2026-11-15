@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { IoHeart } from 'react-icons/io5';
+import emblema from '../../assets/emblema.png';
 import './Footer.css'
 
 function Footer() {
@@ -8,7 +9,7 @@ function Footer() {
             <div className="footer_superior">
                 <div className="footer_logo">
                     <a href="/" className="logo">
-                        <span className="coracao">&#9825;</span>
+                        <img className="logo-emblema" src={emblema} alt="" width="34" height="34" />
                         <strong>Conecte-Bem</strong>
                     </a>
                     <p>Conectando voluntários a ONGs para transformar realidades através do voluntariado.</p>
